@@ -36,7 +36,9 @@ function Profile() {
     const fetchUserWishJars = async () => {
       if (!user) return;
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/wish/user/${user._id}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/wish/user/${user._id}`,
+        );
         if (response.ok) {
           const data = await response.json();
           setUserWishJars(data);
@@ -74,14 +76,17 @@ function Profile() {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.token}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/profile`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user?.token}`,
+          },
+          body: JSON.stringify({ displayName }),
         },
-        body: JSON.stringify({ displayName }),
-      });
+      );
 
       if (response.ok) {
         addToast("Profile updated successfully!", "success");
@@ -122,8 +127,8 @@ function Profile() {
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
             </p>
-         </div>
-       </div>
+          </div>
+        </div>
 
         <div className="mt-6">
           <button
@@ -133,34 +138,47 @@ function Profile() {
             Save Profile
           </button>
         </div>
+      </div>
 
-        <div className="mt-8">
-          <h3 className="text-xl font-bold mb-4">Achievements</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.length > 0 ? '' : 'opacity-50'}`}>
-              <div className="text-3xl mb-2">🏆</div>
-              <h4 className="font-bold">First Dream</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Created your first dream</p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
-              <div className="text-3xl mb-2">💰</div>
-              <h4 className="font-bold">Top Supporter</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Pledged the most</p>
-            </div>
-            <div className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.some(j => j.status === 'ResolvedSuccess') ? '' : 'opacity-50'}`}>
-              <div className="text-3xl mb-2">🎯</div>
-              <h4 className="font-bold">Dream Achiever</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Completed a dream</p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
-              <div className="text-3xl mb-2">🌟</div>
-              <h4 className="font-bold">Community Hero</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Helped 10+ dreams</p>
-            </div>
+      <div className="mt-8">
+        <h3 className="text-xl font-bold mb-4">Achievements</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div
+            className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.length > 0 ? "" : "opacity-50"}`}
+          >
+            <div className="text-3xl mb-2">🏆</div>
+            <h4 className="font-bold">First Dream</h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Created your first dream
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
+            <div className="text-3xl mb-2">💰</div>
+            <h4 className="font-bold">Top Supporter</h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Pledged the most
+            </p>
+          </div>
+          <div
+            className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.some((j) => j.status === "ResolvedSuccess") ? "" : "opacity-50"}`}
+          >
+            <div className="text-3xl mb-2">🎯</div>
+            <h4 className="font-bold">Dream Achiever</h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Completed a dream
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
+            <div className="text-3xl mb-2">🌟</div>
+            <h4 className="font-bold">Community Hero</h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Helped 10+ dreams
+            </p>
           </div>
         </div>
+      </div>
 
-       <div className="mt-8">
+      <div className="mt-8">
         <h3 className="text-xl font-bold mb-4">Dream Progress</h3>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
           <div className="space-y-4">
@@ -212,7 +230,8 @@ function Profile() {
                       {jar.title}
                     </Link>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Pledged: {jar.pledgedAmount / 1000000000} TON / Goal: {jar.stakeAmount / 1000000000} TON
+                      Pledged: {jar.pledgedAmount / 1000000000} TON / Goal:{" "}
+                      {jar.stakeAmount / 1000000000} TON
                     </p>
                   </div>
                   <span
