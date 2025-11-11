@@ -14,7 +14,7 @@
     "@sentry/react": "^7.74.1",
     "@tonconnect/ui-react": "^2.0.0",
     "@twa-dev/sdk": "^7.0.0",
-    "posthog-js": "^1.96.1",
+    "@vercel/analytics": "^1.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-intersection-observer": "^9.5.3",

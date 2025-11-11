@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useEffect, lazy, Suspense } from "react";
 import * as Sentry from "@sentry/react";
+import { inject } from "@vercel/analytics";
 import posthog from "posthog-js";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -37,6 +38,8 @@ Sentry.init({
 posthog.init(import.meta.env.VITE_POSTHOG_KEY || "mock_key", {
   api_host: "https://app.posthog.com",
 });
+
+inject();
 
 function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
