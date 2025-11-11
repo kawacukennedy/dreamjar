@@ -97,6 +97,23 @@ function Profile() {
         </div>
       </div>
 
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+          <h4 className="text-2xl font-bold text-primary">5</h4>
+          <p className="text-gray-600 dark:text-gray-400">Dreams Created</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+          <h4 className="text-2xl font-bold text-success">3</h4>
+          <p className="text-gray-600 dark:text-gray-400">Successful Dreams</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+          <h4 className="text-2xl font-bold text-accent">12.5</h4>
+          <p className="text-gray-600 dark:text-gray-400">
+            Total Pledged (TON)
+          </p>
+        </div>
+      </div>
+
       <div className="mt-8">
         <h3 className="text-xl font-bold mb-4">My Dreams</h3>
         {/* TODO: List user's wish jars */}

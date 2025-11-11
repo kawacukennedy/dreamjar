@@ -4,6 +4,7 @@ import { useInView } from "react-intersection-observer";
 import ProgressBar from "../components/ProgressBar";
 import Skeleton from "../components/Skeleton";
 import LoadingSpinner from "../components/LoadingSpinner";
+import ShareButton from "../components/ShareButton";
 import { useDebounce } from "../hooks/useDebounce";
 
 interface WishJar {
@@ -258,12 +259,19 @@ function Home() {
               <p className="text-sm text-gray-500 mb-4">
                 Deadline: {new Date(jar.deadline).toLocaleDateString()}
               </p>
-              <Link
-                to={`/wish/${jar._id}`}
-                className="block text-center bg-primary text-white py-2 rounded hover:bg-blue-600 transition"
-              >
-                View Details
-              </Link>
+              <div className="flex space-x-2">
+                <ShareButton
+                  url={`${window.location.origin}/wish/${jar._id}`}
+                  title={jar.title}
+                  className="flex-1"
+                />
+                <Link
+                  to={`/wish/${jar._id}`}
+                  className="flex-1 text-center bg-primary text-white py-2 rounded hover:bg-blue-600 transition"
+                >
+                  View Details
+                </Link>
+              </div>
             </div>
           );
         })}
