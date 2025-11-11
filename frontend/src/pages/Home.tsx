@@ -24,8 +24,22 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    const saved = localStorage.getItem("favorites");
+    return saved ? JSON.parse(saved) : [];
+  });
   const debouncedSearch = useDebounce(search, 300);
   const { ref, inView } = useInView();
+
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) => {
+      const newFavorites = prev.includes(id)
+        ? prev.filter((fav) => fav !== id)
+        : [...prev, id];
+      localStorage.setItem("favorites", JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
 
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
@@ -93,7 +107,10 @@ function Home() {
       jar.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
       jar.description.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesFilter =
-      filter === "all" || jar.status.toLowerCase() === filter;
+      filter === "all" ||
+      (filter === "favorites"
+        ? favorites.includes(jar._id)
+        : jar.status.toLowerCase() === filter);
     return matchesSearch && matchesFilter;
   });
 
@@ -163,6 +180,7 @@ function Home() {
               aria-label="Filter dreams"
             >
               <option value="all">All</option>
+              <option value="favorites">Favorites</option>
               <option value="active">Active</option>
               <option value="resolvedsuccess">Successful</option>
               <option value="resolvedfail">Failed</option>
@@ -181,17 +199,26 @@ function Home() {
             >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-lg">{jar.title}</h3>
-                <span
-                  className={`px-2 py-1 rounded text-xs ${
-                    jar.status === "Active"
-                      ? "bg-accent text-white"
-                      : jar.status === "ResolvedSuccess"
-                        ? "bg-success text-white"
-                        : "bg-danger text-white"
-                  }`}
-                >
-                  {jar.status}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => toggleFavorite(jar._id)}
+                    className="text-2xl hover:scale-110 transition"
+                    aria-label="Toggle favorite"
+                  >
+                    {favorites.includes(jar._id) ? "❤️" : "🤍"}
+                  </button>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      jar.status === "Active"
+                        ? "bg-accent text-white"
+                        : jar.status === "ResolvedSuccess"
+                          ? "bg-success text-white"
+                          : "bg-danger text-white"
+                    }`}
+                  >
+                    {jar.status}
+                  </span>
+                </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                 {jar.description}
