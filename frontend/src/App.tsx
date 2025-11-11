@@ -3,9 +3,11 @@ import * as Sentry from "@sentry/react";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { init } from "@twa-dev/sdk";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Home from "./pages/Home";
 import CreateWish from "./pages/CreateWish";
 import WishDetail from "./pages/WishDetail";
+import Profile from "./pages/Profile";
 import "./App.css";
 
 Sentry.init({
@@ -23,10 +25,44 @@ Sentry.init({
 
 function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
+  const { login, logout, user } = useAuth();
 
   useEffect(() => {
     init();
   }, []);
+
+  useEffect(() => {
+    if (tonConnectUI.connected && !user) {
+      // Auto-login when wallet connects
+      handleWalletLogin();
+    }
+  }, [tonConnectUI.connected, user]);
+
+  const handleWalletLogin = async () => {
+    try {
+      const address = tonConnectUI.account?.address;
+      if (!address) return;
+
+      // Get challenge
+      const challengeResponse = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/wallet-challenge`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address }),
+        },
+      );
+      const { challengeMessage } = await challengeResponse.json();
+
+      // Sign message
+      const signedMessage = await tonConnectUI.signMessage(challengeMessage);
+
+      // Verify
+      await login(address, signedMessage, challengeMessage);
+    } catch (error) {
+      console.error("Auto-login failed:", error);
+    }
+  };
 
   const handleConnect = async () => {
     try {
@@ -39,6 +75,7 @@ function AppContent() {
   const handleDisconnect = async () => {
     try {
       await tonConnectUI.disconnect();
+      logout();
     } catch (error) {
       console.error("Failed to disconnect wallet:", error);
     }
@@ -46,32 +83,51 @@ function AppContent() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-backgroundLight dark:bg-backgroundDark">
-        <header className="bg-primary text-white p-4 flex justify-between items-center">
+      <div className="min-h-screen bg-backgroundLight dark:bg-backgroundDark text-gray-900 dark:text-gray-100">
+        <header className="bg-primary text-white p-4 flex justify-between items-center shadow-lg">
           <h1 className="text-2xl font-bold">DreamJar</h1>
-          <div>
+          <div className="flex items-center space-x-4">
+            {user && (
+              <span className="text-sm">
+                Welcome, {user.displayName || user.walletAddress.slice(0, 6)}...
+              </span>
+            )}
             {tonConnectUI.connected ? (
               <button
                 onClick={handleDisconnect}
-                className="bg-danger text-white px-4 py-2 rounded"
+                className="bg-danger hover:bg-red-700 text-white px-4 py-2 rounded transition"
               >
-                Disconnect Wallet
+                Disconnect
               </button>
             ) : (
               <button
                 onClick={handleConnect}
-                className="bg-accent text-white px-4 py-2 rounded"
+                className="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded transition"
               >
                 Connect Wallet
               </button>
             )}
           </div>
         </header>
-        <main>
+        <nav className="bg-white dark:bg-gray-800 shadow p-2">
+          <div className="flex space-x-4">
+            <a href="/" className="text-primary hover:underline">
+              Home
+            </a>
+            <a href="/create" className="text-primary hover:underline">
+              Create Dream
+            </a>
+            <a href="/profile" className="text-primary hover:underline">
+              Profile
+            </a>
+          </div>
+        </nav>
+        <main className="container mx-auto p-4">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/create" element={<CreateWish />} />
             <Route path="/wish/:id" element={<WishDetail />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
       </div>
@@ -82,7 +138,9 @@ function AppContent() {
 function App() {
   return (
     <TonConnectUIProvider manifestUrl="https://your-domain.com/tonconnect-manifest.json">
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </TonConnectUIProvider>
   );
 }
