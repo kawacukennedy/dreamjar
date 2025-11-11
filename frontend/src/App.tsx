@@ -35,13 +35,12 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 import "./App.css";
 
-Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  // integrations: [], // TODO: add proper integrations
-  tracesSampleRate: 1.0,
-  // replaysSessionSampleRate: 0.1,
-  // replaysOnErrorSampleRate: 1.0,
-});
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    tracesSampleRate: 1.0,
+  });
+}
 
 if (
   import.meta.env.VITE_POSTHOG_KEY &&
@@ -63,54 +62,54 @@ function AppContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Initialize TWA SDK
-    WebApp.ready();
-    WebApp.expand();
+    // Initialize TWA SDK if in Telegram
+    if (WebApp.initData) {
+      WebApp.ready();
+      WebApp.expand();
 
-    // Set up back button
-    WebApp.BackButton.onClick(() => {
-      if (window.history.length > 1) {
-        navigate(-1);
-      } else {
-        WebApp.close();
-      }
-    });
+      // Set up back button
+      WebApp.BackButton.onClick(() => {
+        if (window.history.length > 1) {
+          navigate(-1);
+        } else {
+          WebApp.close();
+        }
+      });
 
-    // Set up main button
-    WebApp.MainButton.setText("Create Dream");
-    WebApp.MainButton.onClick(() => {
-      navigate("/create");
-    });
+      // Set up main button
+      WebApp.MainButton.setText("Create Dream");
+      WebApp.MainButton.onClick(() => {
+        navigate("/create");
+      });
 
-    // Show/hide buttons based on page
-    const handleLocationChange = () => {
-      const path = window.location.pathname;
-      if (path === "/") {
-        WebApp.BackButton.hide();
-        WebApp.MainButton.show();
-      } else if (path === "/create") {
-        WebApp.BackButton.show();
-        WebApp.MainButton.hide();
-      } else {
-        WebApp.BackButton.show();
-        WebApp.MainButton.hide();
-      }
-    };
+      // Show/hide buttons based on page
+      const handleLocationChange = () => {
+        const path = window.location.pathname;
+        if (path === "/") {
+          WebApp.BackButton.hide();
+          WebApp.MainButton.show();
+        } else if (path === "/create") {
+          WebApp.BackButton.show();
+          WebApp.MainButton.hide();
+        } else {
+          WebApp.BackButton.show();
+          WebApp.MainButton.hide();
+        }
+      };
 
-    handleLocationChange();
-    window.addEventListener("popstate", handleLocationChange);
+      handleLocationChange();
+      window.addEventListener("popstate", handleLocationChange);
 
-    // Show onboarding for new users (skip in TWA)
-    if (!WebApp.initData) {
+      return () => {
+        window.removeEventListener("popstate", handleLocationChange);
+      };
+    } else {
+      // Show onboarding for new users (web only)
       const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
       if (!hasSeenOnboarding) {
         setShowOnboarding(true);
       }
     }
-
-    return () => {
-      window.removeEventListener("popstate", handleLocationChange);
-    };
   }, [navigate]);
 
   useEffect(() => {
@@ -202,12 +201,7 @@ function AppContent() {
 function App() {
   return (
     <ErrorBoundary>
-      <TonConnectUIProvider
-        manifestUrl={
-          import.meta.env.VITE_TONCONNECT_MANIFEST ||
-          "/tonconnect-manifest.json"
-        }
-      >
+      <TonConnectUIProvider manifestUrl="/tonconnect-manifest.json">
         <ToastProvider>
           <ThemeProvider>
             <DarkModeProvider>
