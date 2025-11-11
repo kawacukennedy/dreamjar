@@ -20,10 +20,29 @@
     />
     <meta name="author" content="DreamJar Team" />
     <meta name="theme-color" content="#6C5CE7" />
-    <title>DreamJar - Turn Dreams into Smart Contracts</title>
+    <meta name="version" content="1.0.1" />
+    <title>DreamJar - Turn Dreams into Smart Contracts v1.0.1</title>
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Clear any cached manifests or service workers
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => {
+            registration.unregister();
+          });
+        });
+      }
+      // Clear caches
+      if ("caches" in window) {
+        caches.keys().then((names) => {
+          names.forEach((name) => {
+            caches.delete(name);
+          });
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
