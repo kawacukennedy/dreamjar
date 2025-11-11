@@ -31,6 +31,11 @@ function Home() {
     const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
   });
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
+    const saved = localStorage.getItem("searchHistory");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showHistory, setShowHistory] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
   const { ref, inView } = useInView();
 
@@ -42,6 +47,19 @@ function Home() {
       localStorage.setItem("favorites", JSON.stringify(newFavorites));
       return newFavorites;
     });
+  };
+
+  const addToSearchHistory = (query: string) => {
+    if (query.trim() && !searchHistory.includes(query)) {
+      const newHistory = [query, ...searchHistory.slice(0, 4)]; // Keep last 5
+      setSearchHistory(newHistory);
+      localStorage.setItem("searchHistory", JSON.stringify(newHistory));
+    }
+  };
+
+  const selectHistoryItem = (item: string) => {
+    setSearch(item);
+    setShowHistory(false);
   };
 
   const loadMore = async () => {
@@ -110,6 +128,12 @@ function Home() {
     }
   }, [inView, hasMore]);
 
+  useEffect(() => {
+    if (debouncedSearch) {
+      addToSearchHistory(debouncedSearch);
+    }
+  }, [debouncedSearch]);
+
   const filteredJars = wishJars.filter((jar) => {
     const matchesSearch =
       jar.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -176,9 +200,24 @@ function Home() {
               placeholder="Search dreams..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setShowHistory(true)}
+              onBlur={() => setTimeout(() => setShowHistory(false), 200)}
               className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
               aria-label="Search dreams"
             />
+            {showHistory && searchHistory.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 shadow-lg z-10">
+                {searchHistory.map((item, index) => (
+                  <div
+                    key={index}
+                    onClick={() => selectHistoryItem(item)}
+                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="relative">
             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">

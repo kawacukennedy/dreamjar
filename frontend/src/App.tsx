@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
 
 import Onboarding from "./components/Onboarding";
@@ -117,11 +118,13 @@ function App() {
     <ErrorBoundary>
       <TonConnectUIProvider manifestUrl="https://your-domain.com/tonconnect-manifest.json">
         <ToastProvider>
-          <DarkModeProvider>
-            <AuthProvider>
-              <AppContent />
-            </AuthProvider>
-          </DarkModeProvider>
+          <ThemeProvider>
+            <DarkModeProvider>
+              <AuthProvider>
+                <AppContent />
+              </AuthProvider>
+            </DarkModeProvider>
+          </ThemeProvider>
         </ToastProvider>
       </TonConnectUIProvider>
     </ErrorBoundary>

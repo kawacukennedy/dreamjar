@@ -54,63 +54,64 @@ function Profile() {
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
             </p>
-          </div>
-        </div>
+         </div>
+       </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Display Name
-            </label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full p-3 border rounded dark:bg-gray-700 dark:border-gray-600"
-              placeholder="Enter display name"
-            />
-          </div>
+       <div className="mt-8">
+         <h3 className="text-xl font-bold mb-4">Achievements</h3>
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+             <div className="text-3xl mb-2">🏆</div>
+             <h4 className="font-bold">First Dream</h4>
+             <p className="text-sm text-gray-600 dark:text-gray-400">Created your first dream</p>
+           </div>
+           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+             <div className="text-3xl mb-2">💰</div>
+             <h4 className="font-bold">Top Supporter</h4>
+             <p className="text-sm text-gray-600 dark:text-gray-400">Pledged the most</p>
+           </div>
+           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
+             <div className="text-3xl mb-2">🎯</div>
+             <h4 className="font-bold">Dream Achiever</h4>
+             <p className="text-sm text-gray-600 dark:text-gray-400">Completed a dream</p>
+           </div>
+           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
+             <div className="text-3xl mb-2">🌟</div>
+             <h4 className="font-bold">Community Hero</h4>
+             <p className="text-sm text-gray-600 dark:text-gray-400">Helped 10+ dreams</p>
+           </div>
+         </div>
+       </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Wallet Address
-            </label>
-            <p className="text-gray-600 dark:text-gray-400 p-3 bg-gray-100 dark:bg-gray-700 rounded">
-              {user.walletAddress}
-            </p>
+       <div className="mt-8">
+        <h3 className="text-xl font-bold mb-4">Dream Progress</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between mb-1">
+                <span>Run Marathon</span>
+                <span>50%</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  className="bg-primary h-2 rounded-full"
+                  style={{ width: "50%" }}
+                ></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between mb-1">
+                <span>Learn Guitar</span>
+                <span>80%</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  className="bg-accent h-2 rounded-full"
+                  style={{ width: "80%" }}
+                ></div>
+              </div>
+            </div>
           </div>
-
-          <div className="flex gap-4">
-            <button
-              onClick={handleSave}
-              className="bg-primary text-white px-6 py-2 rounded hover:bg-blue-600 transition"
-            >
-              Save Changes
-            </button>
-            <button
-              onClick={logout}
-              className="bg-danger text-white px-6 py-2 rounded hover:bg-red-700 transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-          <h4 className="text-2xl font-bold text-primary">5</h4>
-          <p className="text-gray-600 dark:text-gray-400">Dreams Created</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-          <h4 className="text-2xl font-bold text-success">3</h4>
-          <p className="text-gray-600 dark:text-gray-400">Successful Dreams</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
-          <h4 className="text-2xl font-bold text-accent">12.5</h4>
-          <p className="text-gray-600 dark:text-gray-400">
-            Total Pledged (TON)
-          </p>
         </div>
       </div>
 

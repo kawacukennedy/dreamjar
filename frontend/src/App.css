@@ -33,6 +33,27 @@
   animation: bounce 1s;
 }
 
+/* Theme variables */
+[data-theme="default"] {
+  --primary: #6c5ce7;
+  --accent: #00d1ff;
+}
+
+[data-theme="blue"] {
+  --primary: #1e40af;
+  --accent: #3b82f6;
+}
+
+[data-theme="green"] {
+  --primary: #059669;
+  --accent: #10b981;
+}
+
+[data-theme="purple"] {
+  --primary: #7c3aed;
+  --accent: #a855f7;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

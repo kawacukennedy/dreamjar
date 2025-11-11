@@ -2,10 +2,12 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
+  const { theme, setTheme } = useTheme();
   const location = useLocation();
 
   return (
@@ -54,6 +56,17 @@ const Header: React.FC = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as any)}
+              className="p-2 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+              aria-label="Select theme"
+            >
+              <option value="default">Default</option>
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="purple">Purple</option>
+            </select>
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
