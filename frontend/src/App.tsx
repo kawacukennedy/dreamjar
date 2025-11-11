@@ -3,7 +3,13 @@ import * as Sentry from "@sentry/react";
 import { inject } from "@vercel/analytics";
 import posthog from "posthog-js";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import WebApp from "@twa-dev/sdk";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useToast } from "./contexts/ToastContext";
@@ -45,17 +51,60 @@ function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
   const { user, login } = useAuth();
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // init(); // TODO: initialize TWA SDK
-    // Show onboarding for new users
-    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
+    // Initialize TWA SDK
+    WebApp.ready();
+    WebApp.expand();
+
+    // Set up back button
+    WebApp.BackButton.onClick(() => {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        WebApp.close();
+      }
+    });
+
+    // Set up main button
+    WebApp.MainButton.setText("Create Dream");
+    WebApp.MainButton.onClick(() => {
+      navigate("/create");
+    });
+
+    // Show/hide buttons based on page
+    const handleLocationChange = () => {
+      const path = window.location.pathname;
+      if (path === "/") {
+        WebApp.BackButton.hide();
+        WebApp.MainButton.show();
+      } else if (path === "/create") {
+        WebApp.BackButton.show();
+        WebApp.MainButton.hide();
+      } else {
+        WebApp.BackButton.show();
+        WebApp.MainButton.hide();
+      }
+    };
+
+    handleLocationChange();
+    window.addEventListener("popstate", handleLocationChange);
+
+    // Show onboarding for new users (skip in TWA)
+    if (!WebApp.initData) {
+      const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
+      if (!hasSeenOnboarding) {
+        setShowOnboarding(true);
+      }
     }
-  }, []);
+
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+    };
+  }, [navigate]);
 
   useEffect(() => {
     if (tonConnectUI.connected && !user) {
