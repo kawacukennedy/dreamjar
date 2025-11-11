@@ -129,23 +129,34 @@ function Home() {
 
   return (
     <div>
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-2 text-primary">DreamJar</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+          Turn your dreams into smart contracts on TON. Stake, share, and achieve together!
+        </p>
+      </div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-4">Discover Dreams</h2>
         <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Search dreams..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-            aria-label="Search dreams"
-          />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-            aria-label="Filter dreams"
-          >
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+            <input
+              type="text"
+              placeholder="Search dreams..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+              aria-label="Search dreams"
+            />
+          </div>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">📊</span>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
+              aria-label="Filter dreams"
+            >
             <option value="all">All</option>
             <option value="active">Active</option>
             <option value="resolvedsuccess">Successful</option>
