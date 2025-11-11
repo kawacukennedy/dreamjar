@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import ProgressBar from "../components/ProgressBar";
