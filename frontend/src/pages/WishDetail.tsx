@@ -6,6 +6,7 @@ import { useToast } from "../contexts/ToastContext";
 import { useRealTime } from "../hooks/useRealTime";
 import ProgressBar from "../components/ProgressBar";
 import Modal from "../components/Modal";
+import ShareButton from "../components/ShareButton";
 
 interface WishJar {
   _id: string;
@@ -187,11 +188,12 @@ function WishDetail() {
           <ProgressBar progress={progress} />
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           {canPledge && (
             <button
               onClick={() => setShowPledgeModal(true)}
               className="bg-accent text-white px-6 py-2 rounded hover:bg-blue-600 transition"
+              aria-label="Pledge support to this dream"
             >
               Pledge Support
             </button>
@@ -200,6 +202,7 @@ function WishDetail() {
             <button
               onClick={() => setShowProofModal(true)}
               className="bg-success text-white px-6 py-2 rounded hover:bg-green-600 transition"
+              aria-label="Post progress proof"
             >
               Post Proof
             </button>
@@ -210,10 +213,12 @@ function WishDetail() {
               <button
                 onClick={() => setShowVoteModal(true)}
                 className="bg-warning text-white px-6 py-2 rounded hover:bg-yellow-600 transition"
+                aria-label="Start voting on dream completion"
               >
                 Start Voting
               </button>
             )}
+          <ShareButton url={`/wish/${wishJar._id}`} title={wishJar.title} />
         </div>
       </div>
 

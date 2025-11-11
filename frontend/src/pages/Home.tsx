@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
 import ProgressBar from "../components/ProgressBar";
 import Skeleton from "../components/Skeleton";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useDebounce } from "../hooks/useDebounce";
 
 interface WishJar {
@@ -20,7 +22,36 @@ function Home() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const debouncedSearch = useDebounce(search, 300);
+  const { ref, inView } = useInView();
+
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    // Mock load more
+    setTimeout(() => {
+      setWishJars((prev) => [
+        ...prev,
+        {
+          _id: `${prev.length + 1}`,
+          title: `Dream ${prev.length + 1}`,
+          description: `Description for dream ${prev.length + 1}`,
+          stakeAmount: 1000000000,
+          pledgedAmount: Math.random() * 1000000000,
+          deadline: "2024-12-31",
+          status: "Active",
+          ownerId: {
+            displayName: `User ${prev.length + 1}`,
+            walletAddress: "0x...",
+          },
+        },
+      ]);
+      setLoadingMore(false);
+      if (wishJars.length > 20) setHasMore(false);
+    }, 1000);
+  };
 
   useEffect(() => {
     // Mock fetch
@@ -50,6 +81,12 @@ function Home() {
       setLoading(false);
     }, 1000);
   }, []);
+
+  useEffect(() => {
+    if (inView && hasMore) {
+      loadMore();
+    }
+  }, [inView, hasMore]);
 
   const filteredJars = wishJars.filter((jar) => {
     const matchesSearch =
@@ -101,11 +138,13 @@ function Home() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+            aria-label="Search dreams"
           />
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+            aria-label="Filter dreams"
           >
             <option value="all">All</option>
             <option value="active">Active</option>
@@ -168,10 +207,25 @@ function Home() {
 
       {filteredJars.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          No dreams found.{" "}
-          <Link to="/create" className="text-primary">
-            Create one!
-          </Link>
+          No dreams found. <Link to="/create" className="text-primary">Create one!</Link>
+        </div>
+      )}
+
+      {loadingMore && (
+        <div className="flex justify-center py-4">
+          <LoadingSpinner />
+        </div>
+      )}
+
+      {hasMore && <div ref={ref} className="h-10" />}
+
+      <Link
+        to="/create"
+        className="fixed bottom-6 right-6 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
+        aria-label="Create new dream"
+      >
+        <span className="text-2xl">+</span>
+      </Link>
         </div>
       )}
 

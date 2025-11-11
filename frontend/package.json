@@ -17,6 +17,7 @@
     "posthog-js": "^1.96.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-intersection-observer": "^9.5.3",
     "react-router-dom": "^6.22.0"
   },
   "devDependencies": {

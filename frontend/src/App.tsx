@@ -8,14 +8,17 @@ import { init } from "@twa-dev/sdk";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
 import { ToastProvider, useToast } from "./contexts/ToastContext";
+import { useNotifications } from "./hooks/useNotifications";
 import Onboarding from "./components/Onboarding";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
+import Footer from "./components/Footer";
 
 const Home = lazy(() => import("./pages/Home"));
 const CreateWish = lazy(() => import("./pages/CreateWish"));
 const WishDetail = lazy(() => import("./pages/WishDetail"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 import "./App.css";
 
 Sentry.init({
@@ -39,6 +42,8 @@ function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
   const { login, logout, user } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
+  const { permission, requestPermission, sendNotification } =
+    useNotifications();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -48,7 +53,11 @@ function AppContent() {
     if (!hasSeenOnboarding) {
       setShowOnboarding(true);
     }
-  }, []);
+    // Request notification permission
+    if (permission === "default") {
+      requestPermission();
+    }
+  }, [permission, requestPermission]);
 
   useEffect(() => {
     if (tonConnectUI.connected && !user) {
@@ -143,6 +152,9 @@ function AppContent() {
             <a href="/create" className="text-primary hover:underline">
               Create Dream
             </a>
+            <a href="/leaderboard" className="text-primary hover:underline">
+              Leaderboard
+            </a>
             <a href="/profile" className="text-primary hover:underline">
               Profile
             </a>
@@ -161,9 +173,11 @@ function AppContent() {
               <Route path="/create" element={<CreateWish />} />
               <Route path="/wish/:id" element={<WishDetail />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
             </Routes>
           </Suspense>
         </main>
+        <Footer />
       </div>
 
       <Onboarding
