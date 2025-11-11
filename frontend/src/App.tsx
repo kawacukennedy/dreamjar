@@ -39,7 +39,6 @@ inject();
 function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
   const { user } = useAuth();
-  const { isDark, toggleDarkMode } = useDarkMode();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
 
