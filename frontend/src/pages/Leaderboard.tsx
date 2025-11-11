@@ -17,37 +17,80 @@ function Leaderboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data
-    setTimeout(() => {
-      setLeaders([
-        {
-          rank: 1,
-          user: {
-            displayName: "Alice",
-            walletAddress: "0x...",
-            avatarUrl: "/avatar1.png",
+    const fetchLeaderboard = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/leaderboard`,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setLeaders(data);
+        } else {
+          // Fallback to mock data
+          setLeaders([
+            {
+              rank: 1,
+              user: {
+                displayName: "Alice",
+                walletAddress: "0x...",
+                avatarUrl: "/avatar1.png",
+              },
+              totalPledged: 5000000000,
+              dreamsCreated: 5,
+              successRate: 80,
+            },
+            {
+              rank: 2,
+              user: { displayName: "Bob", walletAddress: "0x..." },
+              totalPledged: 3000000000,
+              dreamsCreated: 3,
+              successRate: 100,
+            },
+            {
+              rank: 3,
+              user: { walletAddress: "0x..." },
+              totalPledged: 2000000000,
+              dreamsCreated: 2,
+              successRate: 50,
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch leaderboard:", error);
+        // Fallback to mock data
+        setLeaders([
+          {
+            rank: 1,
+            user: {
+              displayName: "Alice",
+              walletAddress: "0x...",
+              avatarUrl: "/avatar1.png",
+            },
+            totalPledged: 5000000000,
+            dreamsCreated: 5,
+            successRate: 80,
           },
-          totalPledged: 5000000000,
-          dreamsCreated: 5,
-          successRate: 80,
-        },
-        {
-          rank: 2,
-          user: { displayName: "Bob", walletAddress: "0x..." },
-          totalPledged: 3000000000,
-          dreamsCreated: 3,
-          successRate: 100,
-        },
-        {
-          rank: 3,
-          user: { walletAddress: "0x..." },
-          totalPledged: 2000000000,
-          dreamsCreated: 2,
-          successRate: 50,
-        },
-      ]);
-      setLoading(false);
-    }, 1000);
+          {
+            rank: 2,
+            user: { displayName: "Bob", walletAddress: "0x..." },
+            totalPledged: 3000000000,
+            dreamsCreated: 3,
+            successRate: 100,
+          },
+          {
+            rank: 3,
+            user: { walletAddress: "0x..." },
+            totalPledged: 2000000000,
+            dreamsCreated: 2,
+            successRate: 50,
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
   }, []);
 
   if (loading) {

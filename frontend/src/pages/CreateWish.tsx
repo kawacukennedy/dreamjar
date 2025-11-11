@@ -47,9 +47,25 @@ function CreateWish() {
     };
 
     try {
-      await api.wish.create(data, token);
-      addToast("Dream created successfully!", "success");
-      navigate("/");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/wish`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        addToast("Dream created successfully!", "success");
+        navigate("/");
+      } else {
+        const errorData = await response.json();
+        addToast(
+          errorData.message || "Failed to create dream. Please try again.",
+          "error",
+        );
+      }
     } catch (error) {
       console.error(error);
       addToast("Failed to create dream. Please try again.", "error");

@@ -65,61 +65,95 @@ function Home() {
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    // Mock load more
-    setTimeout(() => {
-      setWishJars((prev) => [
-        ...prev,
-        {
-          _id: `${prev.length + 1}`,
-          title: `Dream ${prev.length + 1}`,
-          description: `Description for dream ${prev.length + 1}`,
-          stakeAmount: 1000000000,
-          pledgedAmount: Math.random() * 1000000000,
-          deadline: "2024-12-31",
-          status: "Active",
-          category: ["Health & Fitness", "Arts & Music", "Education", "Travel"][
-            Math.floor(Math.random() * 4)
-          ],
-          ownerId: {
-            displayName: `User ${prev.length + 1}`,
-            walletAddress: "0x...",
-          },
-        },
-      ]);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/wish?skip=${wishJars.length}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.length === 0) {
+          setHasMore(false);
+        } else {
+          setWishJars((prev) => [...prev, ...data]);
+        }
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Failed to load more:", error);
+      setHasMore(false);
+    } finally {
       setLoadingMore(false);
-      if (wishJars.length > 20) setHasMore(false);
-    }, 1000);
+    }
   };
 
   useEffect(() => {
-    // Mock fetch
-    setTimeout(() => {
-      setWishJars([
-        {
-          _id: "1",
-          title: "Run Marathon",
-          description: "Complete a full marathon in under 4 hours",
-          stakeAmount: 1000000000,
-          pledgedAmount: 500000000,
-          deadline: "2024-12-31",
-          status: "Active",
-          category: "Health & Fitness",
-          ownerId: { displayName: "Alice", walletAddress: "0x..." },
-        },
-        {
-          _id: "2",
-          title: "Learn Guitar",
-          description: "Master 10 songs on guitar",
-          stakeAmount: 500000000,
-          pledgedAmount: 200000000,
-          deadline: "2024-11-30",
-          status: "Active",
-          category: "Arts & Music",
-          ownerId: { walletAddress: "0x..." },
-        },
-      ]);
-      setLoading(false);
-    }, 1000);
+    const fetchWishJars = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/wish`);
+        if (response.ok) {
+          const data = await response.json();
+          setWishJars(data);
+        } else {
+          // Fallback to mock data
+          setWishJars([
+            {
+              _id: "1",
+              title: "Run Marathon",
+              description: "Complete a full marathon in under 4 hours",
+              stakeAmount: 1000000000,
+              pledgedAmount: 500000000,
+              deadline: "2024-12-31",
+              status: "Active",
+              category: "Health & Fitness",
+              ownerId: { displayName: "Alice", walletAddress: "0x..." },
+            },
+            {
+              _id: "2",
+              title: "Learn Guitar",
+              description: "Master 10 songs on guitar",
+              stakeAmount: 500000000,
+              pledgedAmount: 200000000,
+              deadline: "2024-11-30",
+              status: "Active",
+              category: "Arts & Music",
+              ownerId: { walletAddress: "0x..." },
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch wish jars:", error);
+        // Fallback to mock data
+        setWishJars([
+          {
+            _id: "1",
+            title: "Run Marathon",
+            description: "Complete a full marathon in under 4 hours",
+            stakeAmount: 1000000000,
+            pledgedAmount: 500000000,
+            deadline: "2024-12-31",
+            status: "Active",
+            category: "Health & Fitness",
+            ownerId: { displayName: "Alice", walletAddress: "0x..." },
+          },
+          {
+            _id: "2",
+            title: "Learn Guitar",
+            description: "Master 10 songs on guitar",
+            stakeAmount: 500000000,
+            pledgedAmount: 200000000,
+            deadline: "2024-11-30",
+            status: "Active",
+            category: "Arts & Music",
+            ownerId: { walletAddress: "0x..." },
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWishJars();
   }, []);
 
   useEffect(() => {
@@ -159,7 +193,7 @@ function Home() {
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="grid">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}

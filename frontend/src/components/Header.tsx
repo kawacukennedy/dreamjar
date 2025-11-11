@@ -59,7 +59,7 @@ const Header: React.FC = () => {
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value as any)}
-              className="p-2 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+              className="p-2 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary"
               aria-label="Select theme"
             >
               <option value="default">Default</option>

@@ -49,38 +49,28 @@ function WishDetail() {
   const realTimeData = useRealTime(id);
 
   useEffect(() => {
-    // Mock fetch
-    setTimeout(() => {
-      setWishJar({
-        _id: id || "",
-        title: "Run Marathon",
-        description: "Complete a full marathon in under 4 hours",
-        stakeAmount: 1000000000,
-        pledgedAmount: 500000000,
-        deadline: "2024-12-31",
-        status: "Active",
-        ownerId: { displayName: "Alice", walletAddress: "0x..." },
-        pledges: [
-          {
-            _id: "1",
-            supporterId: { displayName: "Bob", walletAddress: "0x..." },
-            amount: 100000000,
-            createdAt: "2024-10-01",
-          },
-        ],
-        proofs: [
-          {
-            _id: "1",
-            uploaderId: { displayName: "Alice", walletAddress: "0x..." },
-            mediaURI: "https://example.com/image.jpg",
-            caption: "Training run completed!",
-            createdAt: "2024-10-05",
-          },
-        ],
-      });
-      setLoading(false);
-    }, 1000);
-  }, [id]);
+    const fetchWishJar = async () => {
+      if (!id) return;
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/wish/${id}`,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setWishJar(data);
+        } else {
+          addToast("Failed to load dream details", "error");
+        }
+      } catch (error) {
+        console.error("Failed to fetch wish jar:", error);
+        addToast("Failed to load dream details", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWishJar();
+  }, [id, addToast]);
 
   // Real-time notifications
   useEffect(() => {

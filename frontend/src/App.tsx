@@ -21,6 +21,7 @@ const CreateWish = lazy(() => import("./pages/CreateWish"));
 const WishDetail = lazy(() => import("./pages/WishDetail"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 import "./App.css";
 
 Sentry.init({
@@ -80,13 +81,24 @@ function AppContent() {
 
   return (
     <Router>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded z-50"
+      >
+        Skip to main content
+      </a>
       <div className="min-h-screen bg-backgroundLight dark:bg-backgroundDark text-gray-900 dark:text-gray-100">
         <Header />
-        <main className="container mx-auto p-4">
+        <main id="main-content" className="container mx-auto p-4">
           <Suspense
             fallback={
-              <div className="flex justify-center py-8">
-                <LoadingSpinner />
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                  <LoadingSpinner className="mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Loading DreamJar...
+                  </p>
+                </div>
               </div>
             }
           >
@@ -96,6 +108,7 @@ function AppContent() {
               <Route path="/wish/:id" element={<WishDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </main>
