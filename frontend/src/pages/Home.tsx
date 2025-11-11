@@ -129,78 +129,9 @@ function Home() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-4">Discover Dreams</h2>
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Search dreams..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-            aria-label="Search dreams"
-          />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-            aria-label="Filter dreams"
-          >
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="resolvedsuccess">Successful</option>
-            <option value="resolvedfail">Failed</option>
-          </select>
-        </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredJars.map((jar) => {
-          const progress = (jar.pledgedAmount / jar.stakeAmount) * 100;
-          return (
-            <div
-              key={jar._id}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 animate-fade-in"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-bold text-lg">{jar.title}</h3>
-                <span
-                  className={`px-2 py-1 rounded text-xs ${
-                    jar.status === "Active"
-                      ? "bg-accent text-white"
-                      : jar.status === "ResolvedSuccess"
-                        ? "bg-success text-white"
-                        : "bg-danger text-white"
-                  }`}
-                >
-                  {jar.status}
-                </span>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                {jar.description}
-              </p>
-              <div className="mb-2">
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Pledged: {jar.pledgedAmount / 1000000000} TON</span>
-                  <span>Goal: {jar.stakeAmount / 1000000000} TON</span>
-                </div>
-                <ProgressBar progress={progress} />
-              </div>
-              <p className="text-sm text-gray-500 mb-2">
-                By:{" "}
-                {jar.ownerId.displayName ||
-                  jar.ownerId.walletAddress.slice(0, 6) + "..."}
-              </p>
-              <p className="text-sm text-gray-500 mb-4">
-                Deadline: {new Date(jar.deadline).toLocaleDateString()}
-              </p>
-              <Link
-                to={`/wish/${jar._id}`}
-                className="block text-center bg-primary text-white py-2 rounded hover:bg-blue-600 transition"
-              >
-                View Details
-              </Link>
-            </div>
-          );
+      <h1>Home</h1>
+    </div>
+  );
         })}
       </div>
 
