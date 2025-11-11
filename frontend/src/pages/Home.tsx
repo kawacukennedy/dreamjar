@@ -1,10 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useInView } from "react-intersection-observer";
-import ProgressBar from "../components/ProgressBar";
-import Skeleton from "../components/Skeleton";
-import LoadingSpinner from "../components/LoadingSpinner";
-import { useDebounce } from "../hooks/useDebounce";
+import React from "react";
 
 interface WishJar {
   _id: string;
@@ -19,39 +13,7 @@ interface WishJar {
 
 function Home() {
   const [wishJars, setWishJars] = useState<WishJar[]>([]);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const debouncedSearch = useDebounce(search, 300);
-  const { ref, inView } = useInView();
-
-  const loadMore = async () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    // Mock load more
-    setTimeout(() => {
-      setWishJars((prev) => [
-        ...prev,
-        {
-          _id: `${prev.length + 1}`,
-          title: `Dream ${prev.length + 1}`,
-          description: `Description for dream ${prev.length + 1}`,
-          stakeAmount: 1000000000,
-          pledgedAmount: Math.random() * 1000000000,
-          deadline: "2024-12-31",
-          status: "Active",
-          ownerId: {
-            displayName: `User ${prev.length + 1}`,
-            walletAddress: "0x...",
-          },
-        },
-      ]);
-      setLoadingMore(false);
-      if (wishJars.length > 20) setHasMore(false);
-    }, 1000);
-  };
 
   useEffect(() => {
     // Mock fetch
@@ -81,21 +43,6 @@ function Home() {
       setLoading(false);
     }, 1000);
   }, []);
-
-  useEffect(() => {
-    if (inView && hasMore) {
-      loadMore();
-    }
-  }, [inView, hasMore]);
-
-  const filteredJars = wishJars.filter((jar) => {
-    const matchesSearch =
-      jar.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      jar.description.toLowerCase().includes(debouncedSearch.toLowerCase());
-    const matchesFilter =
-      filter === "all" || jar.status.toLowerCase() === filter;
-    return matchesSearch && matchesFilter;
-  });
 
   if (loading) {
     return (

@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
 import { ToastProvider } from "./contexts/ToastContext";
-import { useNotifications } from "./hooks/useNotifications";
+
 import Onboarding from "./components/Onboarding";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -40,7 +40,7 @@ function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
   const { logout, user } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
-  const { permission, requestPermission } = useNotifications();
+
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -50,11 +50,7 @@ function AppContent() {
     if (!hasSeenOnboarding) {
       setShowOnboarding(true);
     }
-    // Request notification permission
-    if (permission === "default") {
-      requestPermission();
-    }
-  }, [permission, requestPermission]);
+  }, []);
 
   useEffect(() => {
     if (tonConnectUI.connected && !user) {
@@ -79,23 +75,6 @@ function AppContent() {
       // await login(address, signedMessage, challengeMessage);
     } catch (error) {
       console.error("Auto-login failed:", error);
-    }
-  };
-
-  const handleConnect = async () => {
-    try {
-      await tonConnectUI.connectWallet();
-    } catch (error) {
-      console.error("Failed to connect wallet:", error);
-    }
-  };
-
-  const handleDisconnect = async () => {
-    try {
-      await tonConnectUI.disconnect();
-      logout();
-    } catch (error) {
-      console.error("Failed to disconnect wallet:", error);
     }
   };
 
