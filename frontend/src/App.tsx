@@ -6,6 +6,7 @@ import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { useToast } from "./contexts/ToastContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
@@ -21,6 +22,8 @@ const CreateWish = lazy(() => import("./pages/CreateWish"));
 const WishDetail = lazy(() => import("./pages/WishDetail"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const Help = lazy(() => import("./pages/Help"));
+const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 import "./App.css";
 
@@ -40,7 +43,8 @@ inject();
 
 function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
+  const { addToast } = useToast();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -66,16 +70,25 @@ function AppContent() {
       if (!address) return;
 
       // Get challenge
-      // TODO: implement wallet challenge
-      // await fetch(`${import.meta.env.VITE_API_URL}/auth/wallet-challenge`, ...);
+      const challengeResponse = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/wallet-challenge`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address }),
+        },
+      );
+      const { challengeMessage } = await challengeResponse.json();
 
-      // Sign message - TODO: implement proper signing
-      // const signedMessage = await tonConnectUI.signMessage(challengeMessage);
+      // Sign message
+      const signedMessage = await tonConnectUI.signMessage(challengeMessage);
 
-      // Verify - TODO: implement
-      // await login(address, signedMessage, challengeMessage);
+      // Verify
+      await login(address, signedMessage, challengeMessage);
+      addToast("Wallet connected successfully!", "success");
     } catch (error) {
       console.error("Auto-login failed:", error);
+      addToast("Failed to connect wallet", "error");
     }
   };
 
@@ -108,6 +121,8 @@ function AppContent() {
               <Route path="/wish/:id" element={<WishDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

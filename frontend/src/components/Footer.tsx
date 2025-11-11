@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { VERSION } from "../version";
 
 const Footer: React.FC = () => {
@@ -16,19 +17,19 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-4">Features</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li>
-                <a href="/" className="hover:text-primary">
+                <Link to="/" className="hover:text-primary">
                   Discover Dreams
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/create" className="hover:text-primary">
+                <Link to="/create" className="hover:text-primary">
                   Create Dream
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/leaderboard" className="hover:text-primary">
+                <Link to="/leaderboard" className="hover:text-primary">
                   Leaderboard
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -36,19 +37,19 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li>
-                <a href="/help" className="hover:text-primary">
+                <Link to="/help" className="hover:text-primary">
                   Help Center
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/contact" className="hover:text-primary">
+                <Link to="/contact" className="hover:text-primary">
                   Contact Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/faq" className="hover:text-primary">
+                <Link to="/help" className="hover:text-primary">
                   FAQ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

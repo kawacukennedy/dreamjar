@@ -41,6 +41,16 @@ const Header: React.FC = () => {
             >
               Leaderboard
             </Link>
+            <Link
+              to="/help"
+              className={`px-3 py-2 rounded-md text-sm font-medium ${
+                location.pathname === "/help"
+                  ? "text-primary bg-primary/10"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary"
+              }`}
+            >
+              Help
+            </Link>
             {user && (
               <Link
                 to="/profile"
