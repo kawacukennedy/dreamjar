@@ -1,7 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import * as Sentry from "@sentry/react";
 import { inject } from "@vercel/analytics";
-import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -73,12 +72,6 @@ try {
 }
 
 function AppContent() {
-  let tonConnectUI: any = null;
-  try {
-    [tonConnectUI] = useTonConnectUI();
-  } catch (e) {
-    console.warn("TonConnect UI not available:", e);
-  }
   const { user, login } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -136,41 +129,9 @@ function AppContent() {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    if (tonConnectUI?.connected && !user) {
-      // Auto-login when wallet connects
-      handleWalletLogin();
-    }
-  }, [tonConnectUI?.connected, user]);
+  // Wallet login disabled temporarily for debugging
 
-  const handleWalletLogin = async () => {
-    if (!tonConnectUI) return;
-    try {
-      const address = tonConnectUI.account?.address;
-      if (!address) return;
-
-      // Get challenge
-      const challengeResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/wallet-challenge`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address }),
-        },
-      );
-      const { challengeMessage } = await challengeResponse.json();
-
-      // Sign message (mock for now)
-      const signedMessage = "mock_signature";
-
-      // Verify
-      await login(address, signedMessage, challengeMessage);
-      addToast("Wallet connected successfully!", "success");
-    } catch (error) {
-      console.error("Auto-login failed:", error);
-      addToast("Failed to connect wallet", "error");
-    }
-  };
+  // Wallet login disabled temporarily
 
   return (
     <Router>
