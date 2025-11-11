@@ -6,7 +6,7 @@ import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
+import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { ToastProvider } from "./contexts/ToastContext";
 
 import Onboarding from "./components/Onboarding";
