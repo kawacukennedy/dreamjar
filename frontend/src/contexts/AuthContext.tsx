@@ -41,11 +41,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("jwt");
-    const storedUser = localStorage.getItem("user");
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    try {
+      const storedToken = localStorage.getItem("jwt");
+      const storedUser = localStorage.getItem("user");
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Failed to load auth data:", error);
+      // Clear corrupted data
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("user");
     }
     setIsLoading(false);
   }, []);

@@ -1,15 +1,29 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import * as Sentry from "@sentry/react";
 import { inject } from "@vercel/analytics";
-import posthog from "posthog-js";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
-import WebApp from "@twa-dev/sdk";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useNavigate,
 } from "react-router-dom";
+
+// Conditional imports
+let posthog: any = null;
+let WebApp: any = null;
+
+try {
+  posthog = require("posthog-js");
+} catch (e) {
+  // PostHog not available
+}
+
+try {
+  WebApp = require("@twa-dev/sdk");
+} catch (e) {
+  // TWA SDK not available
+}
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useToast } from "./contexts/ToastContext";
@@ -43,6 +57,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 }
 
 if (
+  posthog &&
   import.meta.env.VITE_POSTHOG_KEY &&
   import.meta.env.VITE_POSTHOG_KEY !== "mock_key"
 ) {
@@ -51,10 +66,19 @@ if (
   });
 }
 
-inject();
+try {
+  inject();
+} catch (e) {
+  console.warn("Vercel analytics not available:", e);
+}
 
 function AppContent() {
-  const [tonConnectUI] = useTonConnectUI();
+  let tonConnectUI: any = null;
+  try {
+    [tonConnectUI] = useTonConnectUI();
+  } catch (e) {
+    console.warn("TonConnect UI not available:", e);
+  }
   const { user, login } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -63,7 +87,7 @@ function AppContent() {
 
   useEffect(() => {
     // Initialize TWA SDK if in Telegram
-    if (WebApp.initData) {
+    if (WebApp && WebApp.initData) {
       WebApp.ready();
       WebApp.expand();
 
@@ -113,13 +137,14 @@ function AppContent() {
   }, [navigate]);
 
   useEffect(() => {
-    if (tonConnectUI.connected && !user) {
+    if (tonConnectUI?.connected && !user) {
       // Auto-login when wallet connects
       handleWalletLogin();
     }
-  }, [tonConnectUI.connected, user]);
+  }, [tonConnectUI?.connected, user]);
 
   const handleWalletLogin = async () => {
+    if (!tonConnectUI) return;
     try {
       const address = tonConnectUI.account?.address;
       if (!address) return;
