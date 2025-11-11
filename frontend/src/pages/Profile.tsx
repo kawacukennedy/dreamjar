@@ -12,9 +12,9 @@ interface WishJar {
 }
 
 function Profile() {
-  const { user, logout } = useAuth();
+  const { user, token } = useAuth();
   const { addToast } = useToast();
-  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [displayName] = useState(user?.displayName || "");
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || "");
   const [userWishJars, setUserWishJars] = useState<WishJar[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,7 @@ function Profile() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token}`,
+            Authorization: `Bearer ${token || ""}`,
           },
           body: JSON.stringify({ displayName }),
         },

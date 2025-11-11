@@ -48,27 +48,27 @@ function WishDetail() {
   const { addToast } = useToast();
   const realTimeData = useRealTime(id);
 
-  useEffect(() => {
-    const fetchWishJar = async () => {
-      if (!id) return;
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/wish/${id}`,
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setWishJar(data);
-        } else {
-          addToast("Failed to load dream details", "error");
-        }
-      } catch (error) {
-        console.error("Failed to fetch wish jar:", error);
+  const fetchWishJar = async () => {
+    if (!id) return;
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/wish/${id}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setWishJar(data);
+      } else {
         addToast("Failed to load dream details", "error");
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch wish jar:", error);
+      addToast("Failed to load dream details", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchWishJar();
   }, [id, addToast]);
 
@@ -118,7 +118,7 @@ function WishDetail() {
         // Refresh data
         fetchWishJar();
       } else {
-        addToast("Pledge recorded, but backend update failed", "warning");
+        addToast("Pledge recorded, but backend update failed", "error");
       }
     } catch (error) {
       console.error("Pledge failed:", error);

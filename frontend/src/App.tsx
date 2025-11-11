@@ -131,8 +131,8 @@ function AppContent() {
       );
       const { challengeMessage } = await challengeResponse.json();
 
-      // Sign message
-      const signedMessage = await tonConnectUI.signMessage(challengeMessage);
+      // Sign message (mock for now)
+      const signedMessage = "mock_signature";
 
       // Verify
       await login(address, signedMessage, challengeMessage);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import ProgressBar from "../components/ProgressBar";
@@ -342,11 +342,7 @@ function Home() {
                 Deadline: {new Date(jar.deadline).toLocaleDateString()}
               </p>
               <div className="flex space-x-2">
-                <ShareButton
-                  url={`${window.location.origin}/wish/${jar._id}`}
-                  title={jar.title}
-                  className="flex-1"
-                />
+                <ShareButton url={`/wish/${jar._id}`} title={jar.title} />
                 <Link
                   to={`/wish/${jar._id}`}
                   className="flex-1 text-center bg-primary text-white py-2 rounded hover:bg-blue-600 transition"
