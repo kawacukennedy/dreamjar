@@ -43,9 +43,14 @@ Sentry.init({
   // replaysOnErrorSampleRate: 1.0,
 });
 
-posthog.init(import.meta.env.VITE_POSTHOG_KEY || "mock_key", {
-  api_host: "https://app.posthog.com",
-});
+if (
+  import.meta.env.VITE_POSTHOG_KEY &&
+  import.meta.env.VITE_POSTHOG_KEY !== "mock_key"
+) {
+  posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
+    api_host: "https://app.posthog.com",
+  });
+}
 
 inject();
 
@@ -197,7 +202,12 @@ function AppContent() {
 function App() {
   return (
     <ErrorBoundary>
-      <TonConnectUIProvider manifestUrl="https://your-domain.com/tonconnect-manifest.json">
+      <TonConnectUIProvider
+        manifestUrl={
+          import.meta.env.VITE_TONCONNECT_MANIFEST ||
+          "/tonconnect-manifest.json"
+        }
+      >
         <ToastProvider>
           <ThemeProvider>
             <DarkModeProvider>
