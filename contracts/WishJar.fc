@@ -1,0 +1,34 @@
+;; DreamJar WishJar Contract
+;; Basic FunC implementation
+
+#include "imports/stdlib.fc";
+
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+  ;; Handle internal messages
+  if (in_msg_body~load_uint(32) == 0x12345678) { ;; pledge op
+    int amount = in_msg_body~load_uint(64);
+    ;; Add to pledged amount
+    ;; Mint badge if needed
+  } elseif (in_msg_body~load_uint(32) == 0x87654321) { ;; post proof op
+    slice proof_uri = in_msg_body~load_slice(256);
+    ;; Store proof
+  } elseif (in_msg_body~load_uint(32) == 0xabcd1234) { ;; vote op
+    int choice = in_msg_body~load_uint(1);
+    ;; Record vote
+  } elseif (in_msg_body~load_uint(32) == 0xdcba4321) { ;; resolve op
+    ;; Check deadline and votes
+    ;; Distribute funds
+  }
+}
+
+() recv_external(slice in_msg) impure {
+  ;; Handle external messages
+}
+
+int get_pledged_amount() method_id {
+  return 0; ;; Return stored pledged amount
+}
+
+int get_status() method_id {
+  return 0; ;; Return status
+}

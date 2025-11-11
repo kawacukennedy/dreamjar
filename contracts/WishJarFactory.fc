@@ -1,0 +1,20 @@
+;; WishJarFactory Contract
+
+#include "imports/stdlib.fc";
+
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+  if (in_msg_body~load_uint(32) == 0x11111111) { ;; create wish jar op
+    slice owner = in_msg_body~load_slice(256);
+    int stake = in_msg_body~load_uint(64);
+    ;; Deploy new WishJar contract
+    ;; Return address
+  }
+}
+
+() recv_external(slice in_msg) impure {
+  ;; Handle external
+}
+
+slice get_wish_jars_by_owner(slice owner) method_id {
+  return null(); ;; Return list of addresses
+}

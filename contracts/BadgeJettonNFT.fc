@@ -1,0 +1,19 @@
+;; Badge Jetton NFT Contract
+
+#include "imports/stdlib.fc";
+
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+  if (in_msg_body~load_uint(32) == 0x22222222) { ;; mint op
+    slice to = in_msg_body~load_slice(256);
+    slice uri = in_msg_body~load_slice(256);
+    ;; Mint NFT
+  }
+}
+
+() recv_external(slice in_msg) impure {
+  ;; Handle external
+}
+
+slice get_metadata(int token_id) method_id {
+  return null(); ;; Return metadata URI
+}

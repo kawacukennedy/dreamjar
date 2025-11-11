@@ -1,0 +1,22 @@
+{
+  "name": "dreamjar",
+  "version": "1.0.0",
+  "description": "Turn your dreams into smart contracts — stake, share, and achieve together on TON via a Telegram Mini-App",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "contracts",
+    "infrastructure"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  }
+}
