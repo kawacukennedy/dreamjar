@@ -6,7 +6,6 @@ function Profile() {
   const { user, logout } = useAuth();
   const { addToast } = useToast();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || "");
 
   if (!user) {

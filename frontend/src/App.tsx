@@ -4,7 +4,7 @@ import { inject } from "@vercel/analytics";
 import posthog from "posthog-js";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import init from "@twa-dev/sdk";
+
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
 import { ToastProvider } from "./contexts/ToastContext";
@@ -68,15 +68,8 @@ function AppContent() {
       if (!address) return;
 
       // Get challenge
-      const challengeResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/wallet-challenge`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address }),
-        },
-      );
-      // const { challengeMessage } = await challengeResponse.json();
+      // TODO: implement wallet challenge
+      // await fetch(`${import.meta.env.VITE_API_URL}/auth/wallet-challenge`, ...);
 
       // Sign message - TODO: implement proper signing
       // const signedMessage = await tonConnectUI.signMessage(challengeMessage);
