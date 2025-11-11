@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { api } from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function CreateWish() {
   const [form, setForm] = useState({
@@ -176,8 +177,9 @@ function CreateWish() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-white p-3 rounded hover:bg-blue-600 transition disabled:opacity-50"
+          className="w-full bg-primary text-white p-3 rounded hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center"
         >
+          {loading && <LoadingSpinner className="mr-2" />}
           {loading ? "Creating..." : "Create Dream"}
         </button>
       </form>

@@ -5,6 +5,7 @@ import ProgressBar from "../components/ProgressBar";
 import Skeleton from "../components/Skeleton";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ShareButton from "../components/ShareButton";
+import Tooltip from "../components/Tooltip";
 import { useDebounce } from "../hooks/useDebounce";
 
 interface WishJar {
@@ -221,13 +222,21 @@ function Home() {
                   )}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => toggleFavorite(jar._id)}
-                    className="text-2xl hover:scale-110 transition"
-                    aria-label="Toggle favorite"
+                  <Tooltip
+                    content={
+                      favorites.includes(jar._id)
+                        ? "Remove from favorites"
+                        : "Add to favorites"
+                    }
                   >
-                    {favorites.includes(jar._id) ? "❤️" : "🤍"}
-                  </button>
+                    <button
+                      onClick={() => toggleFavorite(jar._id)}
+                      className="text-2xl hover:scale-110 transition"
+                      aria-label="Toggle favorite"
+                    >
+                      {favorites.includes(jar._id) ? "❤️" : "🤍"}
+                    </button>
+                  </Tooltip>
                   <span
                     className={`px-2 py-1 rounded text-xs ${
                       jar.status === "Active"
