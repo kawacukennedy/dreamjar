@@ -1,11 +1,15 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import multer from "multer";
 import WishJar from "../models/WishJar";
 import Pledge from "../models/Pledge";
 import Proof from "../models/Proof";
 import Vote from "../models/Vote";
+import { uploadToIPFS } from "../services/storage";
 
 const router = express.Router();
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware to verify JWT
 const authenticate = (
@@ -97,20 +101,31 @@ router.post("/:id/pledge", authenticate, async (req, res) => {
 });
 
 // POST /wish/:id/proof
-router.post("/:id/proof", authenticate, async (req, res) => {
-  const { mediaURI, mediaHash, caption } = req.body;
+router.post(
+  "/:id/proof",
+  authenticate,
+  upload.single("mediaFile"),
+  async (req, res) => {
+    const { caption } = req.body;
+    const file = req.file;
 
-  const proof = new Proof({
-    wishJarId: req.params.id,
-    uploaderId: req.userId,
-    mediaURI,
-    mediaHash,
-    caption,
-  });
+    if (!file) return res.status(400).json({ error: "Media file required" });
 
-  await proof.save();
-  res.json({ proof });
-});
+    const mediaURI = await uploadToIPFS(file.buffer, file.originalname);
+    const mediaHash = "mock_hash"; // TODO: Calculate hash
+
+    const proof = new Proof({
+      wishJarId: req.params.id,
+      uploaderId: req.userId,
+      mediaURI,
+      mediaHash,
+      caption,
+    });
+
+    await proof.save();
+    res.json({ proof });
+  },
+);
 
 // POST /wish/:id/start-vote
 router.post("/:id/start-vote", authenticate, async (req, res) => {

@@ -15,13 +15,14 @@ router.post("/wallet-challenge", async (req, res) => {
 
 // POST /auth/wallet-verify
 router.post("/wallet-verify", async (req, res) => {
-  const { address, signedMessage } = req.body;
-  if (!address || !signedMessage)
+  const { address, signedMessage, challengeMessage } = req.body;
+  if (!address || !signedMessage || !challengeMessage)
     return res
       .status(400)
-      .json({ error: "Address and signedMessage required" });
+      .json({ error: "Address, signedMessage, and challengeMessage required" });
 
   // TODO: Verify signature with TON SDK
+  // For now, assume valid
 
   let user = await User.findOne({ walletAddress: address });
   if (!user) {
