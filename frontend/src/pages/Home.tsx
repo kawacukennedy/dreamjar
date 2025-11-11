@@ -204,7 +204,7 @@ function Home() {
         })}
       </div>
 
-      {filteredJars.length === 0 && (
+      {/* {filteredJars.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No dreams found.{" "}
           <Link to="/create" className="text-primary">
@@ -219,7 +219,7 @@ function Home() {
         </div>
       )}
 
-      {hasMore && <div ref={ref} className="h-10" />}
+      {hasMore && <div ref={ref} className="h-10" />} */}
 
       <Link
         to="/create"
