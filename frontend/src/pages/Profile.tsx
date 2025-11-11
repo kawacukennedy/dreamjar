@@ -136,29 +136,29 @@ function Profile() {
 
         <div className="mt-8">
           <h3 className="text-xl font-bold mb-4">Achievements</h3>
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
-             <div className="text-3xl mb-2">🏆</div>
-             <h4 className="font-bold">First Dream</h4>
-             <p className="text-sm text-gray-600 dark:text-gray-400">Created your first dream</p>
-           </div>
-           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
-             <div className="text-3xl mb-2">💰</div>
-             <h4 className="font-bold">Top Supporter</h4>
-             <p className="text-sm text-gray-600 dark:text-gray-400">Pledged the most</p>
-           </div>
-           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
-             <div className="text-3xl mb-2">🎯</div>
-             <h4 className="font-bold">Dream Achiever</h4>
-             <p className="text-sm text-gray-600 dark:text-gray-400">Completed a dream</p>
-           </div>
-           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
-             <div className="text-3xl mb-2">🌟</div>
-             <h4 className="font-bold">Community Hero</h4>
-             <p className="text-sm text-gray-600 dark:text-gray-400">Helped 10+ dreams</p>
-           </div>
-         </div>
-       </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.length > 0 ? '' : 'opacity-50'}`}>
+              <div className="text-3xl mb-2">🏆</div>
+              <h4 className="font-bold">First Dream</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Created your first dream</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
+              <div className="text-3xl mb-2">💰</div>
+              <h4 className="font-bold">Top Supporter</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Pledged the most</p>
+            </div>
+            <div className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.some(j => j.status === 'ResolvedSuccess') ? '' : 'opacity-50'}`}>
+              <div className="text-3xl mb-2">🎯</div>
+              <h4 className="font-bold">Dream Achiever</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Completed a dream</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
+              <div className="text-3xl mb-2">🌟</div>
+              <h4 className="font-bold">Community Hero</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Helped 10+ dreams</p>
+            </div>
+          </div>
+        </div>
 
        <div className="mt-8">
         <h3 className="text-xl font-bold mb-4">Dream Progress</h3>

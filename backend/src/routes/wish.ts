@@ -155,4 +155,47 @@ router.post("/:id/vote", authenticate, async (req, res) => {
   });
 });
 
+// GET /wish/leaderboard
+router.get("/leaderboard", async (req, res) => {
+  try {
+    const users = await User.find({});
+    const leaderboard = await Promise.all(
+      users.map(async (user, index) => {
+        const userWishJars = await WishJar.find({ ownerId: user._id });
+        const pledges = await Pledge.find({ supporterId: user._id });
+        const totalPledged = pledges.reduce((sum, p) => sum + p.amount, 0);
+        const dreamsCreated = userWishJars.length;
+        const successfulDreams = userWishJars.filter(
+          (j) => j.status === "ResolvedSuccess",
+        ).length;
+        const successRate =
+          dreamsCreated > 0
+            ? Math.round((successfulDreams / dreamsCreated) * 100)
+            : 0;
+
+        return {
+          rank: index + 1,
+          user: {
+            displayName: user.displayName,
+            walletAddress: user.walletAddress,
+            avatarUrl: user.avatarUrl,
+          },
+          totalPledged,
+          dreamsCreated,
+          successRate,
+        };
+      }),
+    );
+
+    // Sort by totalPledged descending
+    leaderboard.sort((a, b) => b.totalPledged - a.totalPledged);
+    leaderboard.forEach((entry, index) => (entry.rank = index + 1));
+
+    res.json(leaderboard);
+  } catch (error) {
+    console.error("Leaderboard error:", error);
+    res.status(500).json({ error: "Failed to fetch leaderboard" });
+  }
+});
+
 export default router;
