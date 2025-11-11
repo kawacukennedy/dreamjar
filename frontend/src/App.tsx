@@ -13,6 +13,7 @@ import Onboarding from "./components/Onboarding";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
 import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 const Home = lazy(() => import("./pages/Home"));
 const CreateWish = lazy(() => import("./pages/CreateWish"));
@@ -101,54 +102,7 @@ function AppContent() {
   return (
     <Router>
       <div className="min-h-screen bg-backgroundLight dark:bg-backgroundDark text-gray-900 dark:text-gray-100">
-        <header className="bg-primary text-white p-4 flex justify-between items-center shadow-lg">
-          <h1 className="text-2xl font-bold">DreamJar</h1>
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded bg-white bg-opacity-20 hover:bg-opacity-30 transition"
-              title="Toggle dark mode"
-            >
-              {isDark ? "☀️" : "🌙"}
-            </button>
-            {user && (
-              <span className="text-sm">
-                Welcome, {user.displayName || user.walletAddress.slice(0, 6)}...
-              </span>
-            )}
-            {tonConnectUI.connected ? (
-              <button
-                onClick={handleDisconnect}
-                className="bg-danger text-white px-4 py-2 rounded hover:bg-red-700 transition"
-              >
-                Disconnect
-              </button>
-            ) : (
-              <button
-                onClick={handleConnect}
-                className="bg-accent text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-              >
-                Connect Wallet
-              </button>
-            )}
-          </div>
-        </header>
-        <nav className="bg-white dark:bg-gray-800 shadow p-2">
-          <div className="flex space-x-4">
-            <a href="/" className="text-primary hover:underline">
-              Home
-            </a>
-            <a href="/create" className="text-primary hover:underline">
-              Create Dream
-            </a>
-            <a href="/leaderboard" className="text-primary hover:underline">
-              Leaderboard
-            </a>
-            <a href="/profile" className="text-primary hover:underline">
-              Profile
-            </a>
-          </div>
-        </nav>
+        <Header />
         <main className="container mx-auto p-4">
           <Suspense
             fallback={
