@@ -25,7 +25,6 @@ try {
 }
 
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { useToast } from "./contexts/ToastContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
@@ -72,7 +71,6 @@ try {
 }
 
 function AppContent() {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
