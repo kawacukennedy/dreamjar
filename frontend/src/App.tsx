@@ -226,17 +226,15 @@ function AppContent() {
 function App() {
   return (
     <ErrorBoundary>
-      <TonConnectUIProvider manifestUrl="/tonconnect-manifest.json">
-        <ToastProvider>
-          <ThemeProvider>
-            <DarkModeProvider>
-              <AuthProvider>
-                <AppContent />
-              </AuthProvider>
-            </DarkModeProvider>
-          </ThemeProvider>
-        </ToastProvider>
-      </TonConnectUIProvider>
+      <ToastProvider>
+        <ThemeProvider>
+          <DarkModeProvider>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </DarkModeProvider>
+        </ThemeProvider>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }

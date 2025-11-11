@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme Variables */
-:root {
-  --primary: #3b82f6;
-  --accent: #10b981;
-}
-
 [data-theme="default"] {
   --primary: #3b82f6;
   --accent: #10b981;
