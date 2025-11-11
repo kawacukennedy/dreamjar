@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ProgressBar from "../components/ProgressBar";
+import Skeleton from "../components/Skeleton";
+import { useDebounce } from "../hooks/useDebounce";
 
 interface WishJar {
   _id: string;
@@ -18,6 +20,7 @@ function Home() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     // Mock fetch
@@ -50,15 +53,41 @@ function Home() {
 
   const filteredJars = wishJars.filter((jar) => {
     const matchesSearch =
-      jar.title.toLowerCase().includes(search.toLowerCase()) ||
-      jar.description.toLowerCase().includes(search.toLowerCase());
+      jar.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      jar.description.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesFilter =
       filter === "all" || jar.status.toLowerCase() === filter;
     return matchesSearch && matchesFilter;
   });
 
   if (loading) {
-    return <div className="text-center py-8">Loading dreams...</div>;
+    return (
+      <div>
+        <div className="mb-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <div className="flex gap-4 mb-4">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
+            >
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-full mb-4" />
+              <Skeleton className="h-4 w-2/3 mb-2" />
+              <Skeleton className="h-2 w-full mb-4" />
+              <Skeleton className="h-4 w-1/2 mb-2" />
+              <Skeleton className="h-4 w-1/3 mb-4" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

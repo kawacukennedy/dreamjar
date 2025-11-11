@@ -1,6 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTonConnectUI } from "@tonconnect/ui-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import { useRealTime } from "../hooks/useRealTime";
 import ProgressBar from "../components/ProgressBar";
 import Modal from "../components/Modal";
 
@@ -30,6 +33,7 @@ interface WishJar {
 
 function WishDetail() {
   const { id } = useParams();
+  const [tonConnectUI] = useTonConnectUI();
   const { user, token } = useAuth();
   const [wishJar, setWishJar] = useState<WishJar | null>(null);
   const [pledgeAmount, setPledgeAmount] = useState("");
@@ -40,6 +44,8 @@ function WishDetail() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofCaption, setProofCaption] = useState("");
   const [loading, setLoading] = useState(true);
+  const { addToast } = useToast();
+  const realTimeData = useRealTime(id);
 
   useEffect(() => {
     // Mock fetch
@@ -75,12 +81,38 @@ function WishDetail() {
     }, 1000);
   }, [id]);
 
+  // Real-time notifications
+  useEffect(() => {
+    if (realTimeData.pledges.length > wishJar?.pledges.length) {
+      addToast("New pledge received!", "success");
+    }
+  }, [realTimeData.pledges, wishJar?.pledges, addToast]);
+
   const handlePledge = async () => {
     if (!token || !pledgeAmount) return;
-    // TODO: Implement pledge API call
-    alert(`Pledged ${pledgeAmount} TON!`);
-    setShowPledgeModal(false);
-    setPledgeAmount("");
+
+    try {
+      // Mock transaction data - in real app, get from backend
+      const transaction = {
+        validUntil: Date.now() + 1000000,
+        messages: [
+          {
+            address: "mock_contract_address", // Should come from backend
+            amount: (parseFloat(pledgeAmount) * 1000000000).toString(),
+          },
+        ],
+      };
+
+      await tonConnectUI.sendTransaction(transaction);
+      addToast(`Successfully pledged ${pledgeAmount} TON!`, "success");
+
+      // TODO: Confirm transaction and update backend
+      setShowPledgeModal(false);
+      setPledgeAmount("");
+    } catch (error) {
+      console.error("Pledge failed:", error);
+      addToast("Pledge failed. Please try again.", "error");
+    }
   };
 
   const handlePostProof = async () => {

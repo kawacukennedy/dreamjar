@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import * as Sentry from "@sentry/react";
+import posthog from "posthog-js";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { init } from "@twa-dev/sdk";
@@ -8,10 +10,12 @@ import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
 import { ToastProvider, useToast } from "./contexts/ToastContext";
 import Onboarding from "./components/Onboarding";
 import ErrorBoundary from "./components/ErrorBoundary";
-import Home from "./pages/Home";
-import CreateWish from "./pages/CreateWish";
-import WishDetail from "./pages/WishDetail";
-import Profile from "./pages/Profile";
+import LoadingSpinner from "./components/LoadingSpinner";
+
+const Home = lazy(() => import("./pages/Home"));
+const CreateWish = lazy(() => import("./pages/CreateWish"));
+const WishDetail = lazy(() => import("./pages/WishDetail"));
+const Profile = lazy(() => import("./pages/Profile"));
 import "./App.css";
 
 Sentry.init({
@@ -25,6 +29,10 @@ Sentry.init({
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
+});
+
+posthog.init(import.meta.env.VITE_POSTHOG_KEY || "mock_key", {
+  api_host: "https://app.posthog.com",
 });
 
 function AppContent() {
@@ -141,12 +149,20 @@ function AppContent() {
           </div>
         </nav>
         <main className="container mx-auto p-4">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/create" element={<CreateWish />} />
-            <Route path="/wish/:id" element={<WishDetail />} />
-            <Route path="/profile" element={<Profile />} />
-          </Routes>
+          <Suspense
+            fallback={
+              <div className="flex justify-center py-8">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/create" element={<CreateWish />} />
+              <Route path="/wish/:id" element={<WishDetail />} />
+              <Route path="/profile" element={<Profile />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
 
