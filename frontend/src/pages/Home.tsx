@@ -129,12 +129,6 @@ function Home() {
 
   return (
     <div>
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2 text-primary">DreamJar</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-          Turn your dreams into smart contracts on TON. Stake, share, and achieve together!
-        </p>
-      </div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-4">Discover Dreams</h2>
         <div className="flex flex-col sm:flex-row gap-4 mb-4">
@@ -157,12 +151,12 @@ function Home() {
               className="pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
               aria-label="Filter dreams"
             >
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="resolvedsuccess">Successful</option>
-            <option value="resolvedfail">Failed</option>
-          </select>
-        </div>
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="resolvedsuccess">Successful</option>
+              <option value="resolvedfail">Failed</option>
+            </select>
+          </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
