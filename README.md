@@ -17,8 +17,10 @@ DreamJar is a platform that allows users to create "Wish Jars" (goals) backed by
 
 1. Clone the repository
 2. Install dependencies: `npm run install:all`
-3. Set up environment variables (see .env.example)
-4. Run development servers
+3. Set up environment variables (see docs/DEPLOYMENT.md)
+4. Run development servers:
+   - Frontend: `cd frontend && npm run dev`
+   - Backend: `cd backend && npm run dev`
 
 ## Project Structure
 
@@ -26,10 +28,22 @@ DreamJar is a platform that allows users to create "Wish Jars" (goals) backed by
 - `backend/`: Express API server
 - `contracts/`: TON smart contracts
 - `infrastructure/`: Deployment configs
+- `docs/`: Documentation
+
+## API Documentation
+
+See [docs/API.md](docs/API.md) for API endpoints.
+
+## Deployment
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for deployment instructions.
 
 ## Contributing
 
-See CONTRIBUTING.md for development guidelines.
+1. Fork the repository
+2. Create a feature branch
+3. Make changes and add tests
+4. Submit a pull request
 
 ## License
 

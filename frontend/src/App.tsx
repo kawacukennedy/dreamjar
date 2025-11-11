@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { init } from "@twa-dev/sdk";
@@ -6,6 +7,19 @@ import Home from "./pages/Home";
 import CreateWish from "./pages/CreateWish";
 import WishDetail from "./pages/WishDetail";
 import "./App.css";
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [
+    new Sentry.BrowserTracing({
+      tracePropagationTargets: ["localhost", /^https:\/\/your-domain\.com/],
+    }),
+    new Sentry.Replay(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
 
 function AppContent() {
   const [tonConnectUI] = useTonConnectUI();

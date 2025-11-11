@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -8,6 +9,17 @@ import authRoutes from "./routes/auth";
 import wishRoutes from "./routes/wish";
 
 dotenv.config();
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    new Sentry.Integrations.Http({ tracing: true }),
+    new Sentry.Integrations.Console(),
+    new Sentry.Integrations.OnUncaughtException(),
+    new Sentry.Integrations.OnUnhandledRejection(),
+  ],
+  tracesSampleRate: 1.0,
+});
 
 const app = express();
 const PORT = process.env.PORT || 8080;
