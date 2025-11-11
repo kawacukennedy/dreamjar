@@ -14,6 +14,7 @@ interface WishJar {
   pledgedAmount: number;
   deadline: string;
   status: string;
+  category?: string;
   ownerId: { displayName?: string; walletAddress: string };
 }
 
@@ -56,6 +57,9 @@ function Home() {
           pledgedAmount: Math.random() * 1000000000,
           deadline: "2024-12-31",
           status: "Active",
+          category: ["Health & Fitness", "Arts & Music", "Education", "Travel"][
+            Math.floor(Math.random() * 4)
+          ],
           ownerId: {
             displayName: `User ${prev.length + 1}`,
             walletAddress: "0x...",
@@ -79,6 +83,7 @@ function Home() {
           pledgedAmount: 500000000,
           deadline: "2024-12-31",
           status: "Active",
+          category: "Health & Fitness",
           ownerId: { displayName: "Alice", walletAddress: "0x..." },
         },
         {
@@ -89,6 +94,7 @@ function Home() {
           pledgedAmount: 200000000,
           deadline: "2024-11-30",
           status: "Active",
+          category: "Arts & Music",
           ownerId: { walletAddress: "0x..." },
         },
       ]);
@@ -107,10 +113,13 @@ function Home() {
       jar.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
       jar.description.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesFilter =
-      filter === "all" ||
-      (filter === "favorites"
+      filter === "all" || filter === "favorites"
         ? favorites.includes(jar._id)
-        : jar.status.toLowerCase() === filter);
+        : filter === "active" ||
+            filter === "resolvedsuccess" ||
+            filter === "resolvedfail"
+          ? jar.status.toLowerCase() === filter
+          : jar.category === filter;
     return matchesSearch && matchesFilter;
   });
 
@@ -184,6 +193,10 @@ function Home() {
               <option value="active">Active</option>
               <option value="resolvedsuccess">Successful</option>
               <option value="resolvedfail">Failed</option>
+              <option value="Health & Fitness">Health & Fitness</option>
+              <option value="Arts & Music">Arts & Music</option>
+              <option value="Education">Education</option>
+              <option value="Travel">Travel</option>
             </select>
           </div>
         </div>
@@ -198,7 +211,14 @@ function Home() {
               className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 animate-fade-in"
             >
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-bold text-lg">{jar.title}</h3>
+                <div>
+                  <h3 className="font-bold text-lg">{jar.title}</h3>
+                  {jar.category && (
+                    <span className="text-sm text-primary font-medium">
+                      {jar.category}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => toggleFavorite(jar._id)}
