@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import { describe, it, expect } from "vitest";
 import App from "../App";

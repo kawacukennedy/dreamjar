@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import * as Sentry from "@sentry/react";
 import { inject } from "@vercel/analytics";
 import posthog from "posthog-js";
@@ -24,15 +23,10 @@ import "./App.css";
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracing({
-      tracePropagationTargets: ["localhost", /^https:\/\/your-domain\.com/],
-    }),
-    Sentry.replay(),
-  ],
+  // integrations: [], // TODO: add proper integrations
   tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
+  // replaysSessionSampleRate: 0.1,
+  // replaysOnErrorSampleRate: 1.0,
 });
 
 posthog.init(import.meta.env.VITE_POSTHOG_KEY || "mock_key", {
@@ -43,13 +37,13 @@ inject();
 
 function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
-  const { login, logout, user } = useAuth();
+  const { logout, user } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
   const { permission, requestPermission } = useNotifications();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    init();
+    // init(); // TODO: initialize TWA SDK
     // Show onboarding for new users
     const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
     if (!hasSeenOnboarding) {
@@ -82,7 +76,7 @@ function AppContent() {
           body: JSON.stringify({ address }),
         },
       );
-      const { challengeMessage } = await challengeResponse.json();
+      // const { challengeMessage } = await challengeResponse.json();
 
       // Sign message - TODO: implement proper signing
       // const signedMessage = await tonConnectUI.signMessage(challengeMessage);
