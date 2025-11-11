@@ -72,8 +72,7 @@ try {
 }
 
 function AppContent() {
-  const { user, login } = useAuth();
-  const { addToast } = useToast();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
