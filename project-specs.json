@@ -1,0 +1,155 @@
+{
+  "name": "DreamJar",
+  "version": "1.0.0",
+  "description": "A platform for turning dreams into smart contracts on TON blockchain",
+  "techStack": {
+    "frontend": {
+      "framework": "React",
+      "language": "TypeScript",
+      "styling": "Tailwind CSS",
+      "routing": "React Router",
+      "stateManagement": "React Context",
+      "buildTool": "Vite",
+      "deployment": "Vercel",
+      "pwa": "Vite PWA Plugin",
+      "telegram": "@twa-dev/sdk"
+    },
+    "backend": {
+      "framework": "Express.js",
+      "language": "TypeScript",
+      "database": "MongoDB",
+      "deployment": "Render",
+      "storage": "IPFS",
+      "authentication": "JWT",
+      "validation": "Custom middleware"
+    },
+    "blockchain": {
+      "platform": "TON",
+      "wallet": "TonConnect",
+      "contracts": "FunC",
+      "deployment": "TON CLI"
+    }
+  },
+  "features": {
+    "core": [
+      "Wallet authentication with TonConnect",
+      "Dream creation with stake and deadline",
+      "Community pledging system",
+      "Proof upload and validation",
+      "Voting on dream completion",
+      "Leaderboard and achievements"
+    ],
+    "frontend": [
+      "Responsive design for all devices",
+      "Dark mode and multi-theme support",
+      "Search with history and filters",
+      "Favorites system",
+      "Social sharing",
+      "PWA capabilities",
+      "Telegram Mini-App integration",
+      "Onboarding flow",
+      "Accessibility features",
+      "Real-time notifications"
+    ],
+    "backend": [
+      "RESTful API with authentication",
+      "MongoDB data storage",
+      "IPFS file storage",
+      "Rate limiting and security",
+      "Error tracking with Sentry",
+      "Analytics with PostHog"
+    ],
+    "blockchain": [
+      "Smart contract deployment",
+      "TON transaction handling",
+      "Signature verification",
+      "Decentralized storage"
+    ]
+  },
+  "pages": [
+    "Home - Dream discovery with search and filters",
+    "Create Wish - Form for creating new dreams",
+    "Wish Detail - Individual dream page with pledging",
+    "Profile - User dashboard with achievements",
+    "Leaderboard - User rankings",
+    "Help Center - FAQs and guides",
+    "Contact - Support form",
+    "Terms - Legal terms",
+    "Privacy - Privacy policy",
+    "404 - Not found page"
+  ],
+  "apiEndpoints": [
+    "POST /auth/wallet-challenge - Get authentication challenge",
+    "POST /auth/wallet-verify - Verify wallet signature",
+    "PUT /auth/profile - Update user profile",
+    "POST /wish - Create new dream",
+    "GET /wish/:id - Get dream details",
+    "POST /wish/:id/pledge - Pledge to dream",
+    "POST /wish/:id/proof - Upload proof",
+    "POST /wish/:id/vote - Vote on proof",
+    "GET /wish/leaderboard - Get user rankings"
+  ],
+  "models": [
+    "User - Wallet address, profile data",
+    "WishJar - Dream data with status",
+    "Pledge - Supporter contributions",
+    "Proof - Validation evidence",
+    "Vote - Community voting"
+  ],
+  "deployment": {
+    "frontend": "Vercel",
+    "backend": "Render",
+    "database": "MongoDB Atlas",
+    "storage": "IPFS",
+    "monitoring": "Sentry + Vercel Analytics"
+  },
+  "requirements": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0",
+    "mongodb": ">=5.0.0",
+    "ton": "testnet/mainnet"
+  },
+  "scripts": {
+    "dev": "Frontend and backend development servers",
+    "build": "Production builds",
+    "test": "Run test suites",
+    "deploy": "Deployment scripts"
+  },
+  "architecture": {
+    "frontend": "SPA with lazy loading",
+    "backend": "REST API with middleware",
+    "database": "NoSQL document storage",
+    "blockchain": "Smart contracts for trustless execution"
+  },
+  "security": {
+    "authentication": "JWT tokens",
+    "authorization": "Role-based access",
+    "validation": "Input sanitization",
+    "rateLimiting": "API protection",
+    "cors": "Cross-origin policies",
+    "helmet": "Security headers"
+  },
+  "performance": {
+    "optimization": "Code splitting and lazy loading",
+    "caching": "Service worker and HTTP caching",
+    "compression": "Gzip compression",
+    "cdn": "Vercel CDN"
+  },
+  "accessibility": {
+    "standards": "WCAG 2.1 AA",
+    "features": "ARIA labels, keyboard navigation, screen reader support",
+    "testing": "Manual accessibility testing"
+  },
+  "testing": {
+    "unit": "Jest for backend",
+    "integration": "Supertest for API",
+    "e2e": "Manual testing checklist",
+    "coverage": "Test coverage reporting"
+  },
+  "documentation": {
+    "api": "API documentation in docs/API.md",
+    "deployment": "Deployment guide in docs/DEPLOYMENT.md",
+    "testing": "Testing plan in docs/TESTING.md",
+    "readme": "Project overview and setup"
+  }
+}
