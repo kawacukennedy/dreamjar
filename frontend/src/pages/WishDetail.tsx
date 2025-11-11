@@ -84,7 +84,7 @@ function WishDetail() {
 
   // Real-time notifications
   useEffect(() => {
-    if (realTimeData.pledges.length > wishJar?.pledges.length) {
+    if (realTimeData.pledges.length > (wishJar?.pledges?.length || 0)) {
       addToast("New pledge received!", "success");
     }
   }, [realTimeData.pledges, wishJar?.pledges, addToast]);

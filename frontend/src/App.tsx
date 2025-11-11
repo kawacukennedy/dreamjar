@@ -5,10 +5,10 @@ import { inject } from "@vercel/analytics";
 import posthog from "posthog-js";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { init } from "@twa-dev/sdk";
+import init from "@twa-dev/sdk";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
-import { ToastProvider, useToast } from "./contexts/ToastContext";
+import { ToastProvider } from "./contexts/ToastContext";
 import { useNotifications } from "./hooks/useNotifications";
 import Onboarding from "./components/Onboarding";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -25,10 +25,10 @@ import "./App.css";
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   integrations: [
-    new Sentry.BrowserTracing({
+    Sentry.browserTracing({
       tracePropagationTargets: ["localhost", /^https:\/\/your-domain\.com/],
     }),
-    new Sentry.Replay(),
+    Sentry.replay(),
   ],
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
@@ -45,8 +45,7 @@ function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
   const { login, logout, user } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
-  const { permission, requestPermission, sendNotification } =
-    useNotifications();
+  const { permission, requestPermission } = useNotifications();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -85,11 +84,11 @@ function AppContent() {
       );
       const { challengeMessage } = await challengeResponse.json();
 
-      // Sign message
-      const signedMessage = await tonConnectUI.signMessage(challengeMessage);
+      // Sign message - TODO: implement proper signing
+      // const signedMessage = await tonConnectUI.signMessage(challengeMessage);
 
-      // Verify
-      await login(address, signedMessage, challengeMessage);
+      // Verify - TODO: implement
+      // await login(address, signedMessage, challengeMessage);
     } catch (error) {
       console.error("Auto-login failed:", error);
     }
