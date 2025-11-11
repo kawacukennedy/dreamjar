@@ -12,6 +12,7 @@ function CreateWish() {
     stakeAmount: "",
     deadline: "",
     validatorMode: "community",
+    category: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -172,6 +173,24 @@ function CreateWish() {
           {errors.deadline && (
             <p className="text-danger text-sm mt-1">{errors.deadline}</p>
           )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Category</label>
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className="w-full p-3 border rounded dark:bg-gray-700 dark:border-gray-600"
+          >
+            <option value="">Select a category</option>
+            <option value="Health & Fitness">Health & Fitness</option>
+            <option value="Arts & Music">Arts & Music</option>
+            <option value="Education">Education</option>
+            <option value="Travel">Travel</option>
+            <option value="Career">Career</option>
+            <option value="Personal">Personal</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
 
         <div>

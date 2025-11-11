@@ -1,3 +1,53 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Theme Variables */
+:root {
+  --primary: #3b82f6;
+  --accent: #10b981;
+}
+
+[data-theme="default"] {
+  --primary: #3b82f6;
+  --accent: #10b981;
+}
+
+[data-theme="blue"] {
+  --primary: #1d4ed8;
+  --accent: #3b82f6;
+}
+
+[data-theme="green"] {
+  --primary: #059669;
+  --accent: #10b981;
+}
+
+[data-theme="purple"] {
+  --primary: #7c3aed;
+  --accent: #a855f7;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

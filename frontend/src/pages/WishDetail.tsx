@@ -95,11 +95,31 @@ function WishDetail() {
       };
 
       await tonConnectUI.sendTransaction(transaction);
-      addToast(`Successfully pledged ${pledgeAmount} TON!`, "success");
 
-      // TODO: Confirm transaction and update backend
-      setShowPledgeModal(false);
-      setPledgeAmount("");
+      // Update backend
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/wish/${id}/pledge`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            amount: parseFloat(pledgeAmount) * 1000000000,
+          }),
+        },
+      );
+
+      if (response.ok) {
+        addToast(`Successfully pledged ${pledgeAmount} TON!`, "success");
+        setShowPledgeModal(false);
+        setPledgeAmount("");
+        // Refresh data
+        fetchWishJar();
+      } else {
+        addToast("Pledge recorded, but backend update failed", "warning");
+      }
     } catch (error) {
       console.error("Pledge failed:", error);
       addToast("Pledge failed. Please try again.", "error");
@@ -108,19 +128,70 @@ function WishDetail() {
 
   const handlePostProof = async () => {
     if (!token || !proofFile) return;
-    // TODO: Implement proof upload
-    alert("Proof posted!");
-    setShowProofModal(false);
-    setProofFile(null);
-    setProofCaption("");
+
+    const formData = new FormData();
+    formData.append("mediaFile", proofFile);
+    formData.append("caption", proofCaption);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/wish/${id}/proof`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (response.ok) {
+        addToast("Proof posted successfully!", "success");
+        setShowProofModal(false);
+        setProofFile(null);
+        setProofCaption("");
+        fetchWishJar();
+      } else {
+        addToast("Failed to post proof", "error");
+      }
+    } catch (error) {
+      console.error("Proof upload error:", error);
+      addToast("Failed to post proof", "error");
+    }
   };
 
   const handleVote = async () => {
     if (!token || !voteChoice) return;
-    // TODO: Implement voting API
-    alert(`Voted ${voteChoice}!`);
-    setShowVoteModal(false);
-    setVoteChoice(null);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/wish/${id}/vote`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ choice: voteChoice }),
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        addToast(
+          `Vote recorded! Current: Yes ${data.currentCounts.yes}, No ${data.currentCounts.no}`,
+          "success",
+        );
+        setShowVoteModal(false);
+        setVoteChoice(null);
+        fetchWishJar();
+      } else {
+        addToast("Failed to vote", "error");
+      }
+    } catch (error) {
+      console.error("Vote error:", error);
+      addToast("Failed to vote", "error");
+    }
   };
 
   if (loading)

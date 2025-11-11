@@ -38,4 +38,17 @@ router.post("/wallet-verify", async (req, res) => {
   res.json({ jwt: token, user });
 });
 
+// PUT /auth/profile
+router.put("/profile", authenticate, async (req, res) => {
+  const { displayName } = req.body;
+
+  const user = await User.findById(req.userId);
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  if (displayName) user.displayName = displayName;
+  await user.save();
+
+  res.json({ user });
+});
+
 export default router;
