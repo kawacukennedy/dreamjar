@@ -207,7 +207,10 @@ function Home() {
 
       {filteredJars.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          No dreams found. <Link to="/create" className="text-primary">Create one!</Link>
+          No dreams found.{" "}
+          <Link to="/create" className="text-primary">
+            Create one!
+          </Link>
         </div>
       )}
 
@@ -223,15 +226,6 @@ function Home() {
         to="/create"
         className="fixed bottom-6 right-6 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
         aria-label="Create new dream"
-      >
-        <span className="text-2xl">+</span>
-      </Link>
-        </div>
-      )}
-
-      <Link
-        to="/create"
-        className="fixed bottom-6 right-6 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
       >
         <span className="text-2xl">+</span>
       </Link>
