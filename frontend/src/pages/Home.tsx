@@ -92,7 +92,7 @@ function Home() {
           return (
             <div
               key={jar._id}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition"
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 animate-fade-in"
             >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-lg">{jar.title}</h3>

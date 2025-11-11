@@ -1,9 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as Sentry from "@sentry/react";
 import { TonConnectUIProvider, useTonConnectUI } from "@tonconnect/ui-react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { init } from "@twa-dev/sdk";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { DarkModeProvider, useDarkMode } from "./contexts/DarkModeContext";
+import { ToastProvider, useToast } from "./contexts/ToastContext";
+import Onboarding from "./components/Onboarding";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Home from "./pages/Home";
 import CreateWish from "./pages/CreateWish";
 import WishDetail from "./pages/WishDetail";
@@ -26,9 +30,16 @@ Sentry.init({
 function AppContent() {
   const [tonConnectUI] = useTonConnectUI();
   const { login, logout, user } = useAuth();
+  const { isDark, toggleDarkMode } = useDarkMode();
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     init();
+    // Show onboarding for new users
+    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -87,6 +98,13 @@ function AppContent() {
         <header className="bg-primary text-white p-4 flex justify-between items-center shadow-lg">
           <h1 className="text-2xl font-bold">DreamJar</h1>
           <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded bg-white bg-opacity-20 hover:bg-opacity-30 transition"
+              title="Toggle dark mode"
+            >
+              {isDark ? "☀️" : "🌙"}
+            </button>
             {user && (
               <span className="text-sm">
                 Welcome, {user.displayName || user.walletAddress.slice(0, 6)}...
@@ -95,14 +113,14 @@ function AppContent() {
             {tonConnectUI.connected ? (
               <button
                 onClick={handleDisconnect}
-                className="bg-danger hover:bg-red-700 text-white px-4 py-2 rounded transition"
+                className="bg-danger text-white px-4 py-2 rounded hover:bg-red-700 transition"
               >
                 Disconnect
               </button>
             ) : (
               <button
                 onClick={handleConnect}
-                className="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded transition"
+                className="bg-accent text-white px-4 py-2 rounded hover:bg-blue-600 transition"
               >
                 Connect Wallet
               </button>
@@ -131,17 +149,31 @@ function AppContent() {
           </Routes>
         </main>
       </div>
+
+      <Onboarding
+        isOpen={showOnboarding}
+        onComplete={() => {
+          setShowOnboarding(false);
+          localStorage.setItem("hasSeenOnboarding", "true");
+        }}
+      />
     </Router>
   );
 }
 
 function App() {
   return (
-    <TonConnectUIProvider manifestUrl="https://your-domain.com/tonconnect-manifest.json">
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </TonConnectUIProvider>
+    <ErrorBoundary>
+      <TonConnectUIProvider manifestUrl="https://your-domain.com/tonconnect-manifest.json">
+        <ToastProvider>
+          <DarkModeProvider>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </DarkModeProvider>
+        </ToastProvider>
+      </TonConnectUIProvider>
+    </ErrorBoundary>
   );
 }
 

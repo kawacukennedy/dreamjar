@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import { api } from "../services/api";
 
 function CreateWish() {
@@ -14,6 +15,7 @@ function CreateWish() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -45,10 +47,11 @@ function CreateWish() {
 
     try {
       await api.wish.create(data, token);
+      addToast("Dream created successfully!", "success");
       navigate("/");
     } catch (error) {
       console.error(error);
-      alert("Failed to create dream. Please try again.");
+      addToast("Failed to create dream. Please try again.", "error");
     } finally {
       setLoading(false);
     }

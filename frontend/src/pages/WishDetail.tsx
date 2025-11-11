@@ -35,6 +35,8 @@ function WishDetail() {
   const [pledgeAmount, setPledgeAmount] = useState("");
   const [showPledgeModal, setShowPledgeModal] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
+  const [voteChoice, setVoteChoice] = useState<"yes" | "no" | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofCaption, setProofCaption] = useState("");
   const [loading, setLoading] = useState(true);
@@ -88,6 +90,14 @@ function WishDetail() {
     setShowProofModal(false);
     setProofFile(null);
     setProofCaption("");
+  };
+
+  const handleVote = async () => {
+    if (!token || !voteChoice) return;
+    // TODO: Implement voting API
+    alert(`Voted ${voteChoice}!`);
+    setShowVoteModal(false);
+    setVoteChoice(null);
   };
 
   if (loading)
@@ -162,6 +172,16 @@ function WishDetail() {
               Post Proof
             </button>
           )}
+          {isOwner &&
+            new Date(wishJar.deadline) <= new Date() &&
+            wishJar.status === "Active" && (
+              <button
+                onClick={() => setShowVoteModal(true)}
+                className="bg-warning text-white px-6 py-2 rounded hover:bg-yellow-600 transition"
+              >
+                Start Voting
+              </button>
+            )}
         </div>
       </div>
 
@@ -271,6 +291,46 @@ function WishDetail() {
             className="w-full bg-success text-white p-3 rounded hover:bg-green-600 transition"
           >
             Post Proof
+          </button>
+        </div>
+      </Modal>
+
+      {/* Vote Modal */}
+      <Modal
+        isOpen={showVoteModal}
+        onClose={() => setShowVoteModal(false)}
+        title="Vote on Dream Completion"
+      >
+        <div className="space-y-4">
+          <p>Has the dreamer successfully completed their goal?</p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setVoteChoice("yes")}
+              className={`flex-1 p-3 rounded transition ${
+                voteChoice === "yes"
+                  ? "bg-success text-white"
+                  : "bg-gray-200 dark:bg-gray-700"
+              }`}
+            >
+              ✅ Yes - Success!
+            </button>
+            <button
+              onClick={() => setVoteChoice("no")}
+              className={`flex-1 p-3 rounded transition ${
+                voteChoice === "no"
+                  ? "bg-danger text-white"
+                  : "bg-gray-200 dark:bg-gray-700"
+              }`}
+            >
+              ❌ No - Failed
+            </button>
+          </div>
+          <button
+            onClick={handleVote}
+            disabled={!voteChoice}
+            className="w-full bg-primary text-white p-3 rounded hover:bg-blue-600 transition disabled:opacity-50"
+          >
+            Submit Vote
           </button>
         </div>
       </Modal>
