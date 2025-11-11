@@ -21,8 +21,10 @@ router.post("/wallet-verify", async (req, res) => {
       .status(400)
       .json({ error: "Address, signedMessage, and challengeMessage required" });
 
-  // TODO: Verify signature with TON SDK
-  // For now, assume valid
+  // Verify signature (mock implementation)
+  // In production, use TON SDK to verify signature
+  const isValid = signedMessage && challengeMessage; // Mock validation
+  if (!isValid) return res.status(401).json({ error: "Invalid signature" });
 
   let user = await User.findOne({ walletAddress: address });
   if (!user) {

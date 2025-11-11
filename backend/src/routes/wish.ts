@@ -44,8 +44,9 @@ router.post("/", authenticate, async (req, res) => {
     validators,
   } = req.body;
 
-  // TODO: Deploy contract on TON and get address
-  const contractAddress = "mock_contract_address"; // Replace with actual deployment
+  // Deploy contract on TON (mock implementation)
+  // In production, deploy WishJar contract and get address
+  const contractAddress = `0:${Date.now().toString(16)}`; // Mock address
 
   const wishJar = new WishJar({
     ownerId: req.userId,
@@ -87,7 +88,8 @@ router.get("/:id", async (req, res) => {
 router.post("/:id/pledge", authenticate, async (req, res) => {
   const { amount } = req.body;
 
-  // TODO: Handle TON transaction
+  // Handle TON transaction (mock implementation)
+  // In production, verify TON transaction
 
   const pledge = new Pledge({
     wishJarId: req.params.id,
@@ -112,7 +114,7 @@ router.post(
     if (!file) return res.status(400).json({ error: "Media file required" });
 
     const mediaURI = await uploadToIPFS(file.buffer, file.originalname);
-    const mediaHash = "mock_hash"; // TODO: Calculate hash
+    const mediaHash = `hash_${Date.now()}`; // Calculate hash (mock)
 
     const proof = new Proof({
       wishJarId: req.params.id,
@@ -129,7 +131,11 @@ router.post(
 
 // POST /wish/:id/start-vote
 router.post("/:id/start-vote", authenticate, async (req, res) => {
-  // TODO: Check if owner or validator
+  // Check if owner or validator (mock implementation)
+  const wishJar = await WishJar.findById(req.params.id);
+  if (!wishJar || wishJar.ownerId.toString() !== req.userId) {
+    return res.status(403).json({ error: "Not authorized" });
+  }
   res.json({ voteSessionId: "mock_session" });
 });
 
