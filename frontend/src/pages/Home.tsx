@@ -132,35 +132,6 @@ function Home() {
       <h1>Home</h1>
     </div>
   );
-        })}
-      </div>
-
-      {/* {filteredJars.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          No dreams found.{" "}
-          <Link to="/create" className="text-primary">
-            Create one!
-          </Link>
-        </div>
-      )}
-
-      {loadingMore && (
-        <div className="flex justify-center py-4">
-          <LoadingSpinner />
-        </div>
-      )}
-
-      {hasMore && <div ref={ref} className="h-10" />} */}
-
-      <Link
-        to="/create"
-        className="fixed bottom-6 right-6 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
-        aria-label="Create new dream"
-      >
-        <span className="text-2xl">+</span>
-      </Link>
-    </div>
-  );
 }
 
 export default Home;
