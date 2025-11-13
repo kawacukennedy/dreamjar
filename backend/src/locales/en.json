@@ -1,0 +1,7 @@
+{
+  "welcome": "Welcome to DreamJar",
+  "wish_created": "Wish created successfully",
+  "pledge_success": "Pledge successful",
+  "error_not_found": "Resource not found",
+  "error_unauthorized": "Unauthorized access"
+}

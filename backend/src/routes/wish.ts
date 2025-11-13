@@ -73,6 +73,7 @@ router.post(
     const {
       title,
       description,
+      category,
       stakeAmount,
       deadline,
       validatorMode,
@@ -99,6 +100,7 @@ router.post(
       ownerId: req.userId,
       title,
       description,
+      category,
       contractAddress,
       stakeAmount,
       deadline: new Date(deadline),
@@ -110,6 +112,7 @@ router.post(
     const metadata = {
       title,
       description,
+      category,
       stakeAmount,
       deadline: new Date(deadline).toISOString(),
       validatorMode,
@@ -172,9 +175,21 @@ router.get("/:id", async (req, res) => {
     .populate("supporterId", "displayName walletAddress avatarUrl")
     .sort({ createdAt: -1 });
 
-  const proofs = await Proof.find({ wishJarId: req.params.id })
+  const proofsRaw = await Proof.find({ wishJarId: req.params.id })
     .populate("uploaderId", "displayName walletAddress avatarUrl")
     .sort({ createdAt: -1 });
+
+  const proofs = await Promise.all(
+    proofsRaw.map(async (proof) => {
+      const votes = await Vote.find({ proofId: proof._id });
+      const yesCount = votes.filter((v) => v.choice === "yes").length;
+      const noCount = votes.filter((v) => v.choice === "no").length;
+      return {
+        ...proof.toObject(),
+        voteCounts: { yes: yesCount, no: noCount },
+      };
+    }),
+  );
 
   res.json({ wish, pledges, proofs });
 });
@@ -261,7 +276,12 @@ router.post(
     );
 
     // Track analytics
-    await trackEvent("pledge_created", req.userId, { wishId: req.params.id, amount }, req);
+    await trackEvent(
+      "pledge_created",
+      req.userId,
+      { wishId: req.params.id, amount },
+      req,
+    );
 
     // Notify wish owner
     if (isFeatureEnabled("notifications")) {
@@ -389,9 +409,13 @@ router.post(
 router.post(
   "/:id/proof",
   authenticate,
-  upload.single('media'),
+  upload.single("mediaFile"),
   [
-    body("caption").optional().trim().isLength({ max: 500 }).withMessage("Caption too long"),
+    body("caption")
+      .optional()
+      .trim()
+      .isLength({ max: 500 })
+      .withMessage("Caption too long"),
   ],
   async (req: AuthRequest, res) => {
     const errors = validationResult(req);
@@ -403,7 +427,9 @@ router.post(
     if (!wish) return res.status(404).json({ error: "Wish not found" });
 
     if (wish.ownerId.toString() !== req.userId) {
-      return res.status(403).json({ error: "Only wish owner can upload proof" });
+      return res
+        .status(403)
+        .json({ error: "Only wish owner can upload proof" });
     }
 
     if (!req.file) {
@@ -414,8 +440,11 @@ router.post(
     const mediaURI = await uploadToIPFS(req.file.buffer, req.file.originalname);
 
     // For hash, calculate actual hash
-    const crypto = require('crypto');
-    const mediaHash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
+    const crypto = require("crypto");
+    const mediaHash = crypto
+      .createHash("sha256")
+      .update(req.file.buffer)
+      .digest("hex");
 
     const proof = new Proof({
       wishJarId: req.params.id,
@@ -449,28 +478,9 @@ router.get("/stats", async (req, res) => {
     return res.json(JSON.parse(cached));
   }
 
-  const totalWishes = await WishJar.countDocuments({ deletedAt: { $exists: false } });
-  const activeWishes = await WishJar.countDocuments({ status: "Active", deletedAt: { $exists: false } });
-  const resolvedSuccess = await WishJar.countDocuments({ status: "ResolvedSuccess", deletedAt: { $exists: false } });
-  const resolvedFail = await WishJar.countDocuments({ status: "ResolvedFail", deletedAt: { $exists: false } });
-  const totalPledged = await Pledge.aggregate([
-    { $group: { _id: null, total: { $sum: "$amount" } } },
-  ]);
-  const totalUsers = await User.countDocuments({ deletedAt: { $exists: false } });
-
-  const stats = {
-    totalWishes,
-    activeWishes,
-    resolvedSuccess,
-    resolvedFail,
-    totalPledged: totalPledged[0]?.total || 0,
-    totalUsers,
-  };
-
-  await setCache(cacheKey, JSON.stringify(stats), 300); // 5 minutes
-
-  res.json(stats);
-});
+  const totalWishes = await WishJar.countDocuments({
+    deletedAt: { $exists: false },
+  });
   const activeWishes = await WishJar.countDocuments({
     status: "Active",
     deletedAt: { $exists: false },
@@ -486,26 +496,37 @@ router.get("/stats", async (req, res) => {
   const totalPledged = await Pledge.aggregate([
     { $group: { _id: null, total: { $sum: "$amount" } } },
   ]);
-  const totalUsers = await User.countDocuments();
+  const totalUsers = await User.countDocuments({
+    deletedAt: { $exists: false },
+  });
 
-  res.json({
+  const stats = {
     totalWishes,
     activeWishes,
     resolvedSuccess,
     resolvedFail,
     totalPledged: totalPledged[0]?.total || 0,
     totalUsers,
-  });
+  };
+
+  await setCache(cacheKey, JSON.stringify(stats), 300); // 5 minutes
+
+  res.json(stats);
 });
 
 // GET /wish/leaderboard
 router.get("/leaderboard", async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = await User.find({ deletedAt: { $exists: false } });
     const leaderboard = await Promise.all(
-      users.map(async (user, index) => {
-        const userWishJars = await WishJar.find({ ownerId: user._id });
-        const pledges = await Pledge.find({ supporterId: user._id });
+      users.map(async (user) => {
+        const userWishJars = await WishJar.find({
+          ownerId: user._id,
+          deletedAt: { $exists: false },
+        });
+        const pledges = await Pledge.find({
+          supporterId: user._id,
+        });
         const totalPledged = pledges.reduce((sum, p) => sum + p.amount, 0);
         const dreamsCreated = userWishJars.length;
         const successfulDreams = userWishJars.filter(
@@ -517,7 +538,6 @@ router.get("/leaderboard", async (req, res) => {
             : 0;
 
         return {
-          rank: index + 1,
           user: {
             displayName: user.displayName,
             walletAddress: user.walletAddress,
@@ -532,9 +552,12 @@ router.get("/leaderboard", async (req, res) => {
 
     // Sort by totalPledged descending
     leaderboard.sort((a, b) => b.totalPledged - a.totalPledged);
-    leaderboard.forEach((entry, index) => (entry.rank = index + 1));
+    const rankedLeaderboard = leaderboard.map((entry, index) => ({
+      ...entry,
+      rank: index + 1,
+    }));
 
-    res.json(leaderboard);
+    res.json(rankedLeaderboard);
   } catch (error) {
     console.error("Leaderboard error:", error);
     res.status(500).json({ error: "Failed to fetch leaderboard" });

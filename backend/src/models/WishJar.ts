@@ -5,6 +5,7 @@ export interface IWishJar extends Document {
   ownerId: mongoose.Types.ObjectId;
   title: string;
   description: string;
+  category?: string;
   metadataURI?: string;
   contractAddress: string;
   stakeAmount: number;
@@ -21,6 +22,7 @@ const WishJarSchema: Schema = new Schema({
   ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   title: { type: String, required: true },
   description: { type: String, required: true },
+  category: { type: String },
   metadataURI: { type: String },
   contractAddress: { type: String, required: true },
   stakeAmount: { type: Number, required: true },
@@ -39,6 +41,14 @@ const WishJarSchema: Schema = new Schema({
   validators: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  deletedAt: { type: Date },
 });
+
+// Indexes
+WishJarSchema.index({ ownerId: 1, createdAt: -1 });
+WishJarSchema.index({ status: 1, deadline: 1 });
+WishJarSchema.index({ category: 1 }); // If we add category field
+WishJarSchema.index({ pledgedAmount: -1 });
+WishJarSchema.index({ title: "text", description: "text" }); // Full-text search
 
 export default mongoose.model<IWishJar>("WishJar", WishJarSchema);
