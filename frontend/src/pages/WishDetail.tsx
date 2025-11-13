@@ -41,6 +41,8 @@ function WishDetail() {
   const [pledgeAmount, setPledgeAmount] = useState("");
   const [showPledgeModal, setShowPledgeModal] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
+  const [voteChoice, setVoteChoice] = useState<"yes" | "no" | null>(null);
 
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofCaption, setProofCaption] = useState("");
@@ -432,7 +434,13 @@ function WishDetail() {
             </button>
           </div>
           <button
-            onClick={handleVote}
+            onClick={() => {
+              if (voteChoice) {
+                handleVote("mock_proof_id", voteChoice);
+                setShowVoteModal(false);
+                setVoteChoice(null);
+              }
+            }}
             disabled={!voteChoice}
             className="w-full bg-primary text-white p-3 rounded hover:bg-blue-600 transition disabled:opacity-50"
           >

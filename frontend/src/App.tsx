@@ -126,10 +126,6 @@ function AppContent() {
     }
   }, [navigate]);
 
-  // Wallet login disabled temporarily for debugging
-
-  // Wallet login disabled temporarily
-
   return (
     <Router>
       <a

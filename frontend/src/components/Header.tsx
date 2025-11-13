@@ -1,14 +1,43 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTonConnectUI } from "@tonconnect/ui-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useTheme } from "../contexts/ThemeContext";
 
 const Header: React.FC = () => {
-  const { user, logout } = useAuth();
+  const [tonConnectUI] = useTonConnectUI();
+  const { user, login, logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
   const { theme, setTheme } = useTheme();
   const location = useLocation();
+
+  const handleWalletConnect = async () => {
+    try {
+      await tonConnectUI.connectWallet();
+      const wallet = tonConnectUI.wallet;
+      if (wallet) {
+        // Get challenge from backend
+        const challengeResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/auth/wallet-challenge`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ address: wallet.account.address }),
+          },
+        );
+        const { challenge } = await challengeResponse.json();
+
+        // Sign the challenge
+        const signed = await tonConnectUI.signMessage(challenge);
+
+        // Verify with backend
+        await login(wallet.account.address, signed, challenge);
+      }
+    } catch (error) {
+      console.error("Wallet connect failed:", error);
+    }
+  };
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md">
@@ -98,12 +127,12 @@ const Header: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <Link
-                to="/profile"
+              <button
+                onClick={handleWalletConnect}
                 className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 text-sm"
               >
                 Connect Wallet
-              </Link>
+              </button>
             )}
           </div>
         </div>
