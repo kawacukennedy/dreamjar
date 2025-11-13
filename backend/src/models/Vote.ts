@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface IVote extends Document {
   _id: mongoose.Types.ObjectId;
   wishJarId: mongoose.Types.ObjectId;
+  proofId?: mongoose.Types.ObjectId;
   voterId: mongoose.Types.ObjectId;
   choice: "yes" | "no";
   weight: number;
@@ -12,6 +13,7 @@ export interface IVote extends Document {
 
 const VoteSchema: Schema = new Schema({
   wishJarId: { type: Schema.Types.ObjectId, ref: "WishJar", required: true },
+  proofId: { type: Schema.Types.ObjectId, ref: "Proof" },
   voterId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   choice: { type: String, enum: ["yes", "no"], required: true },
   weight: { type: Number, default: 1 },
