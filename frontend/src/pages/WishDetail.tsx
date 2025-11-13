@@ -29,6 +29,7 @@ interface WishJar {
     mediaURI: string;
     caption?: string;
     createdAt: string;
+    voteCounts: { yes: number; no: number };
   }>;
 }
 
@@ -40,8 +41,7 @@ function WishDetail() {
   const [pledgeAmount, setPledgeAmount] = useState("");
   const [showPledgeModal, setShowPledgeModal] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
-  const [showVoteModal, setShowVoteModal] = useState(false);
-  const [voteChoice, setVoteChoice] = useState<"yes" | "no" | null>(null);
+
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofCaption, setProofCaption] = useState("");
   const [loading, setLoading] = useState(true);
@@ -160,19 +160,19 @@ function WishDetail() {
     }
   };
 
-  const handleVote = async () => {
-    if (!token || !voteChoice) return;
+  const handleVote = async (proofId: string, choice: "yes" | "no") => {
+    if (!token) return;
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/wish/${id}/vote`,
+        `${import.meta.env.VITE_API_URL}/wish/${id}/proof/${proofId}/vote`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ choice: voteChoice }),
+          body: JSON.stringify({ choice }),
         },
       );
 
@@ -182,8 +182,6 @@ function WishDetail() {
           `Vote recorded! Current: Yes ${data.currentCounts.yes}, No ${data.currentCounts.no}`,
           "success",
         );
-        setShowVoteModal(false);
-        setVoteChoice(null);
         fetchWishJar();
       } else {
         addToast("Failed to vote", "error");
@@ -253,7 +251,7 @@ function WishDetail() {
           {canPledge && (
             <button
               onClick={() => setShowPledgeModal(true)}
-              className="bg-accent text-white px-6 py-2 rounded hover:bg-blue-600 transition"
+              className="bg-accent text-white px-6 py-2 rounded hover:bg-blue-600 transition focus:ring-2 focus:ring-accent"
               aria-label="Pledge support to this dream"
             >
               Pledge Support
@@ -262,36 +260,30 @@ function WishDetail() {
           {isOwner && wishJar.status === "Active" && (
             <button
               onClick={() => setShowProofModal(true)}
-              className="bg-success text-white px-6 py-2 rounded hover:bg-green-600 transition"
+              className="bg-success text-white px-6 py-2 rounded hover:bg-green-600 transition focus:ring-2 focus:ring-success"
               aria-label="Post progress proof"
             >
               Post Proof
             </button>
           )}
-          {isOwner &&
-            new Date(wishJar.deadline) <= new Date() &&
-            wishJar.status === "Active" && (
-              <button
-                onClick={() => setShowVoteModal(true)}
-                className="bg-warning text-white px-6 py-2 rounded hover:bg-yellow-600 transition"
-                aria-label="Start voting on dream completion"
-              >
-                Start Voting
-              </button>
-            )}
+
           <ShareButton url={`/wish/${wishJar._id}`} title={wishJar.title} />
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-bold mb-4">
+          <h3 id="pledges-heading" className="text-xl font-bold mb-4">
             Backers ({wishJar.pledges.length})
           </h3>
           {wishJar.pledges.length === 0 ? (
             <p className="text-gray-500">No backers yet</p>
           ) : (
-            <div className="space-y-3">
+            <div
+              aria-labelledby="pledges-heading"
+              aria-live="polite"
+              className="space-y-3"
+            >
               {wishJar.pledges.map((pledge) => (
                 <div
                   key={pledge._id}
@@ -311,18 +303,18 @@ function WishDetail() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-bold mb-4">
+          <h3 id="proofs-heading" className="text-xl font-bold mb-4">
             Progress Proofs ({wishJar.proofs.length})
           </h3>
           {wishJar.proofs.length === 0 ? (
             <p className="text-gray-500">No proofs posted yet</p>
           ) : (
-            <div className="space-y-4">
+            <div aria-labelledby="proofs-heading" className="space-y-4">
               {wishJar.proofs.map((proof) => (
                 <div key={proof._id} className="border rounded p-3">
                   <img
                     src={proof.mediaURI}
-                    alt="Proof"
+                    alt={proof.caption || "Proof of progress"}
                     className="w-full h-32 object-cover rounded mb-2"
                   />
                   <p className="text-sm">{proof.caption}</p>
@@ -332,6 +324,22 @@ function WishDetail() {
                       proof.uploaderId.walletAddress.slice(0, 6) + "..."}{" "}
                     • {new Date(proof.createdAt).toLocaleDateString()}
                   </p>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => handleVote(proof._id, "yes")}
+                      className="bg-success text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition focus:ring-2 focus:ring-success"
+                      aria-label={`Vote yes for this proof, current yes votes: ${proof.voteCounts.yes}`}
+                    >
+                      Yes ({proof.voteCounts.yes})
+                    </button>
+                    <button
+                      onClick={() => handleVote(proof._id, "no")}
+                      className="bg-danger text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition focus:ring-2 focus:ring-danger"
+                      aria-label={`Vote no for this proof, current no votes: ${proof.voteCounts.no}`}
+                    >
+                      No ({proof.voteCounts.no})
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
