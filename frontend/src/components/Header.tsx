@@ -71,6 +71,26 @@ const Header: React.FC = () => {
               Leaderboard
             </Link>
             <Link
+              to="/notifications"
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                location.pathname === "/notifications"
+                  ? "text-primary bg-primary/10"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary hover:bg-primary/5"
+              }`}
+            >
+              Notifications
+            </Link>
+            <Link
+              to="/settings"
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                location.pathname === "/settings"
+                  ? "text-primary bg-primary/10"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary hover:bg-primary/5"
+              }`}
+            >
+              Settings
+            </Link>
+            <Link
               to="/help"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                 location.pathname === "/help"

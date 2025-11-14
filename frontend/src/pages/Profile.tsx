@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { Link } from "react-router-dom";
 import Badge from "../components/Badge";
+import ProgressBar from "../components/ProgressBar";
 
 interface WishJar {
   _id: string;
@@ -149,69 +150,208 @@ function Profile() {
       <div className="mt-8">
         <h3 className="text-xl font-bold mb-4">Achievements</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div
-            className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.length > 0 ? "" : "opacity-50"}`}
-          >
-            <div className="text-3xl mb-2">🏆</div>
-            <h4 className="font-bold">First Dream</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Created your first dream
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
-            <div className="text-3xl mb-2">💰</div>
-            <h4 className="font-bold">Top Supporter</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Pledged the most
-            </p>
-          </div>
-          <div
-            className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center ${userWishJars.some((j) => j.status === "ResolvedSuccess") ? "" : "opacity-50"}`}
-          >
-            <div className="text-3xl mb-2">🎯</div>
-            <h4 className="font-bold">Dream Achiever</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Completed a dream
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center opacity-50">
-            <div className="text-3xl mb-2">🌟</div>
-            <h4 className="font-bold">Community Hero</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Helped 10+ dreams
-            </p>
-          </div>
+          {[
+            {
+              icon: "🏆",
+              title: "First Dream",
+              desc: "Created your first dream",
+              unlocked: userWishJars.length > 0,
+              progress: userWishJars.length,
+              max: 1,
+            },
+            {
+              icon: "💰",
+              title: "Generous Supporter",
+              desc: "Pledged to 5+ dreams",
+              unlocked: false, // Would need pledge data
+              progress: 0,
+              max: 5,
+            },
+            {
+              icon: "🎯",
+              title: "Dream Achiever",
+              desc: "Completed a dream",
+              unlocked: userWishJars.some(
+                (j) => j.status === "ResolvedSuccess",
+              ),
+              progress: userWishJars.filter(
+                (j) => j.status === "ResolvedSuccess",
+              ).length,
+              max: 1,
+            },
+            {
+              icon: "🌟",
+              title: "Community Hero",
+              desc: "Helped 10+ dreams succeed",
+              unlocked: false, // Would need more complex logic
+              progress: 0,
+              max: 10,
+            },
+            {
+              icon: "🔥",
+              title: "Streak Master",
+              desc: "Maintained a dream for 30 days",
+              unlocked: userWishJars.some((j) => {
+                const created = new Date(j.createdAt);
+                const now = new Date();
+                const diffTime = Math.abs(now.getTime() - created.getTime());
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays >= 30;
+              }),
+              progress: 0,
+              max: 30,
+            },
+            {
+              icon: "🎨",
+              title: "Creative Mind",
+              desc: "Created dreams in 3+ categories",
+              unlocked:
+                new Set(userWishJars.map((j) => j.category).filter(Boolean))
+                  .size >= 3,
+              progress: new Set(
+                userWishJars.map((j) => j.category).filter(Boolean),
+              ).size,
+              max: 3,
+            },
+            {
+              icon: "📈",
+              title: "Fundraiser",
+              desc: "Raised 100+ TON total",
+              unlocked:
+                userWishJars.reduce((sum, j) => sum + j.pledgedAmount, 0) >=
+                100000000000,
+              progress: Math.floor(
+                userWishJars.reduce((sum, j) => sum + j.pledgedAmount, 0) /
+                  1000000000,
+              ),
+              max: 100,
+            },
+            {
+              icon: "👑",
+              title: "Dream Leader",
+              desc: "Top 10 on leaderboard",
+              unlocked: false, // Would need leaderboard position
+              progress: 0,
+              max: 10,
+            },
+          ].map((achievement, index) => (
+            <div
+              key={index}
+              className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center transition-all duration-200 ${
+                achievement.unlocked ? "ring-2 ring-primary" : "opacity-60"
+              }`}
+            >
+              <div
+                className={`text-3xl mb-2 ${achievement.unlocked ? "" : "grayscale"}`}
+              >
+                {achievement.icon}
+              </div>
+              <h4 className="font-bold mb-1">{achievement.title}</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                {achievement.desc}
+              </p>
+              {!achievement.unlocked && achievement.max > 1 && (
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${(achievement.progress / achievement.max) * 100}%`,
+                    }}
+                  />
+                </div>
+              )}
+              {achievement.unlocked && (
+                <Badge variant="success" size="sm">
+                  Unlocked
+                </Badge>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
       <div className="mt-8">
-        <h3 className="text-xl font-bold mb-4">Dream Progress</h3>
+        <h3 className="text-xl font-bold mb-4">Analytics Dashboard</h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <div className="text-2xl font-bold text-primary">
+              {userWishJars.length}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total Dreams
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <div className="text-2xl font-bold text-green-500">
+              {
+                userWishJars.filter((j) => j.status === "ResolvedSuccess")
+                  .length
+              }
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Successful
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <div className="text-2xl font-bold text-blue-500">
+              {(
+                userWishJars.reduce((sum, j) => sum + j.pledgedAmount, 0) /
+                1000000000
+              ).toFixed(1)}{" "}
+              TON
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total Raised
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg text-center">
+            <div className="text-2xl font-bold text-purple-500">
+              {userWishJars.length > 0
+                ? Math.round(
+                    (userWishJars.filter((j) => j.status === "ResolvedSuccess")
+                      .length /
+                      userWishJars.length) *
+                      100,
+                  )
+                : 0}
+              %
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Success Rate
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h4 className="font-bold mb-4">Dream Progress</h4>
           <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-1">
-                <span>Run Marathon</span>
-                <span>50%</span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-primary h-2 rounded-full"
-                  style={{ width: "50%" }}
-                ></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span>Learn Guitar</span>
-                <span>80%</span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-accent h-2 rounded-full"
-                  style={{ width: "80%" }}
-                ></div>
-              </div>
-            </div>
+            {userWishJars.slice(0, 3).map((jar) => {
+              const progress = (jar.pledgedAmount / jar.stakeAmount) * 100;
+              return (
+                <div key={jar._id}>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">{jar.title}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {progress.toFixed(1)}%
+                    </span>
+                  </div>
+                  <ProgressBar progress={progress} className="mb-2" />
+                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-500">
+                    <span>
+                      {(jar.pledgedAmount / 1000000000).toFixed(1)} TON raised
+                    </span>
+                    <span>
+                      {(jar.stakeAmount / 1000000000).toFixed(1)} TON goal
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            {userWishJars.length === 0 && (
+              <p className="text-gray-500 text-center py-4">
+                No dreams created yet
+              </p>
+            )}
           </div>
         </div>
       </div>

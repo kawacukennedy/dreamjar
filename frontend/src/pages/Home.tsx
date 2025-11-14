@@ -25,6 +25,9 @@ function Home() {
   const [wishJars, setWishJars] = useState<WishJar[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -37,6 +40,7 @@ function Home() {
     return saved ? JSON.parse(saved) : [];
   });
   const [showHistory, setShowHistory] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
   const { ref, inView } = useInView();
 
@@ -169,20 +173,47 @@ function Home() {
     }
   }, [debouncedSearch]);
 
-  const filteredJars = wishJars.filter((jar) => {
-    const matchesSearch =
-      jar.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      jar.description.toLowerCase().includes(debouncedSearch.toLowerCase());
-    const matchesFilter =
-      filter === "all" || filter === "favorites"
-        ? favorites.includes(jar._id)
-        : filter === "active" ||
-            filter === "resolvedsuccess" ||
-            filter === "resolvedfail"
-          ? jar.status.toLowerCase() === filter
-          : jar.category === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredJars = wishJars
+    .filter((jar) => {
+      const matchesSearch =
+        jar.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        jar.description.toLowerCase().includes(debouncedSearch.toLowerCase());
+      const matchesFilter =
+        filter === "all" || filter === "favorites"
+          ? favorites.includes(jar._id)
+          : filter === "active" ||
+              filter === "resolvedsuccess" ||
+              filter === "resolvedfail"
+            ? jar.status.toLowerCase() === filter
+            : jar.category === filter;
+      const matchesCategory =
+        categoryFilter === "all" || jar.category === categoryFilter;
+      const matchesStatus =
+        statusFilter === "all" || jar.status.toLowerCase() === statusFilter;
+      return matchesSearch && matchesFilter && matchesCategory && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        case "pledged-high":
+          return b.pledgedAmount - a.pledgedAmount;
+        case "pledged-low":
+          return a.pledgedAmount - b.pledgedAmount;
+        case "goal-high":
+          return b.stakeAmount - a.stakeAmount;
+        case "goal-low":
+          return a.stakeAmount - b.stakeAmount;
+        default:
+          return 0;
+      }
+    });
 
   if (loading) {
     return (
@@ -225,56 +256,117 @@ function Home() {
       </div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-4">Discover Dreams</h2>
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-              🔍
-            </span>
-            <input
-              type="text"
-              placeholder="Search dreams..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onFocus={() => setShowHistory(true)}
-              onBlur={() => setTimeout(() => setShowHistory(false), 200)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
-              aria-label="Search dreams"
-            />
-            {showHistory && searchHistory.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 shadow-lg z-10">
-                {searchHistory.map((item, index) => (
-                  <div
-                    key={index}
-                    onClick={() => selectHistoryItem(item)}
-                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                🔍
+              </span>
+              <input
+                type="text"
+                placeholder="Search dreams..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onFocus={() => setShowHistory(true)}
+                onBlur={() => setTimeout(() => setShowHistory(false), 200)}
+                className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                aria-label="Search dreams"
+              />
+              {showHistory && searchHistory.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 shadow-lg z-10">
+                  {searchHistory.map((item, index) => (
+                    <div
+                      key={index}
+                      onClick={() => selectHistoryItem(item)}
+                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                aria-label="Sort dreams"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="pledged-high">Most Pledged</option>
+                <option value="pledged-low">Least Pledged</option>
+                <option value="goal-high">Highest Goal</option>
+                <option value="goal-low">Lowest Goal</option>
+              </select>
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                aria-label="Toggle advanced filters"
+              >
+                🔧
+              </button>
+            </div>
+          </div>
+
+          {showAdvancedFilters && (
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
+              <h3 className="font-medium mb-3">Advanced Filters</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Quick Filter
+                  </label>
+                  <select
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    {item}
-                  </div>
-                ))}
+                    <option value="all">All</option>
+                    <option value="favorites">Favorites</option>
+                    <option value="active">Active</option>
+                    <option value="resolvedsuccess">Successful</option>
+                    <option value="resolvedfail">Failed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="Health & Fitness">Health & Fitness</option>
+                    <option value="Arts & Music">Arts & Music</option>
+                    <option value="Education">Education</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Career">Career</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="resolvedsuccess">Successful</option>
+                    <option value="resolvedfail">Failed</option>
+                  </select>
+                </div>
               </div>
-            )}
-          </div>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-              📊
-            </span>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
-              aria-label="Filter dreams"
-            >
-              <option value="all">All</option>
-              <option value="favorites">Favorites</option>
-              <option value="active">Active</option>
-              <option value="resolvedsuccess">Successful</option>
-              <option value="resolvedfail">Failed</option>
-              <option value="Health & Fitness">Health & Fitness</option>
-              <option value="Arts & Music">Arts & Music</option>
-              <option value="Education">Education</option>
-              <option value="Travel">Travel</option>
-            </select>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 

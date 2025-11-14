@@ -40,6 +40,8 @@ const CreateWish = lazy(() => import("./pages/CreateWish"));
 const WishDetail = lazy(() => import("./pages/WishDetail"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Settings = lazy(() => import("./pages/Settings"));
 const Help = lazy(() => import("./pages/Help"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -155,6 +157,8 @@ function AppContent() {
               <Route path="/wish/:id" element={<WishDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/help" element={<Help />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/terms" element={<Terms />} />
