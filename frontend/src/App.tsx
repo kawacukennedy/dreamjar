@@ -30,6 +30,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
 
 import Onboarding from "./components/Onboarding";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import OfflineIndicator from "./components/OfflineIndicator";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
 import Footer from "./components/Footer";
@@ -177,6 +179,9 @@ function AppContent() {
           localStorage.setItem("hasSeenOnboarding", "true");
         }}
       />
+
+      <PWAInstallPrompt />
+      <OfflineIndicator />
     </Router>
   );
 }

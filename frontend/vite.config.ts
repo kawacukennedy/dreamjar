@@ -7,47 +7,103 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      //   registerType: "autoUpdate",
-      //   workbox: {
-      //     globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
-      //     runtimeCaching: [
-      //       {
-      //         urlPattern: /^https:\/\/api\./,
-      //         handler: "NetworkFirst",
-      //         options: {
-      //           cacheName: "api-cache",
-      //           expiration: {
-      //             maxEntries: 100,
-      //             maxAgeSeconds: 60 * 60 * 24, // 24 hours
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      //   includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
-      //   manifest: {
-      //     name: "DreamJar",
-      //     short_name: "DreamJar",
-      //     description: "Turn your dreams into smart contracts on TON",
-      //     theme_color: "#6C5CE7",
-      //     background_color: "#F7F7FB",
-      //     display: "standalone",
-      //     start_url: "/",
-      //     icons: [
-      //       {
-      //         src: "icon-192.png",
-      //         sizes: "192x192",
-      //         type: "image/png",
-      //         purpose: "any maskable",
-      //       },
-      //       {
-      //         src: "icon-512.png",
-      //         sizes: "512x512",
-      //         type: "image/png",
-      //         purpose: "any maskable",
-      //       },
-      //     ],
-      //   },
+      registerType: "autoUpdate",
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "images-cache",
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/api\./,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+              networkTimeoutSeconds: 10,
+            },
+          },
+          {
+            urlPattern: /^https:\/\/.*\.(?:js|css)$/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "static-resources",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
+        ],
+      },
+      includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
+      manifest: {
+        name: "DreamJar - Turn Dreams into Reality",
+        short_name: "DreamJar",
+        description:
+          "Transform your dreams into smart contracts on TON blockchain. Stake, share, and achieve together!",
+        theme_color: "#6C5CE7",
+        background_color: "#F7F7FB",
+        display: "standalone",
+        start_url: "/",
+        scope: "/",
+        orientation: "portrait-primary",
+        categories: ["finance", "productivity", "social"],
+        icons: [
+          {
+            src: "icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+          {
+            src: "icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+          {
+            src: "icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+        ],
+        screenshots: [
+          {
+            src: "screenshot-wide.png",
+            sizes: "1280x720",
+            type: "image/png",
+            form_factor: "wide",
+          },
+          {
+            src: "screenshot-narrow.png",
+            sizes: "390x844",
+            type: "image/png",
+            form_factor: "narrow",
+          },
+        ],
+      },
+      devOptions: {
+        enabled: true,
+      },
     }),
   ],
   build: {

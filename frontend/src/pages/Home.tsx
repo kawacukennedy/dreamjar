@@ -7,6 +7,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import ShareButton from "../components/ShareButton";
 import Tooltip from "../components/Tooltip";
 import Badge from "../components/Badge";
+import ActivityFeed from "../components/ActivityFeed";
 import { useDebounce } from "../hooks/useDebounce";
 
 interface WishJar {
@@ -465,6 +466,11 @@ function Home() {
       )}
 
       {hasMore && <div ref={ref} className="h-10" />}
+
+      {/* Activity Feed Sidebar */}
+      <div className="fixed right-4 top-20 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 hidden xl:block max-h-96 overflow-y-auto">
+        <ActivityFeed limit={5} showHeader={true} />
+      </div>
 
       <Link
         to="/create"

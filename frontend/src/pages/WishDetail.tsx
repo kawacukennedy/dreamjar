@@ -8,6 +8,7 @@ import ProgressBar from "../components/ProgressBar";
 import Modal from "../components/Modal";
 import ShareButton from "../components/ShareButton";
 import Badge from "../components/Badge";
+import Comments from "../components/Comments";
 
 interface WishJar {
   _id: string;
@@ -349,6 +350,12 @@ function WishDetail() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Comments Section */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h3 className="text-xl font-bold mb-4">Community Discussion</h3>
+        <Comments wishId={id!} />
       </div>
 
       {/* Pledge Modal */}
