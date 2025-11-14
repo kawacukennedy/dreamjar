@@ -29,6 +29,8 @@ function Home() {
   const [sortBy, setSortBy] = useState("newest");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [stakeRange, setStakeRange] = useState<[number, number]>([0, 1000]);
+  const [dateRange, setDateRange] = useState("all");
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -40,8 +42,13 @@ function Home() {
     const saved = localStorage.getItem("searchHistory");
     return saved ? JSON.parse(saved) : [];
   });
+  const [savedSearches, setSavedSearches] = useState<any[]>(() => {
+    const saved = localStorage.getItem("savedSearches");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [showHistory, setShowHistory] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showSavedSearches, setShowSavedSearches] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
   const { ref, inView } = useInView();
 
@@ -66,6 +73,51 @@ function Home() {
   const selectHistoryItem = (item: string) => {
     setSearch(item);
     setShowHistory(false);
+  };
+
+  const saveCurrentSearch = () => {
+    if (
+      !search.trim() &&
+      filter === "all" &&
+      categoryFilter === "all" &&
+      statusFilter === "all"
+    ) {
+      return; // Don't save empty searches
+    }
+
+    const searchConfig = {
+      id: Date.now().toString(),
+      name: search.trim() || "Custom Filter",
+      search: search.trim(),
+      filter,
+      sortBy,
+      categoryFilter,
+      statusFilter,
+      stakeRange,
+      dateRange,
+      createdAt: new Date().toISOString(),
+    };
+
+    const newSavedSearches = [searchConfig, ...savedSearches.slice(0, 9)]; // Keep last 10
+    setSavedSearches(newSavedSearches);
+    localStorage.setItem("savedSearches", JSON.stringify(newSavedSearches));
+  };
+
+  const loadSavedSearch = (savedSearch: any) => {
+    setSearch(savedSearch.search);
+    setFilter(savedSearch.filter);
+    setSortBy(savedSearch.sortBy);
+    setCategoryFilter(savedSearch.categoryFilter);
+    setStatusFilter(savedSearch.statusFilter);
+    setStakeRange(savedSearch.stakeRange);
+    setDateRange(savedSearch.dateRange);
+    setShowSavedSearches(false);
+  };
+
+  const deleteSavedSearch = (id: string) => {
+    const newSavedSearches = savedSearches.filter((s) => s.id !== id);
+    setSavedSearches(newSavedSearches);
+    localStorage.setItem("savedSearches", JSON.stringify(newSavedSearches));
   };
 
   const loadMore = async () => {
@@ -191,7 +243,34 @@ function Home() {
         categoryFilter === "all" || jar.category === categoryFilter;
       const matchesStatus =
         statusFilter === "all" || jar.status.toLowerCase() === statusFilter;
-      return matchesSearch && matchesFilter && matchesCategory && matchesStatus;
+
+      // Stake amount filter (in TON)
+      const stakeAmountTON = jar.stakeAmount / 1000000000;
+      const matchesStake =
+        stakeAmountTON >= stakeRange[0] && stakeAmountTON <= stakeRange[1];
+
+      // Date range filter
+      const jarDate = new Date(jar.createdAt);
+      const now = new Date();
+      let matchesDate = true;
+      if (dateRange === "today") {
+        matchesDate = jarDate.toDateString() === now.toDateString();
+      } else if (dateRange === "week") {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        matchesDate = jarDate >= weekAgo;
+      } else if (dateRange === "month") {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        matchesDate = jarDate >= monthAgo;
+      }
+
+      return (
+        matchesSearch &&
+        matchesFilter &&
+        matchesCategory &&
+        matchesStatus &&
+        matchesStake &&
+        matchesDate
+      );
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -303,10 +382,21 @@ function Home() {
               </select>
               <button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  showAdvancedFilters
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                }`}
                 aria-label="Toggle advanced filters"
               >
                 🔧
+              </button>
+              <button
+                onClick={() => setShowSavedSearches(!showSavedSearches)}
+                className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                aria-label="Saved searches"
+              >
+                💾
               </button>
             </div>
           </div>
@@ -367,8 +457,151 @@ function Home() {
                 </div>
               </div>
             </div>
+            )}
+          </div>
+
+          {showSavedSearches && (
+            <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 shadow-lg z-10 max-h-60 overflow-y-auto">
+              <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-medium">Saved Searches</h4>
+                  <button
+                    onClick={saveCurrentSearch}
+                    className="text-primary hover:text-primary/80 text-sm"
+                  >
+                    Save Current
+                  </button>
+                </div>
+              </div>
+              {savedSearches.length === 0 ? (
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                  No saved searches yet
+                </div>
+              ) : (
+                savedSearches.map((savedSearch) => (
+                  <div
+                    key={savedSearch.id}
+                    className="p-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <button
+                          onClick={() => loadSavedSearch(savedSearch)}
+                          className="text-left w-full"
+                        >
+                          <div className="font-medium">{savedSearch.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {savedSearch.search && `"${savedSearch.search}" • `}
+                            {savedSearch.categoryFilter !== "all" && `${savedSearch.categoryFilter} • `}
+                            {savedSearch.statusFilter !== "all" && savedSearch.statusFilter}
+                          </div>
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => deleteSavedSearch(savedSearch.id)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                        aria-label="Delete saved search"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </div>
+
+        {showAdvancedFilters && (
+          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
+            <h3 className="font-medium mb-3">Advanced Filters</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Quick Filter</label>
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="all">All</option>
+                  <option value="favorites">Favorites</option>
+                  <option value="active">Active</option>
+                  <option value="resolvedsuccess">Successful</option>
+                  <option value="resolvedfail">Failed</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Category</label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="Health & Fitness">Health & Fitness</option>
+                  <option value="Arts & Music">Arts & Music</option>
+                  <option value="Education">Education</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Career">Career</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="resolvedsuccess">Successful</option>
+                  <option value="resolvedfail">Failed</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Date Range</label>
+                <select
+                  value={dateRange}
+                  onChange={(e) => setDateRange(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium mb-2">
+                Stake Amount Range: {stakeRange[0]} - {stakeRange[1]} TON
+              </label>
+              <div className="px-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="10"
+                  value={stakeRange[0]}
+                  onChange={(e) => setStakeRange([parseInt(e.target.value), stakeRange[1]])}
+                  className="w-full"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="10"
+                  value={stakeRange[1]}
+                  onChange={(e) => setStakeRange([stakeRange[0], parseInt(e.target.value)])}
+                  className="w-full mt-2"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

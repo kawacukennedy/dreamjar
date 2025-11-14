@@ -9,6 +9,8 @@ import Modal from "../components/Modal";
 import ShareButton from "../components/ShareButton";
 import Badge from "../components/Badge";
 import Comments from "../components/Comments";
+import Milestones from "../components/Milestones";
+import FollowButton from "../components/FollowButton";
 
 interface WishJar {
   _id: string;
@@ -231,10 +233,16 @@ function WishDetail() {
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-sm text-gray-500">Created by</p>
-            <p className="font-medium">
-              {wishJar.ownerId.displayName ||
-                wishJar.ownerId.walletAddress.slice(0, 6) + "..."}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="font-medium">
+                {wishJar.ownerId.displayName ||
+                  wishJar.ownerId.walletAddress.slice(0, 6) + "..."}
+              </p>
+              <FollowButton
+                targetWalletAddress={wishJar.ownerId.walletAddress}
+                size="sm"
+              />
+            </div>
           </div>
           <div>
             <p className="text-sm text-gray-500">Deadline</p>
@@ -350,6 +358,15 @@ function WishDetail() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Milestones Section */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
+        <Milestones
+          wishId={id!}
+          currentPledged={wishJar.pledgedAmount}
+          totalGoal={wishJar.stakeAmount}
+        />
       </div>
 
       {/* Comments Section */}

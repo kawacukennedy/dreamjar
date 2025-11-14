@@ -27,6 +27,7 @@ import webhookRoutes from "./routes/webhook";
 import apiKeyRoutes from "./routes/apikey";
 import User from "./models/User";
 import WishJar from "./models/WishJar";
+import Follow from "./models/Follow";
 
 dotenv.config();
 

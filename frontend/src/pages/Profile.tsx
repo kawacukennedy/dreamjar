@@ -13,6 +13,12 @@ interface WishJar {
   stakeAmount: number;
 }
 
+interface FollowData {
+  followers: number;
+  following: number;
+  isFollowing: boolean;
+}
+
 function Profile() {
   const { user, token } = useAuth();
   const { addToast } = useToast();
@@ -20,6 +26,12 @@ function Profile() {
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || "");
   const [userWishJars, setUserWishJars] = useState<WishJar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [followData, setFollowData] = useState<FollowData>({
+    followers: 0,
+    following: 0,
+    isFollowing: false,
+  });
+  const [followLoading, setFollowLoading] = useState(false);
 
   if (!user) {
     return <div>Please connect your wallet first.</div>;
@@ -35,9 +47,39 @@ function Profile() {
   };
 
   useEffect(() => {
-    const fetchUserWishJars = async () => {
+    const fetchUserData = async () => {
       if (!user) return;
+
       try {
+        // Fetch follow data
+        const [followersRes, followingRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/auth/followers`, {
+            headers: { Authorization: `Bearer ${token || ""}` },
+          }),
+          fetch(`${import.meta.env.VITE_API_URL}/auth/following`, {
+            headers: { Authorization: `Bearer ${token || ""}` },
+          }),
+        ]);
+
+        let followersCount = 0;
+        let followingCount = 0;
+
+        if (followersRes.ok) {
+          const followersData = await followersRes.json();
+          followersCount = followersData.count;
+        }
+
+        if (followingRes.ok) {
+          const followingData = await followingRes.json();
+          followingCount = followingData.count;
+        }
+
+        setFollowData({
+          followers: followersCount,
+          following: followingCount,
+          isFollowing: false, // Can't follow yourself
+        });
+
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/wish/my`,
           {
@@ -48,7 +90,7 @@ function Profile() {
         );
         if (response.ok) {
           const data = await response.json();
-          setUserWishJars(data);
+          setUserWishJars(data.wishes || data);
         } else {
           // Fallback to mock data
           setUserWishJars([
@@ -62,7 +104,7 @@ function Profile() {
           ]);
         }
       } catch (error) {
-        console.error("Failed to fetch user wish jars:", error);
+        console.error("Failed to fetch user data:", error);
         // Fallback
         setUserWishJars([
           {
@@ -78,8 +120,8 @@ function Profile() {
       }
     };
 
-    fetchUserWishJars();
-  }, [user]);
+    fetchUserData();
+  }, [user, token]);
 
   const handleSave = async () => {
     try {
@@ -127,22 +169,39 @@ function Profile() {
               📷
             </label>
           </div>
-          <div className="ml-4">
+          <div className="ml-4 flex-1">
             <h3 className="text-lg font-semibold">
               {displayName || "Anonymous"}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
             </p>
+            <div className="flex space-x-4 mt-2 text-sm">
+              <span className="text-gray-600 dark:text-gray-400">
+                <strong className="text-gray-900 dark:text-gray-100">
+                  {followData.followers}
+                </strong>{" "}
+                followers
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">
+                <strong className="text-gray-900 dark:text-gray-100">
+                  {followData.following}
+                </strong>{" "}
+                following
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 flex space-x-3">
           <button
             onClick={handleSave}
-            className="bg-primary text-white px-6 py-2 rounded hover:bg-blue-600 transition"
+            className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all duration-200"
           >
             Save Profile
+          </button>
+          <button className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
+            Share Profile
           </button>
         </div>
       </div>

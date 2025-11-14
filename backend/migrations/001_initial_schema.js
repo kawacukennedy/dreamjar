@@ -65,6 +65,16 @@ module.exports = {
       .collection("analytics")
       .createIndex({ userId: 1, createdAt: -1 });
 
+    await mongoose.connection.db
+      .collection("follows")
+      .createIndex({ follower: 1, following: 1 }, { unique: true });
+    await mongoose.connection.db
+      .collection("follows")
+      .createIndex({ follower: 1, createdAt: -1 });
+    await mongoose.connection.db
+      .collection("follows")
+      .createIndex({ following: 1, createdAt: -1 });
+
     console.log("Migration 001 completed");
   },
 
@@ -78,6 +88,7 @@ module.exports = {
     await mongoose.connection.db.collection("apikeys").dropIndexes();
     await mongoose.connection.db.collection("webhooks").dropIndexes();
     await mongoose.connection.db.collection("analytics").dropIndexes();
+    await mongoose.connection.db.collection("follows").dropIndexes();
 
     console.log("Migration 001 rolled back");
   },

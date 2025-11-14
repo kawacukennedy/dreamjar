@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
+import Follow from "../models/Follow";
 import { authenticate, AuthRequest } from "../middleware/auth";
 
 const router = express.Router();
@@ -165,6 +166,105 @@ router.put("/profile", authenticate, async (req: AuthRequest, res) => {
   await user.save();
 
   res.json({ user });
+});
+
+// GET /auth/follow/:walletAddress - Check if current user is following the target user
+router.get(
+  "/follow/:walletAddress",
+  authenticate,
+  async (req: AuthRequest, res) => {
+    const { walletAddress } = req.params;
+
+    const targetUser = await User.findOne({ walletAddress });
+    if (!targetUser) return res.status(404).json({ error: "User not found" });
+
+    const follow = await Follow.findOne({
+      follower: req.userId,
+      following: targetUser._id,
+    });
+
+    res.json({ isFollowing: !!follow });
+  },
+);
+
+// POST /auth/follow/:walletAddress - Follow a user
+router.post(
+  "/follow/:walletAddress",
+  authenticate,
+  async (req: AuthRequest, res) => {
+    const { walletAddress } = req.params;
+
+    const targetUser = await User.findOne({ walletAddress });
+    if (!targetUser) return res.status(404).json({ error: "User not found" });
+
+    if (req.userId === targetUser._id.toString()) {
+      return res.status(400).json({ error: "Cannot follow yourself" });
+    }
+
+    const existingFollow = await Follow.findOne({
+      follower: req.userId,
+      following: targetUser._id,
+    });
+
+    if (existingFollow) {
+      return res.status(400).json({ error: "Already following" });
+    }
+
+    const follow = new Follow({
+      follower: req.userId,
+      following: targetUser._id,
+    });
+
+    await follow.save();
+    res.json({ message: "Followed successfully" });
+  },
+);
+
+// DELETE /auth/follow/:walletAddress - Unfollow a user
+router.delete(
+  "/follow/:walletAddress",
+  authenticate,
+  async (req: AuthRequest, res) => {
+    const { walletAddress } = req.params;
+
+    const targetUser = await User.findOne({ walletAddress });
+    if (!targetUser) return res.status(404).json({ error: "User not found" });
+
+    const follow = await Follow.findOneAndDelete({
+      follower: req.userId,
+      following: targetUser._id,
+    });
+
+    if (!follow) {
+      return res.status(400).json({ error: "Not following" });
+    }
+
+    res.json({ message: "Unfollowed successfully" });
+  },
+);
+
+// GET /auth/followers - Get followers count and list for current user
+router.get("/followers", authenticate, async (req: AuthRequest, res) => {
+  const followers = await Follow.find({ following: req.userId }).populate(
+    "follower",
+    "displayName walletAddress",
+  );
+  res.json({
+    count: followers.length,
+    followers: followers.map((f) => f.follower),
+  });
+});
+
+// GET /auth/following - Get following count and list for current user
+router.get("/following", authenticate, async (req: AuthRequest, res) => {
+  const following = await Follow.find({ follower: req.userId }).populate(
+    "following",
+    "displayName walletAddress",
+  );
+  res.json({
+    count: following.length,
+    following: following.map((f) => f.following),
+  });
 });
 
 export default router;
