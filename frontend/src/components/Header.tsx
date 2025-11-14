@@ -52,30 +52,30 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex space-x-8">
             <Link
               to="/"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                 location.pathname === "/"
                   ? "text-primary bg-primary/10"
-                  : "text-gray-700 dark:text-gray-300 hover:text-primary"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary hover:bg-primary/5"
               }`}
             >
               Home
             </Link>
             <Link
               to="/leaderboard"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                 location.pathname === "/leaderboard"
                   ? "text-primary bg-primary/10"
-                  : "text-gray-700 dark:text-gray-300 hover:text-primary"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary hover:bg-primary/5"
               }`}
             >
               Leaderboard
             </Link>
             <Link
               to="/help"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                 location.pathname === "/help"
                   ? "text-primary bg-primary/10"
-                  : "text-gray-700 dark:text-gray-300 hover:text-primary"
+                  : "text-gray-700 dark:text-gray-300 hover:text-primary hover:bg-primary/5"
               }`}
             >
               Help
@@ -83,10 +83,10 @@ const Header: React.FC = () => {
             {user && (
               <Link
                 to="/profile"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                   location.pathname === "/profile"
                     ? "text-primary bg-primary/10"
-                    : "text-gray-700 dark:text-gray-300 hover:text-primary"
+                    : "text-gray-700 dark:text-gray-300 hover:text-primary hover:bg-primary/5"
                 }`}
               >
                 Profile

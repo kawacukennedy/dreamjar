@@ -6,6 +6,7 @@ import Skeleton from "../components/Skeleton";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ShareButton from "../components/ShareButton";
 import Tooltip from "../components/Tooltip";
+import Badge from "../components/Badge";
 import { useDebounce } from "../hooks/useDebounce";
 
 interface WishJar {
@@ -277,13 +278,13 @@ function Home() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {filteredJars.map((jar) => {
           const progress = (jar.pledgedAmount / jar.stakeAmount) * 100;
           return (
             <div
               key={jar._id}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 animate-fade-in"
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 animate-fade-in cursor-pointer group"
             >
               <div className="flex justify-between items-start mb-2">
                 <div>
@@ -304,23 +305,24 @@ function Home() {
                   >
                     <button
                       onClick={() => toggleFavorite(jar._id)}
-                      className="text-2xl hover:scale-110 transition"
+                      className="text-2xl hover:scale-110 transition-all duration-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95"
                       aria-label="Toggle favorite"
                     >
                       {favorites.includes(jar._id) ? "❤️" : "🤍"}
                     </button>
                   </Tooltip>
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
+                  <Badge
+                    variant={
                       jar.status === "Active"
-                        ? "bg-accent text-white"
+                        ? "info"
                         : jar.status === "ResolvedSuccess"
-                          ? "bg-success text-white"
-                          : "bg-danger text-white"
-                    }`}
+                          ? "success"
+                          : "danger"
+                    }
+                    size="sm"
                   >
                     {jar.status}
-                  </span>
+                  </Badge>
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
@@ -345,7 +347,7 @@ function Home() {
                 <ShareButton url={`/wish/${jar._id}`} title={jar.title} />
                 <Link
                   to={`/wish/${jar._id}`}
-                  className="flex-1 text-center bg-primary text-white py-2 rounded hover:bg-blue-600 transition"
+                  className="flex-1 text-center bg-primary text-white py-2 rounded hover:bg-blue-600 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
                   View Details
                 </Link>
@@ -374,10 +376,10 @@ function Home() {
 
       <Link
         to="/create"
-        className="fixed bottom-6 right-6 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition"
+        className="fixed bottom-6 right-6 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-110 hover:rotate-12 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-bounce"
         aria-label="Create new dream"
       >
-        <span className="text-2xl">+</span>
+        <span className="text-2xl font-bold">+</span>
       </Link>
     </div>
   );

@@ -77,7 +77,7 @@ function CreateWish() {
   const estimatedGas = parseFloat(form.stakeAmount || "0") * 0.01; // Mock gas estimate
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 className="text-2xl font-bold mb-6">Create Your Dream</h2>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
@@ -112,7 +112,7 @@ function CreateWish() {
             placeholder="e.g., Run a Marathon"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full p-3 border rounded dark:bg-gray-700 dark:border-gray-600"
+            className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
             required
           />
           {errors.title && (
@@ -128,7 +128,7 @@ function CreateWish() {
             placeholder="Describe your goal in detail..."
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full p-3 border rounded dark:bg-gray-700 dark:border-gray-600 h-32"
+            className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 h-32 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
             required
           />
           {errors.description && (
@@ -211,7 +211,7 @@ function CreateWish() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-white p-3 rounded hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center"
+          className="w-full bg-primary text-white p-3 rounded-lg hover:bg-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           {loading && <LoadingSpinner className="mr-2" />}
           {loading ? "Creating..." : "Create Dream"}

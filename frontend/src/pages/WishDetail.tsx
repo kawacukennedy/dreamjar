@@ -7,6 +7,7 @@ import { useRealTime } from "../hooks/useRealTime";
 import ProgressBar from "../components/ProgressBar";
 import Modal from "../components/Modal";
 import ShareButton from "../components/ShareButton";
+import Badge from "../components/Badge";
 
 interface WishJar {
   _id: string;
@@ -203,7 +204,7 @@ function WishDetail() {
   const canPledge = wishJar.status === "Active" && !isOwner;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
         <div className="flex justify-between items-start mb-4">
           <div>
@@ -212,17 +213,18 @@ function WishDetail() {
               {wishJar.description}
             </p>
           </div>
-          <span
-            className={`px-3 py-1 rounded text-sm ${
+          <Badge
+            variant={
               wishJar.status === "Active"
-                ? "bg-accent text-white"
+                ? "info"
                 : wishJar.status === "ResolvedSuccess"
-                  ? "bg-success text-white"
-                  : "bg-danger text-white"
-            }`}
+                  ? "success"
+                  : "danger"
+            }
+            size="md"
           >
             {wishJar.status}
-          </span>
+          </Badge>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -253,7 +255,7 @@ function WishDetail() {
           {canPledge && (
             <button
               onClick={() => setShowPledgeModal(true)}
-              className="bg-accent text-white px-6 py-2 rounded hover:bg-blue-600 transition focus:ring-2 focus:ring-accent"
+              className="bg-accent text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all duration-200 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-accent focus:outline-none focus:ring-offset-2 min-h-[44px]"
               aria-label="Pledge support to this dream"
             >
               Pledge Support
@@ -262,7 +264,7 @@ function WishDetail() {
           {isOwner && wishJar.status === "Active" && (
             <button
               onClick={() => setShowProofModal(true)}
-              className="bg-success text-white px-6 py-2 rounded hover:bg-green-600 transition focus:ring-2 focus:ring-success"
+              className="bg-success text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-200 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-success focus:outline-none focus:ring-offset-2 min-h-[44px]"
               aria-label="Post progress proof"
             >
               Post Proof
@@ -329,14 +331,14 @@ function WishDetail() {
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => handleVote(proof._id, "yes")}
-                      className="bg-success text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition focus:ring-2 focus:ring-success"
+                      className="bg-success text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition-all duration-200 transform hover:scale-105 focus:ring-2 focus:ring-success focus:outline-none focus:ring-offset-2"
                       aria-label={`Vote yes for this proof, current yes votes: ${proof.voteCounts.yes}`}
                     >
                       Yes ({proof.voteCounts.yes})
                     </button>
                     <button
                       onClick={() => handleVote(proof._id, "no")}
-                      className="bg-danger text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition focus:ring-2 focus:ring-danger"
+                      className="bg-danger text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition-all duration-200 transform hover:scale-105 focus:ring-2 focus:ring-danger focus:outline-none focus:ring-offset-2"
                       aria-label={`Vote no for this proof, current no votes: ${proof.voteCounts.no}`}
                     >
                       No ({proof.voteCounts.no})

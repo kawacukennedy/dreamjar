@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { Link } from "react-router-dom";
+import Badge from "../components/Badge";
 
 interface WishJar {
   _id: string;
@@ -105,7 +106,7 @@ function Profile() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 className="text-2xl font-bold mb-6">Profile</h2>
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
         <div className="flex items-center mb-6">
@@ -239,17 +240,18 @@ function Profile() {
                       {jar.stakeAmount / 1000000000} TON
                     </p>
                   </div>
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
+                  <Badge
+                    variant={
                       jar.status === "Active"
-                        ? "bg-accent text-white"
+                        ? "info"
                         : jar.status === "ResolvedSuccess"
-                          ? "bg-success text-white"
-                          : "bg-danger text-white"
-                    }`}
+                          ? "success"
+                          : "danger"
+                    }
+                    size="sm"
                   >
                     {jar.status}
-                  </span>
+                  </Badge>
                 </div>
               </div>
             ))}
