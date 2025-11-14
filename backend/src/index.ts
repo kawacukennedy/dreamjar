@@ -131,11 +131,6 @@ io.on("connection", (socket) => {
 // Make io available globally
 (global as any).io = io;
 
-// Start Apollo Server
-server.start().then(() => {
-  server.applyMiddleware({ app, path: "/graphql" });
-});
-
 // Swagger definition
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -191,6 +186,11 @@ const server = new ApolloServer({
     }
     return {};
   },
+});
+
+// Start Apollo Server
+server.start().then(() => {
+  server.applyMiddleware({ app, path: "/graphql" });
 });
 
 // Middleware

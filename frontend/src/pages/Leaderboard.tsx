@@ -20,7 +20,7 @@ function Leaderboard() {
     const fetchLeaderboard = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/leaderboard`,
+          `${import.meta.env.VITE_API_URL}/wish/leaderboard`,
         );
         if (response.ok) {
           const data = await response.json();

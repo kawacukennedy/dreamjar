@@ -1,0 +1,42 @@
+;; WishJar Smart Contract for TON Blockchain
+;; This contract manages a wish jar with pledges and voting
+
+#include "stdlib.fc";
+
+;; Contract data
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+  ;; Handle incoming messages
+  if (in_msg_body.slice_empty?()) {
+    ;; Empty message, ignore
+    return ();
+  }
+
+  ;; Parse message
+  int op = in_msg_body~load_uint(32);
+  if (op == 1) {
+    ;; Pledge operation
+    int amount = in_msg_body~load_uint(64);
+    ;; Add to pledged amount (mock)
+    ;; In real implementation, update storage
+    return ();
+  } elseif (op == 2) {
+    ;; Vote operation
+    int choice = in_msg_body~load_uint(1);
+    ;; Record vote (mock)
+    return ();
+  }
+
+  ;; Unknown operation
+  return ();
+}
+
+;; Get methods
+int get_total_pledged() method_id {
+  ;; Return total pledged (mock)
+  return 0;
+}
+
+int get_status() method_id {
+  ;; Return status (mock)
+  return 0; ;; Active
+}

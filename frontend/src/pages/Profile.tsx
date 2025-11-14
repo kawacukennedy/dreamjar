@@ -37,7 +37,12 @@ function Profile() {
       if (!user) return;
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/wish/user/${user._id}`,
+          `${import.meta.env.VITE_API_URL}/wish/my`,
+          {
+            headers: {
+              Authorization: `Bearer ${token || ""}`,
+            },
+          },
         );
         if (response.ok) {
           const data = await response.json();
