@@ -11,6 +11,7 @@ import Badge from "../components/Badge";
 import Comments from "../components/Comments";
 import Milestones from "../components/Milestones";
 import FollowButton from "../components/FollowButton";
+import OptimizedImage from "../components/OptimizedImage";
 
 interface WishJar {
   _id: string;
@@ -325,10 +326,11 @@ function WishDetail() {
             <div aria-labelledby="proofs-heading" className="space-y-4">
               {wishJar.proofs.map((proof) => (
                 <div key={proof._id} className="border rounded p-3">
-                  <img
+                  <OptimizedImage
                     src={proof.mediaURI}
                     alt={proof.caption || "Proof of progress"}
-                    className="w-full h-32 object-cover rounded mb-2"
+                    className="w-full h-32 rounded mb-2"
+                    height={128}
                   />
                   <p className="text-sm">{proof.caption}</p>
                   <p className="text-xs text-gray-500 mt-1">

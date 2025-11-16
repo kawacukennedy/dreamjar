@@ -18,6 +18,9 @@ import { ApolloServer } from "apollo-server-express";
 import { Server as SocketIOServer } from "socket.io";
 import i18n from "i18n";
 import { collectDefaultMetrics, register, Gauge } from "prom-client";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import hpp from "hpp";
 import { typeDefs } from "./graphql/schema";
 import { resolvers } from "./graphql/resolvers";
 import authRoutes from "./routes/auth";
@@ -203,10 +206,27 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", "https://api.posthog.com", "wss:", "ws:"],
+        frameSrc: ["'self'", "https://*.ton.org"],
       },
     },
+    crossOriginEmbedderPolicy: false,
   }),
 );
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: ["category", "status", "sortBy"], // Allow array parameters for these fields
+  }),
+);
+
 app.use(compression()); // Compress responses
 app.use(
   cors({
@@ -238,12 +258,43 @@ app.use(
 );
 
 app.use(morgan("combined")); // Logging
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-  }),
-);
+
+// General rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: "Too many requests from this IP, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Stricter rate limiting for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 auth requests per windowMs
+  message: {
+    error: "Too many authentication attempts, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Very strict rate limiting for wallet verification
+const walletLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // limit each IP to 10 wallet verifications per hour
+  message: {
+    error: "Too many wallet verification attempts, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(generalLimiter);
+app.use("/api/v1/auth/wallet-verify", walletLimiter);
+app.use("/api/v1/auth", authLimiter);
 
 // Database connection
 mongoose

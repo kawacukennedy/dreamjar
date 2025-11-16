@@ -1,7 +1,6 @@
 import express from "express";
 import multer from "multer";
 import rateLimit from "express-rate-limit";
-import { body, validationResult } from "express-validator";
 import WishJar from "../models/WishJar";
 import Pledge from "../models/Pledge";
 import Proof from "../models/Proof";
@@ -17,6 +16,17 @@ import { logAction } from "../services/audit";
 import { triggerWebhooks } from "../services/webhook";
 import { trackEvent } from "../services/analytics";
 import { moderateContent } from "../services/moderation";
+import {
+  validateCreateWish,
+  validatePledge,
+  validateProof,
+  validateVote,
+  validateId,
+  validateWishId,
+  validateProofId,
+  validatePagination,
+  validateSearch,
+} from "../middleware/validation";
 
 const router = express.Router();
 
@@ -39,37 +49,8 @@ const voteLimiter = rateLimit({
 router.post(
   "/",
   authenticate,
-  [
-    body("title")
-      .trim()
-      .isLength({ min: 3, max: 100 })
-      .withMessage("Title must be 3-100 characters"),
-    body("description")
-      .trim()
-      .isLength({ min: 10, max: 1000 })
-      .withMessage("Description must be 10-1000 characters"),
-    body("stakeAmount")
-      .isFloat({ min: 0.01 })
-      .withMessage("Stake amount must be at least 0.01"),
-    body("deadline")
-      .isISO8601()
-      .custom((value) => {
-        if (new Date(value) <= new Date()) {
-          throw new Error("Deadline must be in the future");
-        }
-        return true;
-      })
-      .withMessage("Invalid deadline date"),
-    body("validatorMode")
-      .isIn(["community", "designatedValidators"])
-      .withMessage("Invalid validator mode"),
-  ],
+  validateCreateWish,
   async (req: AuthRequest, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const {
       title,
       description,
@@ -195,7 +176,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // GET /wish (list all with cursor-based pagination and filtering)
-router.get("/", async (req, res) => {
+router.get("/", validatePagination, validateSearch, async (req, res) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const cursor = req.query.cursor as string;
 
@@ -240,17 +221,9 @@ router.post(
   "/:id/pledge",
   pledgeLimiter,
   authenticate,
-  [
-    body("amount")
-      .isFloat({ min: 0.01 })
-      .withMessage("Pledge amount must be at least 0.01"),
-  ],
+  validateId,
+  validatePledge,
   async (req: AuthRequest, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { amount } = req.body;
 
     // Handle TON transaction (mock implementation)
@@ -286,11 +259,21 @@ router.post(
     // Notify wish owner
     if (isFeatureEnabled("notifications")) {
       const wishJar = await WishJar.findById(req.params.id);
+      const pledger = await User.findById(req.userId);
       if (wishJar) {
         await createNotification(
           wishJar.ownerId.toString(),
           "pledge",
           `Someone pledged ${amount} TON to your wish "${wishJar.title}"`,
+          {
+            pledgerName:
+              pledger?.displayName ||
+              pledger?.walletAddress?.slice(0, 6) + "..." ||
+              "Anonymous",
+            amount,
+            wishTitle: wishJar.title,
+            wishId: wishJar._id.toString(),
+          },
         );
       }
     }
@@ -343,17 +326,10 @@ router.post(
   "/:wishId/proof/:proofId/vote",
   voteLimiter,
   authenticate,
-  [
-    body("choice")
-      .isIn(["yes", "no"])
-      .withMessage("Choice must be 'yes' or 'no'"),
-  ],
+  validateWishId,
+  validateProofId,
+  validateVote,
   async (req: AuthRequest, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { choice } = req.body;
 
     // Check if proof exists and belongs to wish
@@ -393,6 +369,12 @@ router.post(
             wish.ownerId.toString(),
             "resolution",
             `Your wish "${wish.title}" has been resolved as ${wish.status === "ResolvedSuccess" ? "successful" : "failed"}`,
+            {
+              wishTitle: wish.title,
+              status:
+                wish.status === "ResolvedSuccess" ? "successful" : "failed",
+              wishId: wish._id.toString(),
+            },
           );
         }
       }
@@ -409,20 +391,10 @@ router.post(
 router.post(
   "/:id/proof",
   authenticate,
+  validateId,
   upload.single("mediaFile"),
-  [
-    body("caption")
-      .optional()
-      .trim()
-      .isLength({ max: 500 })
-      .withMessage("Caption too long"),
-  ],
+  validateProof,
   async (req: AuthRequest, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const wish = await WishJar.findById(req.params.id);
     if (!wish) return res.status(404).json({ error: "Wish not found" });
 

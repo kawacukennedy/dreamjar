@@ -3,6 +3,11 @@ import jwt from "jsonwebtoken";
 import User from "../models/User";
 import Follow from "../models/Follow";
 import { authenticate, AuthRequest } from "../middleware/auth";
+import {
+  validateWalletChallenge,
+  validateWalletVerify,
+  validateProfile,
+} from "../middleware/validation";
 
 const router = express.Router();
 
@@ -57,9 +62,8 @@ const router = express.Router();
  *                 challengeMessage:
  *                   type: string
  */
-router.post("/wallet-challenge", async (req, res) => {
+router.post("/wallet-challenge", validateWalletChallenge, async (req, res) => {
   const { address } = req.body;
-  if (!address) return res.status(400).json({ error: "Address required" });
 
   const challengeMessage = `Sign this message to authenticate with DreamJar: ${Date.now()}`;
   res.json({ challengeMessage });
@@ -101,12 +105,8 @@ router.post("/wallet-challenge", async (req, res) => {
  *                 user:
  *                   $ref: '#/components/schemas/User'
  */
-router.post("/wallet-verify", async (req, res) => {
+router.post("/wallet-verify", validateWalletVerify, async (req, res) => {
   const { address, signedMessage, challengeMessage } = req.body;
-  if (!address || !signedMessage || !challengeMessage)
-    return res
-      .status(400)
-      .json({ error: "Address, signedMessage, and challengeMessage required" });
 
   // Verify signature (mock implementation)
   // In production, use TON SDK to verify signature
@@ -154,19 +154,24 @@ router.get("/me", authenticate, async (req: AuthRequest, res) => {
 });
 
 // PUT /auth/profile
-router.put("/profile", authenticate, async (req: AuthRequest, res) => {
-  const { displayName, avatarUrl } = req.body;
+router.put(
+  "/profile",
+  authenticate,
+  validateProfile,
+  async (req: AuthRequest, res) => {
+    const { displayName, avatarUrl } = req.body;
 
-  const user = await User.findById(req.userId);
-  if (!user) return res.status(404).json({ error: "User not found" });
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-  if (displayName !== undefined) user.displayName = displayName;
-  if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
-  user.lastSeen = new Date();
-  await user.save();
+    if (displayName !== undefined) user.displayName = displayName;
+    if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
+    user.lastSeen = new Date();
+    await user.save();
 
-  res.json({ user });
-});
+    res.json({ user });
+  },
+);
 
 // GET /auth/follow/:walletAddress - Check if current user is following the target user
 router.get(
