@@ -28,6 +28,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { DarkModeProvider } from "./contexts/DarkModeContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import { SearchProvider } from "./contexts/SearchContext";
 
 import Onboarding from "./components/Onboarding";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
@@ -193,7 +195,11 @@ function App() {
         <ThemeProvider>
           <DarkModeProvider>
             <AuthProvider>
-              <AppContent />
+              <NotificationProvider>
+                <SearchProvider>
+                  <AppContent />
+                </SearchProvider>
+              </NotificationProvider>
             </AuthProvider>
           </DarkModeProvider>
         </ThemeProvider>

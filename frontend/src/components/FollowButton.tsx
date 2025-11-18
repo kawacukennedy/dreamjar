@@ -1,82 +1,78 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { useAnalytics } from "../hooks/useAnalytics";
+import { useOfflineQueue } from "../hooks/useOfflineStorage";
+import { api } from "../services/api";
 
 interface FollowButtonProps {
-  targetWalletAddress: string;
+  targetUserId: string;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
 function FollowButton({
-  targetWalletAddress,
+  targetUserId,
   size = "md",
   className = "",
 }: FollowButtonProps) {
   const { user, token } = useAuth();
   const { addToast } = useToast();
+  const { trackFollow, trackUnfollow } = useAnalytics();
+  const { addToQueue } = useOfflineQueue();
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Don't show follow button for self
-  if (user?.walletAddress === targetWalletAddress) {
+  if (user?.id === targetUserId) {
     return null;
   }
 
   useEffect(() => {
     const checkFollowStatus = async () => {
-      if (!token || !targetWalletAddress) return;
+      if (!token || !targetUserId) return;
 
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/auth/follow/${targetWalletAddress}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsFollowing(data.isFollowing);
-        }
+        const data = await api.follow.getStatus(targetUserId, token);
+        setIsFollowing(data.isFollowing);
       } catch (error) {
         console.error("Failed to check follow status:", error);
       }
     };
 
     checkFollowStatus();
-  }, [targetWalletAddress, token]);
+  }, [targetUserId, token]);
 
   const handleFollowToggle = async () => {
     if (!token || loading) return;
 
     setLoading(true);
-    try {
-      const method = isFollowing ? "DELETE" : "POST";
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/follow/${targetWalletAddress}`,
-        {
-          method,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+    const action = isFollowing ? "unfollow" : "follow";
+    const actionData = { type: action, targetUserId, timestamp: Date.now() };
 
-      if (response.ok) {
-        setIsFollowing(!isFollowing);
-        addToast(
-          isFollowing ? "Unfollowed successfully" : "Following successfully",
-          "success",
-        );
+    try {
+      if (isFollowing) {
+        await api.follow.unfollow(targetUserId, token);
+        setIsFollowing(false);
+        trackUnfollow(targetUserId);
+        addToast("Unfollowed successfully", "success");
       } else {
-        addToast("Failed to update follow status", "error");
+        await api.follow.follow(targetUserId, token);
+        setIsFollowing(true);
+        trackFollow(targetUserId);
+        addToast("Following successfully", "success");
       }
     } catch (error) {
-      console.error("Follow toggle error:", error);
-      addToast("Failed to update follow status", "error");
+      // If offline or network error, queue the action
+      if (!navigator.onLine || error.message?.includes("network")) {
+        addToQueue(JSON.stringify(actionData));
+        // Optimistically update UI
+        setIsFollowing(!isFollowing);
+        addToast(`Action queued for when you're back online`, "info");
+      } else {
+        console.error("Follow toggle error:", error);
+        addToast("Failed to update follow status", "error");
+      }
     } finally {
       setLoading(false);
     }

@@ -25,6 +25,7 @@ import { typeDefs } from "./graphql/schema";
 import { resolvers } from "./graphql/resolvers";
 import authRoutes from "./routes/auth";
 import wishRoutes from "./routes/wish";
+import followRoutes from "./routes/follow";
 import notificationRoutes from "./routes/notification";
 import webhookRoutes from "./routes/webhook";
 import apiKeyRoutes from "./routes/apikey";
@@ -308,6 +309,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/wish", wishRoutes);
+app.use("/api/v1/follow", followRoutes);
 app.use("/api/v1/notification", notificationRoutes);
 app.use("/api/v1/webhook", webhookRoutes);
 app.use("/api/v1/apikey", apiKeyRoutes);

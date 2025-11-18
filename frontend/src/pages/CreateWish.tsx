@@ -1,8 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { useAnalytics } from "../hooks/useAnalytics";
+import { useOfflineStorage } from "../hooks/useOfflineStorage";
 import LoadingSpinner from "../components/LoadingSpinner";
+import Modal from "../components/Modal";
+import { CATEGORIES } from "../contexts/SearchContext";
+
+const DREAM_TEMPLATES = [
+  {
+    title: "Run a Marathon",
+    description:
+      "Complete a full marathon (42.195km) in under 4 hours. I'll train consistently for 6 months, building up my endurance and speed through structured running plans.",
+    category: "Health & Fitness",
+    stakeAmount: "100",
+  },
+  {
+    title: "Learn Guitar",
+    description:
+      "Master 10 songs on guitar within 6 months. I'll practice daily, take online lessons, and perform for friends by the deadline.",
+    category: "Arts & Music",
+    stakeAmount: "50",
+  },
+  {
+    title: "Write a Novel",
+    description:
+      "Complete a 50,000-word novel within 12 months. I'll write 1,000 words per day and share progress updates weekly.",
+    category: "Creative",
+    stakeAmount: "200",
+  },
+  {
+    title: "Learn a New Language",
+    description:
+      "Achieve conversational fluency in Spanish within 6 months through daily practice, language exchange, and immersion activities.",
+    category: "Education",
+    stakeAmount: "75",
+  },
+];
 
 function CreateWish() {
   const [form, setForm] = useState({
@@ -15,11 +50,43 @@ function CreateWish() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [autoSaved, setAutoSaved] = useState(false);
+
   const { token } = useAuth();
   const { addToast } = useToast();
+  const { trackWishCreate } = useAnalytics();
   const navigate = useNavigate();
 
-  const validateForm = () => {
+  // Auto-save draft
+  const { value: draft, setValue: saveDraft } = useOfflineStorage({
+    key: "dreamDraft",
+    defaultValue: null,
+  });
+
+  // Load draft on mount
+  useEffect(() => {
+    if (draft && !form.title) {
+      setForm(draft);
+      addToast("Draft loaded from previous session", "info");
+    }
+  }, [draft, addToast]);
+
+  // Auto-save form changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (form.title || form.description) {
+        saveDraft(form);
+        setAutoSaved(true);
+        setTimeout(() => setAutoSaved(false), 2000);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [form, saveDraft]);
+
+  const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
     if (!form.title.trim()) newErrors.title = "Title is required";
     if (!form.description.trim())
@@ -32,11 +99,46 @@ function CreateWish() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  }, [form]);
+
+  const applyTemplate = (template: (typeof DREAM_TEMPLATES)[0]) => {
+    setForm((prev) => ({
+      ...prev,
+      ...template,
+    }));
+    setShowTemplates(false);
+    addToast("Template applied! Customize as needed.", "success");
+  };
+
+  const clearDraft = () => {
+    saveDraft(null);
+    setForm({
+      title: "",
+      description: "",
+      stakeAmount: "",
+      deadline: "",
+      validatorMode: "community",
+      category: "",
+    });
+    addToast("Draft cleared", "info");
+  };
+
+  const getFormProgress = () => {
+    let completed = 0;
+    if (form.title.trim()) completed++;
+    if (form.description.trim()) completed++;
+    if (form.stakeAmount && parseFloat(form.stakeAmount) > 0) completed++;
+    if (form.deadline && new Date(form.deadline) > new Date()) completed++;
+    if (form.category) completed++;
+    return (completed / 5) * 100;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) return alert("Please connect your wallet first");
+    if (!token) {
+      addToast("Please connect your wallet first", "warning");
+      return;
+    }
     if (!validateForm()) return;
 
     setLoading(true);
@@ -57,8 +159,11 @@ function CreateWish() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+        trackWishCreate(data);
+        saveDraft(null); // Clear draft on success
         addToast("Dream created successfully!", "success");
-        navigate("/");
+        navigate(`/wish/${result.wishJar._id}`);
       } else {
         const errorData = await response.json();
         addToast(
@@ -77,11 +182,75 @@ function CreateWish() {
   const estimatedGas = parseFloat(form.stakeAmount || "0") * 0.01; // Mock gas estimate
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold mb-6">Create Your Dream</h1>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="text-2xl font-bold">Create Your Dream</h1>
+        <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+          {autoSaved && (
+            <span className="text-sm text-green-600 flex items-center">
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Auto-saved
+            </span>
+          )}
+          <button
+            onClick={() => setShowTemplates(true)}
+            className="text-primary hover:text-primary/80 text-sm font-medium flex items-center"
+          >
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            Use Template
+          </button>
+          {draft && (
+            <button
+              onClick={clearDraft}
+              className="text-red-600 hover:text-red-800 text-sm font-medium"
+            >
+              Clear Draft
+            </button>
+          )}
+        </div>
+      </div>
 
+      {/* Progress Bar */}
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium">Form Progress</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {Math.round(getFormProgress())}% complete
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div
+            className="bg-primary h-2 rounded-full transition-all duration-300"
+            style={{ width: `${getFormProgress()}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Live Preview */}
       <div
-        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mb-6"
+        className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg mb-6"
         role="region"
         aria-labelledby="preview-heading"
       >
@@ -93,23 +262,36 @@ function CreateWish() {
           role="region"
           aria-labelledby="dream-preview"
         >
-          <h3 id="dream-preview" className="font-bold text-lg">
-            {form.title || "Your Dream Title"}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <div className="flex items-start justify-between mb-2">
+            <h3 id="dream-preview" className="font-bold text-lg flex-1">
+              {form.title || "Your Dream Title"}
+            </h3>
+            {form.category && (
+              <span className="text-xs bg-primary text-white px-2 py-1 rounded-full ml-2">
+                {form.category}
+              </span>
+            )}
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 mt-2 line-clamp-3">
             {form.description || "Describe your dream here..."}
           </p>
-          <div className="mt-4 flex justify-between text-sm">
+          <div className="mt-4 flex flex-col sm:flex-row sm:justify-between text-sm space-y-1 sm:space-y-0">
             <span aria-label={`Stake amount: ${form.stakeAmount || "0"} TON`}>
-              Stake: {form.stakeAmount || "0"} TON
+              💰 Stake: {form.stakeAmount || "0"} TON
             </span>
             <span
               aria-label={`Deadline: ${form.deadline ? new Date(form.deadline).toLocaleDateString() : "Not set"}`}
             >
-              Deadline:{" "}
+              📅 Deadline:{" "}
               {form.deadline
                 ? new Date(form.deadline).toLocaleDateString()
                 : "Not set"}
+            </span>
+            <span aria-label={`Validation mode: ${form.validatorMode}`}>
+              🗳️{" "}
+              {form.validatorMode === "community"
+                ? "Community Voting"
+                : "Designated Validators"}
             </span>
           </div>
         </div>
@@ -117,7 +299,7 @@ function CreateWish() {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg space-y-4"
+        className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg space-y-6"
         role="form"
         aria-labelledby="create-form-heading"
         noValidate
@@ -363,6 +545,43 @@ function CreateWish() {
           </p>
         )}
       </form>
+
+      {/* Templates Modal */}
+      <Modal
+        isOpen={showTemplates}
+        onClose={() => setShowTemplates(false)}
+        title="Choose a Dream Template"
+        size="lg"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          {DREAM_TEMPLATES.map((template, index) => (
+            <div
+              key={index}
+              className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:border-primary hover:shadow-md transition-all duration-200 cursor-pointer"
+              onClick={() => applyTemplate(template)}
+            >
+              <h3 className="font-semibold text-lg mb-2">{template.title}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">
+                {template.description}
+              </p>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-primary font-medium">
+                  {template.category}
+                </span>
+                <span className="text-gray-500">
+                  {template.stakeAmount} TON
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+            Templates help you get started quickly. You can customize all
+            details after applying a template.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }

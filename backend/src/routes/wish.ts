@@ -183,13 +183,83 @@ router.get("/", validatePagination, validateSearch, async (req, res) => {
   const filter: any = { deletedAt: { $exists: false } };
 
   // Status filter
-  if (req.query.status) {
+  if (req.query.status && req.query.status !== "all") {
     filter.status = req.query.status;
+  }
+
+  // Category filter
+  if (req.query.category && req.query.category !== "all") {
+    filter.category = req.query.category;
   }
 
   // Search filter
   if (req.query.search) {
     filter.$text = { $search: req.query.search };
+  }
+
+  // Stake range filter
+  if (req.query.minStake || req.query.maxStake) {
+    filter.stakeAmount = {};
+    if (req.query.minStake) {
+      filter.stakeAmount.$gte = parseInt(req.query.minStake as string);
+    }
+    if (req.query.maxStake) {
+      filter.stakeAmount.$lte = parseInt(req.query.maxStake as string);
+    }
+  }
+
+  // Date range filter
+  if (req.query.dateRange && req.query.dateRange !== "all") {
+    const now = new Date();
+    let startDate: Date;
+
+    switch (req.query.dateRange) {
+      case "today":
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case "week":
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "month":
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "year":
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(0); // All time
+    }
+
+    if (req.query.dateRange !== "all") {
+      filter.createdAt = { $gte: startDate };
+    }
+  }
+
+  // Sort options
+  let sortOption: any = { _id: -1 }; // Default: newest
+  if (req.query.sortBy) {
+    switch (req.query.sortBy) {
+      case "newest":
+        sortOption = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOption = { createdAt: 1 };
+        break;
+      case "pledged-high":
+        sortOption = { pledgedAmount: -1 };
+        break;
+      case "pledged-low":
+        sortOption = { pledgedAmount: 1 };
+        break;
+      case "goal-high":
+        sortOption = { stakeAmount: -1 };
+        break;
+      case "goal-low":
+        sortOption = { stakeAmount: 1 };
+        break;
+      default:
+        sortOption = { _id: -1 };
+    }
   }
 
   // Cursor filter
@@ -199,7 +269,7 @@ router.get("/", validatePagination, validateSearch, async (req, res) => {
 
   const wishes = await WishJar.find(filter)
     .populate("ownerId", "displayName walletAddress")
-    .sort({ _id: -1 })
+    .sort(sortOption)
     .limit(limit + 1); // +1 to check if there are more
 
   const hasNextPage = wishes.length > limit;

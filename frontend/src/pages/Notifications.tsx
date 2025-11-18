@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useNotifications } from "../contexts/NotificationContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Badge from "../components/Badge";
 
@@ -16,88 +16,26 @@ interface Notification {
 }
 
 function Notifications() {
-  const { token } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    notifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    isConnected,
+  } = useNotifications();
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (!token) return;
-
-      try {
-        // Mock data for now - in real app, fetch from API
-        const mockNotifications: Notification[] = [
-          {
-            _id: "1",
-            type: "pledge",
-            title: "New Pledge!",
-            message: "Someone pledged 50 TON to your dream 'Run Marathon'",
-            read: false,
-            createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            relatedWishId: "1",
-            amount: 50,
-          },
-          {
-            _id: "2",
-            type: "vote",
-            title: "Proof Voted",
-            message: "Your proof for 'Learn Guitar' received 5 yes votes",
-            read: false,
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            relatedWishId: "2",
-          },
-          {
-            _id: "3",
-            type: "resolution",
-            title: "Dream Resolved!",
-            message:
-              "Your dream 'Run Marathon' has been successfully completed!",
-            read: true,
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-            relatedWishId: "1",
-          },
-          {
-            _id: "4",
-            type: "system",
-            title: "Welcome to DreamJar!",
-            message:
-              "Thanks for joining our community. Start by creating your first dream!",
-            read: true,
-            createdAt: new Date(
-              Date.now() - 1000 * 60 * 60 * 24 * 7,
-            ).toISOString(),
-          },
-        ];
-
-        setNotifications(mockNotifications);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNotifications();
-  }, [token]);
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif._id === id ? { ...notif, read: true } : notif,
-      ),
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
-  };
 
   const filteredNotifications = notifications.filter((notif) => {
     if (filter === "unread") return !notif.read;
     if (filter === "read") return notif.read;
     return true;
   });
+
+  const handleDeleteNotification = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this notification?")) {
+      deleteNotification(id);
+    }
+  };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -129,22 +67,24 @@ function Notifications() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Notifications</h2>
+        <div className="flex items-center space-x-3">
+          <h1 className="text-2xl font-bold">Notifications</h1>
+          <div
+            className={`flex items-center space-x-2 text-sm ${isConnected ? "text-green-600" : "text-red-600"}`}
+          >
+            <div
+              className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-600" : "bg-red-600"}`}
+            />
+            <span>{isConnected ? "Live" : "Offline"}</span>
+          </div>
+        </div>
         {notifications.some((n) => !n.read) && (
           <button
             onClick={markAllAsRead}
-            className="text-primary hover:text-primary/80 transition-colors duration-200"
+            className="text-primary hover:text-primary/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             Mark all as read
           </button>
@@ -224,7 +164,7 @@ function Notifications() {
                       {notification.relatedWishId && (
                         <Link
                           to={`/wish/${notification.relatedWishId}`}
-                          className="text-primary hover:text-primary/80 transition-colors duration-200 text-sm"
+                          className="text-primary hover:text-primary/80 transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded px-2 py-1"
                         >
                           View Dream
                         </Link>
@@ -232,11 +172,20 @@ function Notifications() {
                       {!notification.read && (
                         <button
                           onClick={() => markAsRead(notification._id)}
-                          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 text-sm"
+                          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded px-2 py-1"
                         >
                           Mark as read
                         </button>
                       )}
+                      <button
+                        onClick={() =>
+                          handleDeleteNotification(notification._id)
+                        }
+                        className="text-red-500 hover:text-red-700 transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded px-2 py-1"
+                        aria-label="Delete notification"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>

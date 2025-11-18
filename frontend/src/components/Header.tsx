@@ -4,6 +4,7 @@ import { useTonConnectUI } from "@tonconnect/ui-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useTheme } from "../contexts/ThemeContext";
+import NotificationBell from "./NotificationBell";
 
 const Header: React.FC = () => {
   const [tonConnectUI] = useTonConnectUI();
@@ -165,6 +166,7 @@ const Header: React.FC = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
+            <NotificationBell />
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value as any)}
