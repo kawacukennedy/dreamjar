@@ -458,19 +458,35 @@ function Home() {
        </section>
       </div>
 
-      <div
-        className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-        role="grid"
-        aria-label="Dream jars"
-      >
-        {filteredJars.map((jar) => (
-          <WishCard
-            key={jar._id}
-            jar={jar}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
-          />
-        ))}
+      <div className="flex gap-6">
+        {/* Main Feed Grid */}
+        <div className="flex-1">
+          <div
+            className="grid gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}
+            role="grid"
+            aria-label="Dream jars"
+          >
+            {filteredJars.map((jar) => (
+              <WishCard
+                key={jar._id}
+                jar={jar}
+                favorites={favorites}
+                onToggleFavorite={toggleFavorite}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Sidebar - Hot Wishes */}
+        <div className="hidden xl:block w-80">
+          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-level1 sticky top-4">
+            <h3 className="text-h4 font-bold mb-4">🔥 Hot Wishes</h3>
+            <Suspense fallback={<LoadingSpinner />}>
+              <ActivityFeed limit={5} showHeader={false} />
+            </Suspense>
+          </div>
+        </div>
       </div>
 
       {filteredJars.length === 0 && (
