@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import localforage from "localforage";
 
 interface OfflineStorageOptions {
   key: string;
@@ -10,17 +11,23 @@ interface OfflineStorageOptions {
 export const useOfflineStorage = <T = any>({
   key,
   defaultValue,
-  serialize = JSON.stringify,
-  deserialize = JSON.parse,
 }: OfflineStorageOptions) => {
-  const [value, setValue] = useState<T>(() => {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? deserialize(item) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  });
+  const [value, setValue] = useState<T>(defaultValue);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadValue = async () => {
+      try {
+        const item = await localforage.getItem<T>(key);
+        setValue(item ?? defaultValue);
+      } catch {
+        setValue(defaultValue);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadValue();
+  }, [key, defaultValue]);
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -38,22 +45,22 @@ export const useOfflineStorage = <T = any>({
   }, []);
 
   const setStoredValue = useCallback(
-    (newValue: T | ((prevValue: T) => T)) => {
+    async (newValue: T | ((prevValue: T) => T)) => {
       try {
         const valueToStore =
           newValue instanceof Function ? newValue(value) : newValue;
         setValue(valueToStore);
-        localStorage.setItem(key, serialize(valueToStore));
+        await localforage.setItem(key, valueToStore);
       } catch (error) {
         console.error(`Error storing ${key}:`, error);
       }
     },
-    [key, serialize, value],
+    [key, value],
   );
 
-  const removeStoredValue = useCallback(() => {
+  const removeStoredValue = useCallback(async () => {
     try {
-      localStorage.removeItem(key);
+      await localforage.removeItem(key);
       setValue(defaultValue);
     } catch (error) {
       console.error(`Error removing ${key}:`, error);
@@ -65,6 +72,7 @@ export const useOfflineStorage = <T = any>({
     setValue: setStoredValue,
     removeValue: removeStoredValue,
     isOnline,
+    loading,
   };
 };
 
