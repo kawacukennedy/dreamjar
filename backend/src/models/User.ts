@@ -44,4 +44,6 @@ const UserSchema: Schema = new Schema({
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ lastSeen: -1 });
 
-export default mongoose.model<IUser>("User", UserSchema);
+export const User = mongoose.model<IUser>("User", UserSchema);
+export type UserDocument = IUser;
+export { UserSchema };

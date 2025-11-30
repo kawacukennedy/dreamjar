@@ -15,4 +15,6 @@ const FollowSchema: Schema = new Schema({
 // Compound index to prevent duplicate follows
 FollowSchema.index({ follower: 1, following: 1 }, { unique: true });
 
-export default mongoose.model<IFollow>("Follow", FollowSchema);
+export const Follow = mongoose.model<IFollow>("Follow", FollowSchema);
+export type FollowDocument = IFollow;
+export { FollowSchema };
