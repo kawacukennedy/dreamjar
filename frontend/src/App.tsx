@@ -159,12 +159,41 @@ function AppContent() {
           >
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/create" element={<CreateWish />} />
-              <Route path="/wish/:id" element={<WishDetail />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/settings" element={<Settings />} />
+              <Route path="/wish/:wishId" element={<WishDetail />} />
+              <Route
+                path="/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateWish />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/profile/:userId" element={<Profile />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <div>Admin Dashboard</div>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/trending" element={<Leaderboard />} />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/help" element={<Help />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/terms" element={<Terms />} />
