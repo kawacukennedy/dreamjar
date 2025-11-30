@@ -30,6 +30,12 @@ export interface IWishJar extends Document {
     on_fail_percent: number;
     beneficiary: string;
   };
+  sponsor?: {
+    name: string;
+    logo_url?: string;
+    website?: string;
+    campaign_id?: string;
+  };
 }
 
 const WishJarSchema: Schema = new Schema({
@@ -69,6 +75,12 @@ const WishJarSchema: Schema = new Schema({
   impact_allocation: {
     on_fail_percent: { type: Number, min: 0, max: 100, default: 50 },
     beneficiary: { type: String },
+  },
+  sponsor: {
+    name: { type: String },
+    logo_url: { type: String },
+    website: { type: String },
+    campaign_id: { type: String },
   },
 });
 

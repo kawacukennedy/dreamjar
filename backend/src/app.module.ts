@@ -10,6 +10,9 @@ import { WebhookModule } from "./webhook/webhook.module";
 import { ApiKeyModule } from "./apikey/apikey.module";
 import { DAOModule } from "./dao/dao.module";
 import { WebSocketGatewayService } from "./services/websocket.gateway";
+import { LeaderboardController } from "./services/leaderboard.controller";
+import { LeaderboardService } from "./services/leaderboard";
+import { ProofVerificationService } from "./services/proof-verification";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -42,6 +45,11 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     ApiKeyModule,
     DAOModule,
   ],
-  providers: [WebSocketGatewayService],
+  controllers: [LeaderboardController],
+  providers: [
+    WebSocketGatewayService,
+    LeaderboardService,
+    ProofVerificationService,
+  ],
 })
 export class AppModule {}

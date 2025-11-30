@@ -17,6 +17,11 @@ interface WishJar {
   status: string;
   category?: string;
   ownerId: { displayName?: string; walletAddress: string };
+  sponsor?: {
+    name: string;
+    logo_url?: string;
+    website?: string;
+  };
 }
 
 interface WishCardProps {
@@ -89,6 +94,11 @@ const WishCard: React.FC<WishCardProps> = React.memo(
               >
                 {jar.status}
               </Badge>
+              {jar.sponsor && (
+                <Badge variant="warning" size="sm">
+                  Sponsored
+                </Badge>
+              )}
             </div>
           </div>
 
