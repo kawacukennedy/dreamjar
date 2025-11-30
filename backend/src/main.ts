@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import * as Sentry from "@sentry/node";
 import { Logger } from "@nestjs/common";
 import { AllExceptionsFilter } from "./common/all-exceptions.filter";
+import { monitoring } from "./services/monitoring";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -43,6 +44,12 @@ async function bootstrap() {
 
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Metrics endpoint
+  app.get("/metrics", (req, res) => {
+    res.set("Content-Type", register.contentType);
+    res.end(monitoring.getMetrics());
+  });
 
   // CORS
   app.enableCors({
