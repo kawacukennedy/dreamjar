@@ -12,6 +12,8 @@ import Comments from "../components/Comments";
 import Milestones from "../components/Milestones";
 import FollowButton from "../components/FollowButton";
 import OptimizedImage from "../components/OptimizedImage";
+import Avatar from "../components/Avatar";
+import Button from "../components/Button";
 
 interface WishJar {
   _id: string;
@@ -348,16 +350,16 @@ function WishDetail() {
   const canPledge = wishJar.status === "Active" && !isOwner;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left Column */}
-        <div className="lg:w-2/3 space-y-6">
-          {/* Title and Creator */}
-          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-level1">
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left Column - 680px content */}
+        <div className="lg:w-[680px] space-y-6">
+          {/* Title and Creator Card */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-level1">
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <h1 className="text-h1 font-bold">{wishJar.title}</h1>
-                <p className="text-neutral-600 dark:text-neutral-400 mt-2">
+              <div className="flex-1">
+                <h1 className="text-h1 font-bold mb-2">{wishJar.title}</h1>
+                <p className="text-gray-600 dark:text-gray-400 text-body">
                   {wishJar.description}
                 </p>
               </div>
@@ -375,103 +377,140 @@ function WishDetail() {
               </Badge>
             </div>
 
-            <div className="flex items-center gap-4 mb-4">
+            {/* Creator Card */}
+            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <Avatar
                 src={wishJar.ownerId.avatarUrl}
                 alt={wishJar.ownerId.displayName || "Creator"}
                 fallback={wishJar.ownerId.displayName?.[0] || "U"}
+                size="lg"
               />
-              <div>
-                <p className="font-medium">
+              <div className="flex-1">
+                <p className="font-medium text-h5">
                   {wishJar.ownerId.displayName ||
                     wishJar.ownerId.walletAddress.slice(0, 6) + "..."}
                 </p>
-                <p className="text-sm text-neutral-500">
-                  Deadline: {new Date(wishJar.deadline).toLocaleDateString()}
+                <p className="text-sm text-gray-500">
+                  Created • Deadline:{" "}
+                  {new Date(wishJar.deadline).toLocaleDateString()}
                 </p>
               </div>
-            </div>
-
-            <div className="mb-6">
-              <div className="flex justify-between text-sm mb-2">
-                <span>Pledged: {wishJar.pledgedAmount / 1000000000} TON</span>
-                <span>Goal: {wishJar.stakeAmount / 1000000000} TON</span>
-              </div>
-              <ProgressBar progress={progress} />
+              <FollowButton userId={wishJar.ownerId.walletAddress} />
             </div>
           </div>
 
           {/* Progress Timeline */}
-          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-level1">
-            <h2 className="text-h3 font-bold mb-4">Progress Updates</h2>
-            {/* Placeholder for updates feed */}
-            <p className="text-neutral-500">No updates yet</p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-level1">
+            <h2 className="text-h3 font-bold mb-4">Progress Timeline</h2>
+            <Milestones wishId={wishJar._id} />
+          </div>
+
+          {/* Updates Feed */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-level1">
+            <h2 className="text-h3 font-bold mb-4">Updates Feed</h2>
+            <Comments wishId={wishJar._id} />
           </div>
 
           {/* Media Gallery */}
-          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-level1">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-level1">
             <h2 className="text-h3 font-bold mb-4">Media Gallery</h2>
-            {/* Placeholder for media gallery */}
-            <p className="text-neutral-500">No media uploaded yet</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {wishJar.proofs?.map((proof) => (
+                <div key={proof._id} className="aspect-square">
+                  <OptimizedImage
+                    src={proof.mediaURI}
+                    alt={proof.caption || "Proof"}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+              )) || (
+                <p className="text-gray-500 col-span-full text-center py-8">
+                  No media uploaded yet
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="lg:w-1/3 space-y-6">
+        {/* Right Column - 360px sidebar */}
+        <div className="lg:w-[360px] space-y-6">
           {/* Pledge Summary */}
-          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-level1 sticky top-4">
-            <h3 className="text-h4 font-bold mb-4">Support This Wish</h3>
-            <div className="mb-4">
-              <div className="text-2xl font-bold text-dream-blue">
-                {wishJar.pledgeTotalMicroTon / 1000000000} TON
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-level1 sticky top-4">
+            <h3 className="text-h4 font-bold mb-4">Pledge Summary</h3>
+            <div className="mb-6">
+              <div className="text-3xl font-bold text-dream-blue mb-1">
+                {(wishJar.pledgedAmount / 1000000000).toFixed(2)} TON
               </div>
-              <div className="text-sm text-neutral-500">
-                pledged of {wishJar.stakeAmount / 1000000000} TON goal
+              <div className="text-sm text-gray-500 mb-3">
+                of {(wishJar.stakeAmount / 1000000000).toFixed(2)} TON goal
+              </div>
+              <ProgressBar progress={progress} className="mb-2" />
+              <div className="text-xs text-gray-500">
+                {wishJar.pledges.length} supporters
               </div>
             </div>
 
-            {canPledge && (
-              <Button
-                onClick={() => setShowPledgeModal(true)}
-                className="w-full mb-4"
-              >
-                💰 Pledge Support
-              </Button>
-            )}
+            {/* Action CTA */}
+            <div className="space-y-3">
+              {canPledge && (
+                <Button
+                  onClick={() => setShowPledgeModal(true)}
+                  className="w-full"
+                  size="lg"
+                >
+                  💰 Pledge Support
+                </Button>
+              )}
 
-            {isOwner && wishJar.status === "active" && (
-              <Button
-                variant="secondary"
-                onClick={() => setShowProofModal(true)}
-                className="w-full mb-4"
-              >
-                📸 Post Update
-              </Button>
-            )}
+              {isOwner && wishJar.status === "active" && (
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowProofModal(true)}
+                  className="w-full"
+                  size="lg"
+                >
+                  📸 Post Update
+                </Button>
+              )}
 
-            <ShareButton url={`/wish/${wishJar._id}`} title={wishJar.title} />
+              <ShareButton
+                url={`/wish/${wishJar._id}`}
+                title={wishJar.title}
+                className="w-full"
+              />
+            </div>
           </div>
 
           {/* Supporters List */}
-          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-level1">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-level1">
             <h3 className="text-h4 font-bold mb-4">
               Supporters ({wishJar.pledges.length})
             </h3>
             {wishJar.pledges.length === 0 ? (
-              <p className="text-neutral-500">No supporters yet</p>
+              <p className="text-gray-500 text-center py-4">
+                No supporters yet
+              </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-60 overflow-y-auto">
                 {wishJar.pledges.map((pledge) => (
                   <div
                     key={pledge._id}
-                    className="flex justify-between items-center"
+                    className="flex justify-between items-center py-2"
                   >
-                    <span className="text-sm">
-                      {pledge.supporterId.displayName ||
-                        pledge.supporterId.walletAddress.slice(0, 6) + "..."}
-                    </span>
-                    <span className="font-medium text-sm">
-                      {pledge.amount / 1000000000} TON
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        src={pledge.supporterId.avatarUrl}
+                        alt={pledge.supporterId.displayName || "Supporter"}
+                        fallback={pledge.supporterId.displayName?.[0] || "S"}
+                        size="sm"
+                      />
+                      <span className="text-sm font-medium">
+                        {pledge.supporterId.displayName ||
+                          pledge.supporterId.walletAddress.slice(0, 6) + "..."}
+                      </span>
+                    </div>
+                    <span className="font-medium text-sm text-dream-blue">
+                      {(pledge.amount / 1000000000).toFixed(2)} TON
                     </span>
                   </div>
                 ))}
@@ -480,9 +519,10 @@ function WishDetail() {
           </div>
 
           {/* Related Wishes */}
-          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg shadow-level1">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-level1">
             <h3 className="text-h4 font-bold mb-4">Related Wishes</h3>
-            <p className="text-neutral-500">No related wishes</p>
+            <p className="text-gray-500 text-center py-4">No related wishes</p>
+          </div>
         </div>
       </div>
 

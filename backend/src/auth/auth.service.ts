@@ -29,9 +29,15 @@ export class AuthService {
     const isValid = signedMessage && challengeMessage;
     if (!isValid) throw new Error("Invalid signature");
 
-    let user = await this.userModel.findOne({ walletAddress: address });
+    let user = await this.userModel.findOne({
+      "wallet_addresses.address": address,
+    });
     if (!user) {
-      user = new this.userModel({ walletAddress: address });
+      user = new this.userModel({
+        username: `user_${address.slice(0, 8)}`,
+        display_name: `User ${address.slice(0, 8)}`,
+        wallet_addresses: [{ address, provider: "TonConnect" }],
+      });
       await user.save();
     }
 
@@ -50,13 +56,13 @@ export class AuthService {
     displayName?: string,
     avatarUrl?: string,
   ): Promise<User> {
-    const user = await this.userModel.findById(userId);
+    const updateData: any = {};
+    if (displayName !== undefined) updateData.display_name = displayName;
+    if (avatarUrl !== undefined) updateData.avatar_url = avatarUrl;
+    const user = await this.userModel.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
     if (!user) throw new Error("User not found");
-
-    if (displayName !== undefined) user.displayName = displayName;
-    if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
-    user.lastSeen = new Date();
-    await user.save();
     return user;
   }
 
@@ -64,7 +70,9 @@ export class AuthService {
     userId: string,
     walletAddress: string,
   ): Promise<{ isFollowing: boolean }> {
-    const targetUser = await this.userModel.findOne({ walletAddress });
+    const targetUser = await this.userModel.findOne({
+      "wallet_addresses.address": walletAddress,
+    });
     if (!targetUser) throw new Error("User not found");
 
     const follow = await this.followModel.findOne({
@@ -78,7 +86,9 @@ export class AuthService {
     userId: string,
     walletAddress: string,
   ): Promise<{ message: string }> {
-    const targetUser = await this.userModel.findOne({ walletAddress });
+    const targetUser = await this.userModel.findOne({
+      "wallet_addresses.address": walletAddress,
+    });
     if (!targetUser) throw new Error("User not found");
 
     if (userId === targetUser._id.toString()) {
@@ -107,7 +117,9 @@ export class AuthService {
     userId: string,
     walletAddress: string,
   ): Promise<{ message: string }> {
-    const targetUser = await this.userModel.findOne({ walletAddress });
+    const targetUser = await this.userModel.findOne({
+      "wallet_addresses.address": walletAddress,
+    });
     if (!targetUser) throw new Error("User not found");
 
     const follow = await this.followModel.findOneAndDelete({
@@ -127,7 +139,7 @@ export class AuthService {
   ): Promise<{ count: number; followers: any[] }> {
     const followers = await this.followModel
       .find({ following: userId })
-      .populate("follower", "displayName walletAddress");
+      .populate("follower", "display_name avatar_url");
     return {
       count: followers.length,
       followers: followers.map((f) => f.follower),
@@ -139,7 +151,7 @@ export class AuthService {
   ): Promise<{ count: number; following: any[] }> {
     const following = await this.followModel
       .find({ follower: userId })
-      .populate("following", "displayName walletAddress");
+      .populate("following", "display_name avatar_url");
     return {
       count: following.length,
       following: following.map((f) => f.following),

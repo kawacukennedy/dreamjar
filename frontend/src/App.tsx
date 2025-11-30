@@ -2,12 +2,7 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import * as Sentry from "@sentry/react";
 import { inject } from "@vercel/analytics";
 import { useTranslation } from "react-i18next";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
 // Conditional imports
 let posthog: any = null;
@@ -135,7 +130,7 @@ function AppContent() {
   }, [navigate]);
 
   return (
-    <Router>
+    <>
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded z-50"
@@ -215,7 +210,7 @@ function AppContent() {
 
       <PWAInstallPrompt />
       <OfflineIndicator />
-    </Router>
+    </>
   );
 }
 

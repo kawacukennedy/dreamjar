@@ -2,7 +2,7 @@ import { atom } from "recoil";
 
 export interface UiState {
   theme: "light" | "dark";
-  locale: string;
+  locale: "en" | "hi";
 }
 
 export const uiState = atom<UiState>({

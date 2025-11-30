@@ -2,47 +2,59 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
-  walletAddress: string;
-  telegramId?: string;
-  email?: string;
-  displayName?: string;
-  avatarUrl?: string;
-  role: "user" | "moderator" | "admin";
-  notificationPreferences: {
-    email: boolean;
-    inApp: boolean;
-    pledges: boolean;
-    proofs: boolean;
-    resolutions: boolean;
-    deadlines: boolean;
+  username: string;
+  display_name: string;
+  avatar_url?: string;
+  wallet_addresses: Array<{
+    address: string;
+    connected_at: Date;
+    provider: string;
+  }>;
+  created_at: Date;
+  bio?: string;
+  statistics: {
+    created_wishes_count: number;
+    completed_wishes_count: number;
+    supporter_badges_count: number;
   };
-  createdAt: Date;
-  lastSeen: Date;
+  preferences: {
+    notifications: {
+      telegram_mentions: boolean;
+      email: boolean;
+    };
+    locale: string;
+  };
 }
 
 const UserSchema: Schema = new Schema({
-  walletAddress: { type: String, required: true, unique: true, index: true },
-  telegramId: { type: String },
-  email: { type: String, sparse: true },
-  displayName: { type: String },
-  avatarUrl: { type: String },
-  role: { type: String, enum: ["user", "moderator", "admin"], default: "user" },
-  notificationPreferences: {
-    email: { type: Boolean, default: true },
-    inApp: { type: Boolean, default: true },
-    pledges: { type: Boolean, default: true },
-    proofs: { type: Boolean, default: true },
-    resolutions: { type: Boolean, default: true },
-    deadlines: { type: Boolean, default: true },
+  username: { type: String, required: true, unique: true },
+  display_name: { type: String, required: true },
+  avatar_url: { type: String },
+  wallet_addresses: [
+    {
+      address: { type: String, required: true },
+      connected_at: { type: Date, default: Date.now },
+      provider: { type: String, required: true },
+    },
+  ],
+  created_at: { type: Date, default: Date.now },
+  bio: { type: String },
+  statistics: {
+    created_wishes_count: { type: Number, default: 0 },
+    completed_wishes_count: { type: Number, default: 0 },
+    supporter_badges_count: { type: Number, default: 0 },
   },
-  createdAt: { type: Date, default: Date.now },
-  lastSeen: { type: Date, default: Date.now },
-  deletedAt: { type: Date },
+  preferences: {
+    notifications: {
+      telegram_mentions: { type: Boolean, default: true },
+      email: { type: Boolean, default: false },
+    },
+    locale: { type: String, default: "en" },
+  },
 });
 
 // Indexes
-UserSchema.index({ createdAt: -1 });
-UserSchema.index({ lastSeen: -1 });
+UserSchema.index({ username: 1 });
 
 export const User = mongoose.model<IUser>("User", UserSchema);
 export type UserDocument = IUser;

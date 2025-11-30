@@ -7,6 +7,7 @@ import * as compression from "compression";
 import rateLimit from "express-rate-limit";
 import * as Sentry from "@sentry/node";
 import { Logger } from "@nestjs/common";
+import { AllExceptionsFilter } from "./common/all-exceptions.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -36,7 +37,12 @@ async function bootstrap() {
   );
 
   // Validation
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
+
+  // Global exception filter
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // CORS
   app.enableCors({

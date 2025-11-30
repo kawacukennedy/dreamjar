@@ -1,155 +1,1332 @@
 {
-  "name": "DreamJar",
-  "version": "1.0.0",
-  "description": "A platform for turning dreams into smart contracts on TON blockchain",
-  "techStack": {
-    "frontend": {
-      "framework": "React",
-      "language": "TypeScript",
-      "styling": "Tailwind CSS",
-      "routing": "React Router",
-      "stateManagement": "React Context",
-      "buildTool": "Vite",
-      "deployment": "Vercel",
-      "pwa": "Vite PWA Plugin",
-      "telegram": "@twa-dev/sdk"
-    },
-    "backend": {
-      "framework": "Express.js",
-      "language": "TypeScript",
-      "database": "MongoDB",
-      "deployment": "Render",
-      "storage": "IPFS",
-      "authentication": "JWT",
-      "validation": "Custom middleware"
-    },
-    "blockchain": {
-      "platform": "TON",
-      "wallet": "TonConnect",
-      "contracts": "FunC",
-      "deployment": "TON CLI"
-    }
-  },
-  "features": {
-    "core": [
-      "Wallet authentication with TonConnect",
-      "Dream creation with stake and deadline",
-      "Community pledging system",
-      "Proof upload and validation",
-      "Voting on dream completion",
-      "Leaderboard and achievements"
-    ],
-    "frontend": [
-      "Responsive design for all devices",
-      "Dark mode and multi-theme support",
-      "Search with history and filters",
-      "Favorites system",
-      "Social sharing",
-      "PWA capabilities",
-      "Telegram Mini-App integration",
-      "Onboarding flow",
-      "Accessibility features",
-      "Real-time notifications"
-    ],
-    "backend": [
-      "RESTful API with authentication",
-      "MongoDB data storage",
-      "IPFS file storage",
-      "Rate limiting and security",
-      "Error tracking with Sentry",
-      "Analytics with PostHog"
-    ],
-    "blockchain": [
-      "Smart contract deployment",
-      "TON transaction handling",
-      "Signature verification",
-      "Decentralized storage"
-    ]
-  },
-  "pages": [
-    "Home - Dream discovery with search and filters",
-    "Create Wish - Form for creating new dreams",
-    "Wish Detail - Individual dream page with pledging",
-    "Profile - User dashboard with achievements",
-    "Leaderboard - User rankings",
-    "Help Center - FAQs and guides",
-    "Contact - Support form",
-    "Terms - Legal terms",
-    "Privacy - Privacy policy",
-    "404 - Not found page"
-  ],
-  "apiEndpoints": [
-    "POST /auth/wallet-challenge - Get authentication challenge",
-    "POST /auth/wallet-verify - Verify wallet signature",
-    "PUT /auth/profile - Update user profile",
-    "POST /wish - Create new dream",
-    "GET /wish/:id - Get dream details",
-    "POST /wish/:id/pledge - Pledge to dream",
-    "POST /wish/:id/proof - Upload proof",
-    "POST /wish/:id/vote - Vote on proof",
-    "GET /wish/leaderboard - Get user rankings"
-  ],
-  "models": [
-    "User - Wallet address, profile data",
-    "WishJar - Dream data with status",
-    "Pledge - Supporter contributions",
-    "Proof - Validation evidence",
-    "Vote - Community voting"
-  ],
-  "deployment": {
-    "frontend": "Vercel",
-    "backend": "Render",
-    "database": "MongoDB Atlas",
-    "storage": "IPFS",
-    "monitoring": "Sentry + Vercel Analytics"
-  },
-  "requirements": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0",
-    "mongodb": ">=5.0.0",
-    "ton": "testnet/mainnet"
-  },
-  "scripts": {
-    "dev": "Frontend and backend development servers",
-    "build": "Production builds",
-    "test": "Run test suites",
-    "deploy": "Deployment scripts"
-  },
-  "architecture": {
-    "frontend": "SPA with lazy loading",
-    "backend": "REST API with middleware",
-    "database": "NoSQL document storage",
-    "blockchain": "Smart contracts for trustless execution"
-  },
-  "security": {
-    "authentication": "JWT tokens",
-    "authorization": "Role-based access",
-    "validation": "Input sanitization",
-    "rateLimiting": "API protection",
-    "cors": "Cross-origin policies",
-    "helmet": "Security headers"
-  },
-  "performance": {
-    "optimization": "Code splitting and lazy loading",
-    "caching": "Service worker and HTTP caching",
-    "compression": "Gzip compression",
-    "cdn": "Vercel CDN"
-  },
-  "accessibility": {
-    "standards": "WCAG 2.1 AA",
-    "features": "ARIA labels, keyboard navigation, screen reader support",
-    "testing": "Manual accessibility testing"
-  },
-  "testing": {
-    "unit": "Jest for backend",
-    "integration": "Supertest for API",
-    "e2e": "Manual testing checklist",
-    "coverage": "Test coverage reporting"
-  },
-  "documentation": {
-    "api": "API documentation in docs/API.md",
-    "deployment": "Deployment guide in docs/DEPLOYMENT.md",
-    "testing": "Testing plan in docs/TESTING.md",
-    "readme": "Project overview and setup"
-  }
+"project_overview": {
+"app_name": "DreamJar",
+"app_description": "DreamJar is a consumer-facing Telegram Mini-App that turns personal goals into social, tokenized 'Wish Jars' on the TON blockchain. Users create goal-based smart contracts that require a small TON stake, invite community pledges, post progress updates, and verify outcomes through social validation or trusted proofs. The platform combines motivation, micro-crowdfunding, NFT badges, and social accountability with clear reward/penalty mechanics and a public-impact fallback when goals fail.",
+"target_audience": [
+"Individual consumers aged 16-45 seeking motivation to achieve personal goals",
+"Friends and communities who want to support peers with small micro-pledges",
+"Early Web3 users who use TON and Telegram",
+"Brands and communities looking to sponsor challenges and run user engagement campaigns",
+"Hackathon participants and indie developers wanting an example use-case for TON + Telegram Mini-Apps"
+],
+"core_objectives": [
+"Enable users to convert personal goals into accountable, stake-backed commitments on TON.",
+"Drive organic virality through shareable Telegram native UX and NFT-backed supporter badges.",
+"Demonstrate robust TON smart contract usage (Tolk/FunC), TON Connect wallet flows, and Telegram Mini-App integration.",
+"Provide an emotionally engaging product that balances incentives with social good (failed-stake donation pool).",
+"Be production-ready: secure, scalable, and maintainable by a small engineering team."
+],
+"key_features": [
+"Create Wish Jar (goal + deadline + stake) with on-chain smart contract",
+"TON Connect wallet integration for staking and pledges",
+"Community pledging with micro-amounts and NFT supporter badges",
+"Progress timeline — media uploads (images/video), auto-timestamped updates",
+"Verification flows: community vote, appointed validators, or cryptographic proof (GPS/Strava/GitHub)",
+"Automatic reward distribution on successful verification and donation routing on failure",
+"Leaderboards, trending dreams, and sponsored challenge campaigns",
+"Admin dashboard for monitoring contracts, disputes, and impact pool",
+"Analytics for user retention, conversion, and engagement",
+"Complete audit logs and contract explorer links"
+],
+"success_metrics": [
+"Daily Active Users (DAU) target: 5,000 within first 3 months",
+"Conversion: 20% of users who open the app create a Wish Jar",
+"Average pledge per jar: 2.5 TON-equivalent units (or local currency equivalent)",
+"Verification accuracy: 98% correct community validation rate (verified by audit)",
+"Retention: 30-day retention of 25%",
+"Viral coefficient: >1.1 (each user brings more than one new user)",
+"Revenue: protocol fees equal to 1% of transaction volume; target $10k MRR within 6 months via sponsorships and premium features"
+]
+},
+
+"system_architecture": {
+"overall_architecture_diagram_description": "The system is a hybrid architecture combining a Telegram Mini-App frontend (hosted on Vercel) that communicates with a Node.js backend (hosted on Render) via HTTPS REST API. The backend orchestrates business logic, interacts with MongoDB Atlas for persistent metadata and Redis for caching, and interacts with the TON blockchain via a smart-contract gateway (TON API/Toncenter). Media files are uploaded to IPFS (Pinata + optional TON Storage fallback). Authentication uses TON Connect wallet sessions for blockchain actions and JWT for backend session endpoints. Monitoring and logs flow to Sentry and Logtail. CI/CD runs from GitHub Actions with automated tests, static analysis, Docker image builds and deployments.",
+"client_side": {
+"architecture_type": "Telegram Mini-App (Single Page Application - SPA) using React 18 (v18.2.0) with Vite 5 (v5.0.0) bundling",
+"state_management": "Primary state: React Context for auth and theme; Recoil v0.7.6 for complex client state (wish jars feed, optimistic updates). Detailed specification: userAuthState (walletConnected:boolean, walletAddress:string, sessionJWT:string, tokenExpiry:ISO8601), uiState (theme:'light'|'dark', locale:'en|hi'), feedState (paginated feed with cursor-based pagination, items[], nextCursor:string), draftsState (local for in-progress wish creation using IndexedDB fallback via localForage v1.10), optimistic transaction queue for pending transactions with unique client-generated IDs tracking smart contract tx hashes.",
+"routing_strategy": "Single-page routing using React Router v6.14.0. Routes are shallow and mapped as: / (home feed), /wish/:wishId (wish detail), /create (wish creation modal overlay), /profile/:userId (user profile), /dashboard (admin). Navigation is history.push based. Deep links handled with Telegram web app parameters and a redirect flow for tonconnect callback. Route guards: /create and /dashboard require walletConnected true; if not, trigger TON Connect flow and then redirect back.",
+"caching_strategy": "Client cache using SWR v2 (stale-while-revalidate) with 30s default revalidation for feed endpoints, keyed by query parameters (cursor, filter). Persistent local cache for drafts using IndexedDB with TTL of 7 days. Media thumbnails cached via browser caching headers with Cache-Control: public, max-age=604800 for 7 days and service-worker controlled offline caching for the last 20 viewed wishes. Optimistic UI for posting updates with rollback on tx failure. Configurable cache invalidation: successful on-chain confirmation triggers WebSocket notification to invalidate relevant keys."
+},
+"server_side": {
+"architecture_pattern": "Backend follows a modular monolith architecture with microservices readiness (MVC separation within Node.js service), pattern: API Gateway (single Node.js service exposing REST) + background worker subsystem for asynchronous tasks (pledge settlement, NFT minting, disputes) implemented using BullMQ (Redis-based queue).",
+"service_dependencies": [
+{
+"service_name": "API Gateway",
+"description": "Exposes REST endpoints; handles authentication, validation, and orchestration of business logic."
+},
+{
+"service_name": "Worker Service",
+"description": "Background job processor for blockchain transaction monitoring, NFT minting, rewards distribution, scheduled wish deadline checks, and sending push notifications via Telegram bot API."
+},
+{
+"service_name": "MongoDB Atlas",
+"description": "Primary document store for user profiles, wish metadata, progress updates, comments, and transaction logs."
+},
+{
+"service_name": "Redis",
+"description": "Used for caching, session storage for worker locks, and as BullMQ backend."
+},
+{
+"service_name": "TON Node / TON RPC (toncenter.com or custom bridge)",
+"description": "Interface for smart contract deployment, querying contract states, and sending signed transactions via server-signed gateway when needed."
+},
+{
+"service_name": "IPFS Pinning Service (Pinata/Infura) + TON Storage",
+"description": "Media storage and retrieval for proof artifacts with fallback redundancy."
+},
+{
+"service_name": "Sentry / Logtail",
+"description": "Application monitoring and centralized logging."
+},
+{
+"service_name": "GitHub Actions",
+"description": "CI/CD for tests, builds, and deployment pipelines."
+}
+],
+"data_flow_diagram": "User interacts via Telegram Mini-App -> Frontend issues REST calls to API Gateway -> API Gateway persists metadata in MongoDB and enqueues blockchain actions in Redis/BullMQ -> Worker Service signs or prepares transactions (if off-chain signing required, uses TON Connect on client) and submits to TON RPC -> TON RPC confirms and emits event -> Worker updates MongoDB and triggers notifications to Telegram via bot -> Frontend receives update via WebSocket or polls and updates UI.",
+"scalability_approach": "Horizontal scaling for stateless API nodes behind a load balancer (Render/AWS ALB). Workers scale based on queue length with autoscaling configured to maintain queue wait time <5s. MongoDB Atlas configured with replica set and autoscaling storage; apply shard strategy for larger scale (shard by wishId range). Redis uses managed cluster with replication. Use CDN (Cloudflare) in front of Vercel for static assets. Rate limiting and throttling enforced at the API Gateway (per-IP and per-wallet). Plan for eventual decomposition into microservices: auth service, wallet-service, marketplace-service, analytics-service when throughput demands exceed single-node maintainability."
+},
+"data_architecture": {
+"database_design": {
+"database_choice": "MongoDB Atlas (v6.x) with a mix of document collections and time-series collections for logs; transactional multi-document transactions used sparingly.",
+"collections": {
+"users": {
+"description": "User metadata; wallet addresses may be multiple; no private keys stored.",
+"schema": {
+"_id": "ObjectId",
+"username": "string (unique)",
+"display_name": "string",
+"avatar_url": "string (ipfs/ton-storage/http)",
+"wallet_addresses": [
+{
+"address": "string",
+"connected_at": "ISO8601",
+"provider": "string (TonKeep, TonHub)"
+}
+],
+"created_at": "ISO8601",
+"bio": "string",
+"statistics": {
+"created_wishes_count": "int",
+"completed_wishes_count": "int",
+"supporter_badges_count": "int"
+},
+"preferences": {
+"notifications": {
+"telegram_mentions": "boolean",
+"email": "boolean"
+},
+"locale": "string"
+}
+}
+},
+"wishes": {
+"description": "Core wish jar metadata and operational state.",
+"schema": {
+"_id": "ObjectId",
+"wish_id": "string (UUID v4)",
+"creator_user_id": "ObjectId -> users._id",
+"title": "string (max 120 chars)",
+"description": "string (max 2000 chars)",
+"stake_amount_microton": "int (microTON units integer)",
+"goal_deadline": "ISO8601",
+"proof_method": "enum ['media','gps','github','strava','custom']",
+"contract_address": "string (TON address)",
+"status": "enum ['active','pending_verification','verified','failed','cancelled']",
+"created_at": "ISO8601",
+"updated_at": "ISO8601",
+"pledge_total_microton": "int",
+"pledge_count": "int",
+"validators": [
+{
+"user_id": "ObjectId",
+"role": "enum ['community','appointed','oracle']"
+}
+],
+"visibility": "enum ['public','private','friends']",
+"category_tags": ["array of strings"],
+"impact_allocation": {
+"on_fail_percent": "number (0-100, default 50)",
+"beneficiary": "string (DAO|charity identifier)"
+}
+},
+"indexes": [
+"{'wish_id':1, 'creator_user_id':1}",
+"{'status':1, 'goal_deadline':1}",
+"{'contract_address':1}"
+]
+},
+"pledges": {
+"description": "Records of user pledges; each pledge may result in an on-chain transfer or an off-chain promise resolved at verification.",
+"schema": {
+"_id": "ObjectId",
+"pledge_id": "string (UUID v4)",
+"wish_id": "ObjectId -> wishes._id",
+"supporter_user_id": "ObjectId -> users._id",
+"amount_microton": "int",
+"transaction_hash": "string (optional if on-chain)",
+"status": "enum ['pending','confirmed','refunded']",
+"created_at": "ISO8601"
+},
+"indexes": [
+"{'wish_id':1}",
+"{'supporter_user_id':1}"
+]
+},
+"updates": {
+"description": "Progress updates posted by creator with media references.",
+"schema": {
+"_id": "ObjectId",
+"wish_id": "ObjectId",
+"author_user_id": "ObjectId",
+"content": "string",
+"media": [
+{
+"type": "enum['image','video','document']",
+"url": "string (ipfs/ton-storage URL)",
+"thumbnail_url": "string"
+}
+],
+"created_at": "ISO8601",
+"verified_proof_metadata": "object (optional)"
+},
+"indexes": [
+"{'wish_id':1, 'created_at':-1}"
+]
+},
+"transactions": {
+"description": "On-chain and off-chain transaction logs for audit.",
+"schema": {
+"_id": "ObjectId",
+"tx_id": "string",
+"related_entity": "object {type:'wish'|'pledge'|'reward', id:ObjectId}",
+"tx_hash": "string (TON or internal)",
+"amount_microton": "int",
+"from_address": "string",
+"to_address": "string",
+"status": "enum['pending','confirmed','failed']",
+"block_height": "int (optional)",
+"created_at": "ISO8601"
+},
+"indexes": [
+"{'tx_hash':1}",
+"{'related_entity.id':1}"
+]
+},
+"audit_logs_time_series": {
+"description": "Time-series collection for high-volume audit events and on-chain event polling",
+"schema": "time-series with fields: event_type, payload, timestamp"
+}
+}
+},
+"data_flow": "All user actions generate events: create wish -> API writes wish metadata -> Worker enqueues contract creation -> Worker interacts with TON RPC -> on-chain confirmation triggers event -> Transaction record updated -> Notifications sent to followers -> Pledges cause on-chain events or escrow updates -> verification flow resolves and triggers reward distribution updates and final ledger writes. All events logged to audit time-series collection.",
+"storage_strategy": "Metadata persisted in MongoDB with read-optimized indexes. Media stored on IPFS + Pinata with redundancy and content-addressed links stored in Mongo. Small, frequently accessed assets (thumbnails) cached using CDN (Cloudflare). Use TON Storage for sensitive proof that must live on TON Storage. Use S3-compatible object store as hot fallback for large media.",
+"backup_recovery_strategy": "MongoDB Atlas automated backup snapshots daily with point-in-time recovery for 7 days by default, retention policy adjustable to 30/90/365 days. Test restore drills monthly. IPFS pinning has replication across at least two pinning providers. Disaster recovery runbook: RTO 4 hours for API with warm standby on alternate region; RPO 15 minutes for critical transaction logs (replayed from time-series). Escrow-critical data replicated to cold backups stored in encrypted snapshots on AWS S3 Glacier for 1 year."
+}
+},
+
+"technology_stack": {
+"frontend": {
+"framework": "React v18.2.0 (with TypeScript 5.3)",
+"state_management": "Recoil v0.7.6 and React Context for auth",
+"styling_framework": "Tailwind CSS v4.0 (configured with JIT) plus utility-first token system",
+"ui_component_library": "Radix UI primitives + shadcn/ui components (latest compatible versions) for accessibility",
+"build_tools": [
+"Vite v5.0.0",
+"ESLint v9.9",
+"Prettier v3.0",
+"TypeScript v5.3",
+"PostCSS v9"
+],
+"testing_framework": "Vitest v1.3.0 for unit tests and React Testing Library v14 for component testing",
+"additional_libraries": [
+{
+"name": "@tonconnect/sdk",
+"version": "1.2.0",
+"purpose": "TON Connect wallet integration"
+},
+{
+"name": "swr",
+"version": "2.2.0",
+"purpose": "Data fetching with stale-while-revalidate"
+},
+{
+"name": "localforage",
+"version": "1.10.0",
+"purpose": "IndexedDB-based client persistence for drafts and offline caches"
+},
+{
+"name": "socket.io-client",
+"version": "4.7.0",
+"purpose": "Real-time updates via WebSocket"
+}
+]
+},
+"backend": {
+"runtime_environment": "Node.js v20.5.0 (LTS compatible)",
+"framework": "NestJS v10.0 (structured modules, DI)",
+"authentication_library": "jsonwebtoken v9.0 for JWT + custom TON session middleware for TON Connect signature verification",
+"api_specification": "RESTful API (OpenAPI 3.1 specification) for all endpoints with future GraphQL layer planned",
+"database": "MongoDB Atlas 6.x cluster",
+"orm_odm": "Mongoose v7.9 (TypeScript typings)",
+"caching_solution": "Redis v7.x (managed) for caching and BullMQ backend",
+"queue_system": "BullMQ v2.8 (running on Redis) for background tasks",
+"additional_services": [
+{
+"service": "Sentry",
+"version": "latest",
+"purpose": "Error monitoring and performance tracing"
+},
+{
+"service": "Pinata",
+"version": "latest",
+"purpose": "IPFS pinning service for media"
+},
+{
+"service": "SendGrid",
+"version": "latest",
+"purpose": "Transactional email for account alerts and receipts (optional)"
+},
+{
+"service": "Cloudflare",
+"version": "latest",
+"purpose": "CDN and WAF"
+}
+]
+},
+"devops_infrastructure": {
+"hosting_platform": "Frontend: Vercel (global edge); Backend: Render.com or AWS ECS Fargate with ALB; DB: MongoDB Atlas; Redis: Managed Redis (Upstash/Redis Cloud); TON RPC via toncenter.com or self-hosted TON node",
+"ci_cd_pipeline": "GitHub Actions workflows: lint/test/build/docker-image -> push to container registry (GHCR) -> deploy to staging on merge to main branch -> blue/green deployment to production on tag. Pre-deploy gates: unit tests pass, e2e smoke tests pass, contract tests passed, and code coverage threshold met.",
+"containerization": "Docker v24.0 with multi-stage builds; each service ships a minimal image based on node:20-alpine",
+"monitoring_tools": [
+"Sentry",
+"Logtail",
+"Prometheus (for custom metrics)",
+"Grafana (dashboards)"
+],
+"logging_solution": "Logtail (structured logs in JSON) aggregated from API, Workers, and Frontend SSR logs",
+"performance_monitoring": "Lightstep or Datadog APM for distributed tracing and latency analytics (or OpenTelemetry with Grafana Tempo as lower-cost alternative)"
+}
+},
+
+"ui_ux_specifications": {
+"design_system": {
+"color_palette": {
+"primary_colors": [
+{
+"name": "Dream Blue",
+"hex": "#2563EB",
+"rgb": "37,99,235",
+"usage": "Primary buttons, links, primary CTA"
+},
+{
+"name": "Sun Accent",
+"hex": "#F59E0B",
+"rgb": "245,158,11",
+"usage": "Accent highlights, badges, success accents"
+}
+],
+"secondary_colors": [
+{
+"name": "Violet",
+"hex": "#7C3AED",
+"rgb": "124,58,237",
+"usage": "Secondary CTA, tags"
+},
+{
+"name": "Mint",
+"hex": "#10B981",
+"rgb": "16,185,129",
+"usage": "Positive indicators, supporter badges"
+}
+],
+"neutral_colors": [
+{
+"name": "Neutral 900",
+"hex": "#0F172A",
+"rgb": "15,23,42",
+"usage": "Primary text"
+},
+{
+"name": "Neutral 500",
+"hex": "#6B7280",
+"rgb": "107,114,128",
+"usage": "Secondary text"
+},
+{
+"name": "Neutral 100",
+"hex": "#F3F4F6",
+"rgb": "243,244,246",
+"usage": "Background"
+}
+],
+"semantic_colors": [
+{
+"type": "success",
+"name": "Green Success",
+"hex": "#16A34A",
+"rgb": "22,163,74",
+"usage": "Success states, verified badges"
+},
+{
+"type": "warning",
+"name": "Amber Warning",
+"hex": "#F59E0B",
+"rgb": "245,158,11",
+"usage": "Warnings, deadline near accents"
+},
+{
+"type": "error",
+"name": "Crimson Error",
+"hex": "#DC2626",
+"rgb": "220,38,38",
+"usage": "Errors, failed verifications"
+},
+{
+"type": "info",
+"name": "Sky Info",
+"hex": "#0EA5E9",
+"rgb": "14,165,233",
+"usage": "Info banners"
+}
+]
+},
+"typography_scale": {
+"font_family": "Inter Variable, fallback: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue'",
+"font_weights": {
+"light": 300,
+"normal": 400,
+"medium": 500,
+"semibold": 600,
+"bold": 700
+},
+"type_scale": {
+"h1": {
+"font_size": "48px",
+"line_height": "56px",
+"letter_spacing": "-0.02em"
+},
+"h2": {
+"font_size": "36px",
+"line_height": "44px",
+"letter_spacing": "-0.01em"
+},
+"h3": {
+"font_size": "28px",
+"line_height": "36px"
+},
+"h4": {
+"font_size": "20px",
+"line_height": "28px"
+},
+"h5": {
+"font_size": "16px",
+"line_height": "24px"
+},
+"body": {
+"font_size": "16px",
+"line_height": "24px"
+},
+"caption": {
+"font_size": "12px",
+"line_height": "16px"
+}
+}
+},
+"spacing_system": {
+"base_unit": 8,
+"spacing_scale": {
+"xs": 4,
+"sm": 8,
+"md": 16,
+"lg": 24,
+"xl": 32,
+"xxl": 48
+}
+},
+"border_radius": {
+"scale": {
+"sm": "4px",
+"md": "8px",
+"lg": "12px",
+"xl": "24px",
+"full": "9999px"
+}
+},
+"shadows": {
+"elevation_levels": {
+"level0": "none",
+"level1": "0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06)",
+"level2": "0 4px 8px rgba(15,23,42,0.06)",
+"level3": "0 8px 20px rgba(15,23,42,0.08)"
+}
+},
+"iconography": {
+"icon_library": "Lucide + custom DreamJar icons (SVG source)",
+"custom_icons": [
+"jar-fill",
+"jar-outline",
+"supporter-badge",
+"pledge-heart",
+"verified-check",
+"donation-tree",
+"contract-chain"
+]
+}
+},
+"component_library": {
+"atoms": [
+{
+"component_name": "Button",
+"detailed_specs": {
+"variants": ["primary","secondary","ghost","danger"],
+"sizes": {
+"sm": {"height":"32px","font_size":"14px","padding":"0 12px"},
+"md": {"height":"40px","font_size":"16px","padding":"0 16px"},
+"lg": {"height":"48px","font_size":"18px","padding":"0 20px"}
+},
+"states": ["default","hover","active","disabled","loading"]
+}
+},
+{
+"component_name": "Input",
+"detailed_specs": {
+"types": ["text","number","email","textarea","search"],
+"sizes": ["sm","md","lg"],
+"validationStates": ["default","error","success","focused"]
+}
+},
+{
+"component_name": "Avatar",
+"detailed_specs": {"sizes":["24px","32px","48px","72px"], "fallback":"initials", "borderRadius":"full"}
+}
+],
+"molecules": [
+{
+"component_name": "WishCard",
+"detailed_specs": {
+"layout": "horizontal card with left thumbnail 120x120, right text axis",
+"props": ["wishId","title","shortDescription(160 chars)","pledgeTotal","deadlineCountdown","statusBadge"],
+"interactions": ["click -> /wish/:wishId", "hover -> quick actions (pledge, share)"]
+}
+},
+{
+"component_name": "PledgeComposer",
+"detailed_specs": {
+"layout": "modal with amount input, note field, confirm via TON Connect",
+"validation": "min amount 0.001 TON, max amount 1000 TON (configurable)",
+"onSuccess": "show supporter NFT mint progress"
+}
+}
+],
+"organisms": [
+{
+"component_name": "WishDetailView",
+"detailed_specs": {
+"layout": "two-column responsive: left column 680px content, right column 360px sidebar",
+"leftColumn": ["title (h1)","creator card","progress timeline","updates feed","media gallery"],
+"rightColumn": ["pledge summary","supporters list","action CTA","related wishes"]
+}
+}
+],
+"templates": [
+{
+"template_name": "HomeFeedTemplate",
+"detailed_specs": {
+"regions": ["top-nav","hero-filter","feed-grid (masonry)","sidebar (hot wishes)"],
+"grid": "responsive breakpoints: 1 column <= 640px, 2 columns 641-1024px, 3 columns >=1024px",
+"pixel-perfect": "cards fixed width 340px at >=1024px; gap 16px"
+}
+}
+]
+},
+"page_specifications": {
+"total_pages": 9,
+"pages": [
+{
+"page_id": "home_feed",
+"page_name": "Home Feed",
+"page_description": "Discover public Wish Jars, filter by category, trending and friends.",
+"page_route": "/",
+"required_authentication": false,
+"layout_type": "Feed with header nav and left burger menu on mobile",
+"components": [
+{
+"component_id": "search_bar",
+"positioning": {"x":"header-left","y":"top","width":"calc(100% - 160px)"},
+"props": {"placeholder":"Search wishes, creators, tags..."}
+},
+{
+"component_id": "feed_grid",
+"positioning": {"x":"main","y":"below-hero","width":"100%"},
+"props": {"pageSize":20,"cardWidthPx":340}
+}
+],
+"responsive_behavior": {
+"breakpoints": {
+"<=480px": "single column, action CTA fixed bottom 64px height",
+"481-1024px": "two-column layout, sidebar collapsible",
+">1024px": "three-column stable layout"
+}
+},
+"loading_states": "skeleton cards 340x180 with shimmer for list items, main CTA shows spinner",
+"error_states": "banner with Retry button and error code, suggest 'View cached version' if available",
+"empty_states": "illustrated empty state: 'No wishes found' with CTA 'Create your first Wish' (button)"
+},
+{
+"page_id": "wish_detail",
+"page_name": "Wish Detail",
+"page_description": "Full wish details, progress timeline, pledge composer, and verification flow.",
+"page_route": "/wish/:wishId",
+"required_authentication": false,
+"layout_type": "Two-column detail view",
+"components": [
+{
+"component_id": "media_gallery",
+"positioning": {"left_column":"top","width_px":680},
+"props": {"thumbnailSize":"160x160","maxItems":12}
+},
+{
+"component_id": "pledge_widget",
+"positioning": {"right_column":"sticky-top","width_px":360},
+"props": {"minPledgeMicroTon":1000,"currencyLabel":"TON"}
+}
+],
+"responsive_behavior": {
+"<=640px": "single column; pledge widget collapses into bottom sheet",
+">640px": "two-column sticky sidebar"
+},
+"loading_states": "skeleton for title and pledge widget; spinner for media gallery",
+"error_states": "404 state with message 'Wish not found' and suggestions",
+"empty_states": "If no updates yet: call-to-action 'Post your first update' with guidance modal"
+},
+{
+"page_id": "create_wish",
+"page_name": "Create Wish",
+"page_description": "Wizard-style creation flow that guides goal setup and stake selection.",
+"page_route": "/create",
+"required_authentication": true,
+"layout_type": "Modal wizard with 4 steps",
+"components": [
+{
+"component_id": "step_1_goal",
+"positioning": {"centered":"true","width":"min(720px, 92vw)"},
+"props": {"fields":["title","description","category","visibility"]}
+},
+{
+"component_id": "step_2_proof",
+"positioning": {"centered":"true"},
+"props": {"proofMethodSelect":["media","gps","github","strava","custom"], "instructions":"Specific examples per method"}
+},
+{
+"component_id": "step_3_stake",
+"positioning": {"centered":"true"},
+"props": {"stakeInput":"numeric","suggestedStakes":[1000,5000,10000] }
+},
+{
+"component_id": "step_4_confirm",
+"positioning": {"centered":"true"},
+"props": {"termsCheckbox":true,"createOnChainButton":"TON Connect required"}
+}
+],
+"responsive_behavior": "modal stacks to full-screen on mobile",
+"loading_states": "progress ring and 'Awaiting on-chain confirmation' microcopy",
+"error_states": "if on-chain tx fails show retry with reason and support link",
+"empty_states": "Not applicable"
+},
+{
+"page_id": "profile",
+"page_name": "User Profile",
+"page_description": "Shows created wishes, supported wishes, badges, statistics.",
+"page_route": "/profile/:userId",
+"required_authentication": false,
+"layout_type": "Header with stats & tabbed content",
+"components": ["avatar","stats_summary","wishes_list","badges_grid"],
+"responsive_behavior": "stack tabs vertically on small screens",
+"loading_states": "avatar shimmer, stats placeholders",
+"error_states": "profile private message if visibility restricted",
+"empty_states": "call-to-action to connect wallet or create first wish"
+},
+{
+"page_id": "dashboard_admin",
+"page_name": "Admin Dashboard",
+"page_description": "Internal tool for dispute resolution, contract monitoring, and analytics.",
+"page_route": "/dashboard",
+"required_authentication": true,
+"layout_type": "Admin panels with filters and tables",
+"components": ["contracts_table","disputes_queue","impact_pool_overview"],
+"responsive_behavior": "desktop-first, limited mobile functionality",
+"loading_states": "table skeletons",
+"error_states": "detailed error with funnel to support ticket",
+"empty_states": "No outstanding disputes message"
+},
+{
+"page_id": "leaderboard",
+"page_name": "Leaderboards & Trending",
+"page_description": "Top creators, top supporters, and trending categories.",
+"page_route": "/trending",
+"required_authentication": false,
+"layout_type": "cards grid with filters: timeframe, category",
+"components": ["top_creators","top_supporters","trending_wishes"],
+"responsive_behavior": "masonry at large breakpoints",
+"loading_states": "skeleton cards",
+"error_states": "fallback to cached leaderboard"
+},
+{
+"page_id": "notifications",
+"page_name": "Notifications",
+"page_description": "Lists activity on user's wishes, replies and verification requests.",
+"page_route": "/notifications",
+"required_authentication": true,
+"layout_type": "simple list",
+"components": ["notification_item"],
+"responsive_behavior": "pagination on mobile",
+"loading_states": "skeleton items",
+"error_states": "retry banner",
+"empty_states": "No notifications - CTA to explore wishes"
+},
+{
+"page_id": "settings",
+"page_name": "Settings & Preferences",
+"page_description": "Account settings, wallet management, notification preferences.",
+"page_route": "/settings",
+"required_authentication": true,
+"layout_type": "two-column forms",
+"components": ["wallet_management","preferences_form","logout_button"],
+"responsive_behavior": "forms stack vertically on mobile",
+"loading_states": "form skeletons",
+"error_states": "validation errors inline",
+"empty_states": "Not applicable"
+},
+{
+"page_id": "help_center",
+"page_name": "Help Center",
+"page_description": "Guides, FAQ and contact support.",
+"page_route": "/help",
+"required_authentication": false,
+"layout_type": "searchable articles with categories",
+"components": ["search_input","faq_list","contact_card"],
+"responsive_behavior": "list to accordion on mobile",
+"loading_states": "skeleton article items",
+"error_states": "fallback content",
+"empty_states": "No results: suggest contacting support"
+}
+]
+},
+"user_flows": {
+"onboarding_flow": "1) User opens Telegram Mini-App; 2) Hero screen explains concept; 3) Connect Wallet CTA triggers TON Connect; 4) TonConnect handshake and wallet address captured; 5) User completes profile quick-setup (display name, avatar); 6) Guided tour overlay highlights Create button, Feed, and Profile; 7) Optional: create first wish with prefilled templates.",
+"authentication_flow": "1) Client invokes TON Connect SDK -> TonConnect popup for the mobile wallet or TON-telegram wallet; 2) User signs a nonce challenge to prove wallet ownership; 3) Frontend sends signature + wallet address to backend /auth/ton-login endpoint; 4) Backend verifies signature via TON RPC or SDK, returns JWT with 24-hour expiry and refresh token; 5) Client stores JWT in secure storage (sessionStorage for webview) and wallet connection in localforage; 6) For sensitive actions, re-auth (signature) may be requested.",
+"main_workflow": "Create Wish: user navigates to /create -> completes wizard -> TON Connect executes on-chain contract creation transaction or server-assisted contract creation -> backend records contract_address and initial status 'active' -> users share wish link -> supporters pledge via TON Connect or off-chain escrow -> deadline arrives -> verification triggered (automated or community vote) -> Worker resolves payouts or routes funds to impact pool -> update statuses and emit notifications.",
+"error_handling_flow": "Network errors: show retry with exponential backoff label; On-chain failures: display transaction hash and explain action, bubble to support if repeated; Verification disputes: create dispute case in 'disputes' collection, escalate to appointed validators, freeze fund distribution until resolution, track SLA (48 hours) and notify involved parties."
+},
+"interaction_design": {
+"animations": {
+"micro_animations": [
+{
+"name": "button-press",
+"spec": "scale to 0.98 over 80ms, shadow deepen, then return to 1 in 120ms"
+},
+{
+"name": "pledge-success",
+"spec": "small confetti burst animation centered on CTA for 900ms, then fade to supporter badge reveal"
+},
+{
+"name": "toast-appear",
+"spec": "slide from bottom with 12px translate and fade in 200ms"
+}
+],
+"page_transitions": [
+{
+"name": "fade-slide",
+"spec": "route transitions use 150ms fade and 120ms upward translate for new content on mobile"
+}
+],
+"loading_animations": [
+{
+"name": "skeleton-shimmer",
+"spec": "linear gradient shimmer moving left-to-right across placeholder over 1.2s infinite"
+}
+]
+},
+"gestures_interactions": {
+"mobile_gestures": [
+{
+"gesture": "swipe-right",
+"spec": "on wish-card -> quick actions (share, pledge) revealed"
+},
+{
+"gesture": "pull-to-refresh",
+"spec": "refresh feed with standard 48px threshold"
+}
+],
+"desktop_interactions": [
+{
+"interaction": "hover-cards",
+"spec": "hover reveals quick actions with fade in 120ms"
+}
+]
+},
+"feedback_mechanisms": {
+"toasts_notifications": "Short ephemeral messages up to 5 words for success, 10 words for errors; accessible with ARIA role='status'; auto-dismiss after 4s; persisted for errors until user dismisses.",
+"loading_indicators": "Global top progress bar for route changes (approx 3px height) and local spinners for modals or action-specific buttons with aria-busy attributes.",
+"error_messages": "Descriptive error messages with code, short user-facing reason, and 'What you can do next' action link; errors logged with context to Sentry."
+}
+},
+"accessibility": {
+"wcag_compliance": "WCAG 2.1 AA compliance minimum",
+"keyboard_navigation": "All interactive controls reachable by Tab order; visible focus ring using 3px outline offset; skip-to-content link available.",
+"screen_reader_support": "All dynamic content announces changes with ARIA live regions; images have alt text; modals trap focus and return focus on close; role attributes properly set.",
+"color_contrast_requirements": "Minimum contrast ratio 4.5:1 for normal text and 3:1 for large text; badges and semantic colors tested against this threshold.",
+"focus_management": "On route change, focus set to page H1; on modal open focus set to first interactive element. Custom focus-visible class for keyboard-only focus."
+}
+},
+
+"backend_specifications": {
+"api_specification": {
+"api_type": "REST (OpenAPI 3.1 documented)",
+"base_url": "[https://api.dreamjar.xyz/v1](https://api.dreamjar.xyz/v1)",
+"versioning_strategy": "URI-based versioning; e.g., /v1/resource, plan v2 as /v2/",
+"authentication_mechanism": "JWT for API session + TON signature verification endpoints for critical on-chain action. Token flow: /auth/ton-login verifies wallet signature and returns accessToken (JWT) and refreshToken. Access tokens expire in 24h, refresh tokens rotate and expire in 30 days.",
+"rate_limiting": "Per-IP and per-wallet rate limit: 120 requests per minute per IP; 60 requests per minute per wallet address for critical endpoints. Burst allowance with token bucket algorithm. 429 responses include Retry-After header.",
+"endpoints": [
+{
+"endpoint_id": "auth_ton_login",
+"endpoint_path": "/v1/auth/ton-login",
+"http_method": "POST",
+"description": "Verify TON signature and mint JWT session.",
+"authentication_required": false,
+"authorization_requirements": [],
+"request_parameters": [],
+"request_body_schema": {
+"type": "object",
+"properties": {
+"wallet_address": {"type":"string","example":"EQC1..."},
+"nonce": {"type":"string","example":"random-nonce-123"},
+"signature": {"type":"string","example":"0x..."}
+},
+"required": ["wallet_address","nonce","signature"]
+},
+"response_schema": {
+"type":"object",
+"properties": {
+"accessToken":{"type":"string"},
+"refreshToken":{"type":"string"},
+"user":{"$ref":"#/components/schemas/UserSummary"}
+}
+},
+"error_responses": [
+{"code":401,"message":"Invalid signature"},
+{"code":400,"message":"Missing parameters"}
+],
+"caching_strategy": "No caching",
+"timeout_settings": 15000
+},
+{
+"endpoint_id": "create_wish",
+"endpoint_path": "/v1/wishes",
+"http_method": "POST",
+"description": "Create a new Wish metadata record and trigger smart contract creation workflow.",
+"authentication_required": true,
+"authorization_requirements": ["user must be wallet owner"],
+"request_parameters": [],
+"request_body_schema": {
+"type":"object",
+"properties": {
+"title":{"type":"string","maxLength":120},
+"description":{"type":"string","maxLength":2000},
+"stakeAmountMicroTon":{"type":"integer","minimum":1000},
+"goalDeadline":{"type":"string","format":"date-time"},
+"proofMethod":{"type":"string","enum":["media","gps","github","strava","custom"]},
+"visibility":{"type":"string","enum":["public","private","friends"]},
+"impactAllocationOnFail":{"type":"integer","minimum":0,"maximum":100}
+},
+"required":["title","stakeAmountMicroTon","goalDeadline","proofMethod"]
+},
+"response_schema": {
+"type":"object",
+"properties": {
+"wishId":{"type":"string"},
+"contractAddress":{"type":"string"},
+"status":{"type":"string"}
+}
+},
+"error_responses": [
+{"code":400,"message":"Validation error"},
+{"code":402,"message":"Insufficient stake or wallet fund"}
+],
+"caching_strategy": "No caching",
+"timeout_settings": 30000
+},
+{
+"endpoint_id": "get_wish",
+"endpoint_path": "/v1/wishes/{wishId}",
+"http_method": "GET",
+"description": "Retrieve full wish details including pledges and updates.",
+"authentication_required": false,
+"authorization_requirements": [],
+"request_parameters": [
+{"name":"wishId","in":"path","required":true,"schema":{"type":"string"}}
+],
+"request_body_schema": null,
+"response_schema": {
+"$ref":"#/components/schemas/WishDetail"
+},
+"error_responses": [
+{"code":404,"message":"Wish not found"}
+],
+"caching_strategy": "Public cache with 30s TTL for read endpoints; stale-while-revalidate for feed endpoints",
+"timeout_settings": 15000
+},
+{
+"endpoint_id": "create_pledge",
+"endpoint_path": "/v1/wishes/{wishId}/pledges",
+"http_method": "POST",
+"description": "Record a user pledge and optionally create on-chain transaction via TON Connect.",
+"authentication_required": true,
+"authorization_requirements": ["walletConnected"],
+"request_parameters": [
+{"name":"wishId","in":"path","required":true,"schema":{"type":"string"}}
+],
+"request_body_schema": {
+"type":"object",
+"properties": {
+"amountMicroTon":{"type":"integer","minimum":100},
+"note":{"type":"string"}
+},
+"required":["amountMicroTon"]
+},
+"response_schema": {
+"type":"object",
+"properties": {"pledgeId":{"type":"string"},"status":{"type":"string"}}
+},
+"error_responses": [
+{"code":400,"message":"Invalid amount"},
+{"code":402,"message":"Insufficient funds"}
+],
+"caching_strategy": "No caching",
+"timeout_settings": 20000
+},
+{
+"endpoint_id": "post_update",
+"endpoint_path": "/v1/wishes/{wishId}/updates",
+"http_method": "POST",
+"description": "Creator posts a progress update with optional media IPFS references.",
+"authentication_required": true,
+"authorization_requirements": ["creatorOnly"],
+"request_parameters": [
+{"name":"wishId","in":"path","required":true,"schema":{"type":"string"}}
+],
+"request_body_schema": {
+"type":"object",
+"properties": {
+"content":{"type":"string","maxLength":2000},
+"mediaUrls":{"type":"array","items":{"type":"string"}}
+},
+"required":["content"]
+},
+"response_schema": {"type":"object","properties":{"updateId":{"type":"string"}}},
+"error_responses": [{"code":403,"message":"Not creator"}],
+"caching_strategy": "No caching",
+"timeout_settings": 15000
+},
+{
+"endpoint_id": "verify_wish",
+"endpoint_path": "/v1/wishes/{wishId}/verify",
+"http_method": "POST",
+"description": "Trigger verification: either community voting or validator assertion.",
+"authentication_required": true,
+"authorization_requirements": ["voter or validator roles as configured"],
+"request_parameters": [
+{"name":"wishId","in":"path","required":true,"schema":{"type":"string"}}
+],
+"request_body_schema": {
+"type":"object",
+"properties": {"vote":{"type":"string","enum":["approve","reject"]},"comment":{"type":"string"}}
+},
+"response_schema": {"type":"object","properties":{"result":"string","votesRequired":"integer"}},
+"error_responses": [{"code":409,"message":"Verification already in progress"}],
+"caching_strategy": "No caching",
+"timeout_settings": 20000
+},
+{
+"endpoint_id": "admin_dispute_resolve",
+"endpoint_path": "/v1/admin/disputes/{disputeId}/resolve",
+"http_method": "POST",
+"description": "Admin endpoint to resolve disputes and force payouts or refunds.",
+"authentication_required": true,
+"authorization_requirements": ["role:admin"],
+"request_parameters": [{"name":"disputeId","in":"path","required":true,"schema":{"type":"string"}}],
+"request_body_schema": {"type":"object","properties":{"resolution":"string","notes":"string"},"required":["resolution"]},
+"response_schema": {"type":"object","properties":{"status":"string"}},
+"error_responses": [{"code":403,"message":"Unauthorized"}],
+"caching_strategy": "No caching",
+"timeout_settings": 30000
+}
+],
+"components": {
+"schemas": {
+"UserSummary": {
+"type":"object",
+"properties": {
+"id":{"type":"string"},
+"username":{"type":"string"},
+"displayName":{"type":"string"},
+"avatarUrl":{"type":"string"}
+}
+},
+"WishDetail": {
+"type":"object",
+"properties": {
+"wishId":{"type":"string"},
+"title":{"type":"string"},
+"description":{"type":"string"},
+"stakeAmountMicroTon":{"type":"integer"},
+"pledgeTotalMicroTon":{"type":"integer"},
+"pledgesCount":{"type":"integer"},
+"creator":{"$ref":"#/components/schemas/UserSummary"},
+"status":{"type":"string"},
+"goalDeadline":{"type":"string","format":"date-time"},
+"updates":{"type":"array","items":{"type":"object"}},
+"contractAddress":{"type":"string"}
+}
+}
+}
+}
+},
+"database_design": {
+"database_type": "document-store (MongoDB) with time-series for audit logs",
+"database_schema": "See data_architecture.database_design.collections for full collection schemas. Use Mongoose models with explicit TypeScript interfaces; apply strict schema mode and validation at model level.",
+"indexes": [
+{"collection":"wishes","index":"{status:1, goal_deadline:1}","purpose":"efficient deadline scanning for worker"},
+{"collection":"pledges","index":"{wish_id:1, supporter_user_id:1}","purpose":"fast lookup and aggregation"},
+{"collection":"transactions","index":"{tx_hash:1}","purpose":"idempotent tx handling"},
+{"collection":"users","index":"{username:1}","purpose":"unique constraint"}
+],
+"relationships": [
+"users._id -> wishes.creator_user_id (one-to-many)",
+"wishes._id -> pledges.wish_id (one-to-many)",
+"wishes._id -> updates.wish_id (one-to-many)"
+],
+"migrations_strategy": "Schema migrations via migrate-mongo or custom migration scripts orchestrated in CI; maintain backward-compatible changes with additive fields and deprecation windows; apply migration in staging and run data migration jobs with idempotency and checkpoints."
+},
+"business_logic": {
+"core_algorithms": [
+{
+"name": "deadline_watcher",
+"spec": "Cron job that scans wishes with status 'active' and goal_deadline <= now and enqueues verification checks. Uses optimized index and batch size 1000 per run."
+},
+{
+"name": "reward_distribution",
+"spec": "On verified success, compute total pot = stake + pledges - protocolFee. Protocol fee default 1%. Distribute to creator and supporters based on rules: creator receives stake + 70% of surplus; supporters receive pro-rata rewards if matching rules apply. Supporter NFT minted on confirmed pledge if configured."
+},
+{
+"name": "dispute_resolver",
+"spec": "Aggregates votes; if community vote threshold (e.g., 60% of votes with min 10 voters) reached, auto-resolve; else escalate to appointed validators or admin queue."
+}
+],
+"validation_rules": [
+"Title non-empty and <= 120 chars",
+"Description sanitized for XSS and <= 2000 chars",
+"Stake amount must be >= platform minimum (configurable by env) and < max threshold",
+"Deadline must be at least 24 hours in future and <= 2 years",
+"Proof method-specific validations (GPS must include lat/long range, GitHub requires repo URL and commit hash pattern, Strava requires activity link format)"
+],
+"workflow_engines": [
+"Use BullMQ-based state transitions for on-chain contract life-cycle: queued -> deploying -> deployed -> active -> verification_pending -> resolved_success/resolved_failure"
+],
+"scheduled_tasks": [
+{
+"name": "cron:deadline-check",
+"schedule": "*/5 * * * * (every 5 minutes)",
+"task": "Scan for due wishes and enqueue verification"
+},
+{
+"name": "cron:contract-sync",
+"schedule": "*/1 * * * * (every minute)",
+"task": "Poll TON RPC for recent transactions related to known contract addresses to reconcile state"
+}
+]
+},
+"authentication_authorization": {
+"authentication_flow": "1) TON Connect signature provides wallet address proof; 2) Backend verifies the signature and stores wallet address on user record; 3) JWT issued for session; 4) For critical actions (creating contract or signing distribution) additional on-the-fly signature requested client-side; 5) Admin uses standard username/password + 2FA (TOTP) to access admin portal.",
+"user_roles": [
+{"role":"user","description":"Regular user; can create wishes, pledge, and vote"},
+{"role":"validator","description":"Appointed validators who can adjudicate disputes"},
+{"role":"admin","description":"Platform admin with ability to resolve disputes and adjust fund routing"},
+{"role":"system","description":"Service accounts used by background workers"}
+],
+"permissions_matrix": {
+"create_wish":["user"],
+"create_pledge":["user"],
+"resolve_dispute":["admin","validator"],
+"mint_supporter_nft":["system","admin"]
+},
+"session_management": "JWT access tokens with 24-hour expiry stored in secure storage; refresh tokens rotate and stored server-side hashed for revocation. Logout endpoint invalidates refresh tokens. For extra security, session binding to wallet address and client fingerprint is supported.",
+"password_policies": "Admins only: minimum 12 characters, at least one uppercase, one lowercase, one number, and one symbol; recommended password rotation every 180 days; enforce 2FA with TOTP."
+},
+"third_party_integrations": {
+"external_apis": [
+{"name":"TON RPC (toncenter/tonapi)", "purpose":"smart contract submission and querying"},
+{"name":"IPFS Pinning (Pinata)", "purpose":"media pinning and retrieval"},
+{"name":"Strava/GitHub OAuth (optional)", "purpose":"proof verification for activity or commit evidence"}
+],
+"payment_gateways": [
+{"name":"TON on-chain transfers", "purpose":"native payments; no fiat gateway required for core flows"}
+],
+"social_media_integrations": [
+{"name":"Telegram Bot API", "purpose":"Notifications, sharing, and bot-driven flows"},
+{"name":"Optional: Twitter/X API", "purpose":"Social sharing and sponsored campaigns"}
+],
+"analytics_services": [
+{"name":"Mixpanel/Amplitude", "purpose":"User behavioral analytics and funnels"},
+{"name":"Google Analytics 4 (limited due to privacy)", "purpose":"Web metrics"}
+]
+}
+},
+
+"performance_requirements": {
+"core_web_vitals": {
+"lcp_threshold": 2.5,
+"fid_threshold": 100,
+"cls_threshold": 0.1
+},
+"load_time_requirements": {
+"first_contentful_paint": 1.2,
+"time_to_interactive": 2.0,
+"largest_contentful_paint": 2.5
+},
+"optimization_strategies": {
+"code_splitting": "Use route-based code-splitting via Vite + React.lazy; vendor chunking configured to keep initial payload < 200KB gzipped.",
+"lazy_loading": "Lazy load media gallery images and non-critical components; IntersectionObserver for image loading with low-quality image placeholders (LQIP).",
+"caching_strategies": "Edge caching of static assets via CDN (Cache-Control: immutable for hashed assets). API responses: use caching headers and stale-while-revalidate for feed endpoints; server-side Redis caching for heavy aggregated endpoints.",
+"compression_techniques": "Serve gzip and Brotli compressed assets; optimize images with WebP/AVIF where supported; apply text compression for JSON responses."
+}
+},
+
+"security_specifications": {
+"data_protection": {
+"encryption_strategies": [
+"At-rest: MongoDB Atlas encryption at rest enabled by default.",
+"In-transit: HTTPS/TLS 1.3 for all endpoints; TLS enforced via CDN and load balancers.",
+"Secrets: Store secrets in environment variables via cloud provider secrets manager (AWS Secrets Manager / Render Secrets) with KMS-backed encryption."
+],
+"data_masking": [
+"Mask sensitive logs (wallet private keys never logged).",
+"Display partial wallet addresses when shown publicly (first 6, last 4 chars) unless user opts in."
+],
+"secure_data_transmission": "All communications between services secured with mTLS where supported; internal services communicate via private networks; Webhooks signed using HMAC with rotating secret keys."
+},
+"vulnerability_prevention": {
+"owasp_top_10_mitigation": [
+"A1 Broken Access Control: enforce role-based access control with authorization middleware and object-level ACL checks.",
+"A2 Cryptographic Failures: use proven crypto libraries for signature verification; rotate keys and monitor compromise.",
+"A3 Injection: use ODM (Mongoose) parameterized queries and sanitize inputs; no string-based query building.",
+"A4 Insecure Design: threat modeling during design and threat mitigation in architecture docs.",
+"A5 Security Misconfiguration: automated configuration checks in CI; enforce least privilege in cloud IAM.",
+"A6 Vulnerable Components: Snyk or Dependabot for dependency scanning and remediation.",
+"A7 Identification and Authentication Failures: robust login flows with signature verification and 2FA for admins.",
+"A8 Software and Data Integrity Failures: signed releases and artifact checksums in CI.",
+"A9 Security Logging and Monitoring: structured logs, alerting on suspicious patterns.",
+"A10 Server-Side Request Forgery: validate all outbound request destinations and restrict egress where possible."
+],
+"input_validation": "Centralized Joi/Yup validation for all API inputs; sanitize rich text using DOMPurify on frontend and server-side cleaning.",
+"sql_injection_prevention": "Not applicable for document DB; still avoid string concatenation in queries; use parameterized drivers.",
+"xss_prevention": "Escape and sanitize user-submitted content; use Content Security Policy (CSP) headers."
+},
+"compliance_requirements": {
+"gdpr_compliance": "Data subject rights flows implemented: data export, deletion (subject to legal retention for transactions), consent management for analytics; Data Protection Addendum available for EU customers.",
+"data_retention_policies": "Transaction logs retained for 7 years for audit; user-generated media retained per user request or default 3 years; soft-deletion with 90-day grace period before permanent removal.",
+"privacy_policy_requirements": "Privacy policy covers blockchain interaction specifics, no private keys stored, explains public nature of on-chain data, user data portability instructions, and contact for GDPR DPO."
+}
+},
+
+"testing_strategy": {
+"unit_testing": {
+"coverage_requirements": 85,
+"testing_frameworks": [
+{"name":"Vitest","purpose":"frontend unit tests"},
+{"name":"Jest","purpose":"backend unit tests"},
+{"name":"React Testing Library","purpose":"component tests"}
+],
+"test_cases": [
+{"id":"UT-01","description":"Create wish input validation edge cases"},
+{"id":"UT-02","description":"Pledge amount boundaries and rounding"},
+{"id":"UT-03","description":"JWT auth middleware rejects invalid tokens"}
+]
+},
+"integration_testing": {
+"testing_strategy": "Run integration tests in CI using a local ephemeral MongoDB instance (MongoDB Memory Server) and a mocked TON RPC. Tests cover API routes, DB writes and background job enqueueing, worker processing simulated in CI.",
+"test_scenarios": [
+{"id":"IT-01","description":"Create wish and verify background job enqueues contract deployment"},
+{"id":"IT-02","description":"User pledges and worker reconciles on-chain transfer to pledge record"},
+{"id":"IT-03","description":"Verification vote resolves and triggers reward distribution flow"}
+]
+},
+"end_to_end_testing": {
+"testing_framework": "Playwright v1.40",
+"critical_user_journeys": [
+{"id":"E2E-01","description":"Complete Sign-in via TON Connect flow (mocked wallet) and create a Wish"},
+{"id":"E2E-02","description":"Supporter makes pledge via TON Connect and sees NFT badge minted"},
+{"id":"E2E-03","description":"Creator posts updates and goes through verification process to success"}
+]
+},
+"performance_testing": {
+"load_testing_requirements": "Use k6 or Artillery to simulate 5k concurrent users with a read-heavy workload (90% reads, 10% writes). Measure endpoint P95 latency < 300ms under this load.",
+"stress_testing_requirements": "Gradually increase to 50k concurrent virtual users to identify bottlenecks and ensure graceful degradation; workers should maintain queue consumer rate to keep backlog < 5 minutes."
+},
+"security_testing": {
+"penetration_testing": "Third-party penetration test before mainnet launch covering OWASP top 10 and business logic flaws, results remediated prior to production deployment.",
+"vulnerability_scanning": "CI-integrated Snyk or Dependabot alerts for dependency vulnerabilities, weekly scans of container images and infra CVEs."
+}
+},
+
+"deployment_operations": {
+"environment_configurations": {
+"development": {
+"api_url": "[http://localhost:4000/v1](http://localhost:4000/v1)",
+"db_uri": "mongodb://localhost:27017/dreamjar_dev",
+"redis_uri": "redis://localhost:6379/0",
+"ton_network": "testnet",
+"log_level": "debug",
+"feature_flags": {"enableMockTon": true}
+},
+"staging": {
+"api_url": "[https://staging-api.dreamjar.xyz/v1](https://staging-api.dreamjar.xyz/v1)",
+"db_uri": "mongodb+srv://staging_user:****@cluster.mongodb.net/dreamjar_staging?retryWrites=true&w=majority",
+"redis_uri": "redis://staging-redis:6379/0",
+"ton_network": "testnet",
+"log_level": "info",
+"feature_flags": {"enableMockTon": false}
+},
+"production": {
+"api_url": "[https://api.dreamjar.xyz/v1](https://api.dreamjar.xyz/v1)",
+"db_uri": "mongodb+srv://prod_user:****@cluster.mongodb.net/dreamjar_prod?retryWrites=true&w=majority",
+"redis_uri": "rediss://prod-redis:6379/0",
+"ton_network": "mainnet",
+"log_level": "warn",
+"feature_flags": {"enableMockTon": false}
+}
+},
+"deployment_pipeline": {
+"build_process": "On push to main: run lint -> run unit tests -> build frontend (Vite) -> build docker images for backend and workers -> run integration tests on built images in isolated network -> push images to GHCR -> deploy to staging. On tag release: run production pipeline with smoke e2e tests -> blue-green deploy to production cluster.",
+"deployment_strategy": "Blue-green deployment for backend to minimize downtime: new release deployed to idle environment, smoke tests run, then traffic switched. Frontend uses immutable hashed assets with CDN cache invalidation.",
+"rollback_procedure": "If smoke tests or post-deploy healthchecks fail, automated rollback to previous container image within 5 minutes. Data migrations are performed with safe backward compatible scripts; in the event migration causes issue, we can roll back app and run compensating migration if needed."
+},
+"monitoring_alerting": {
+"application_monitoring": "Expose Prometheus metrics from API and workers (request durations, error rates, queue lengths). Dashboards in Grafana for key metrics: DAU, wishes created, pending verifications, queue backlog.",
+"error_tracking": "Sentry captures exceptions and performance traces; configured to alert on new issues and error spike thresholds.",
+"performance_monitoring": "APM traces collected via OpenTelemetry; alerts on P95 latency > 500ms for API endpoints.",
+"alerting_rules": [
+{"name":"HighErrorRate","condition":"error_rate > 5% over 5m","notify":["#oncall","email_oncall"]},
+{"name":"QueueBacklog","condition":"bullmq_queue_size > 1000","notify":["#oncall"]},
+{"name":"DBConnectionErrors","condition":"db_connection_failures > 3 in 5m","notify":["#dba_oncall"]}
+]
+}
+},
+
+"documentation_requirements": {
+"technical_documentation": {
+"api_documentation": "OpenAPI 3.1 JSON/YAML documenting all endpoints, schemas, examples, error codes, auth flows and rate limits. Hosted at [https://api.dreamjar.xyz/docs](https://api.dreamjar.xyz/docs) (Swagger UI).",
+"architecture_documentation": "High-level architecture diagrams (SVG/PNG), component interaction sequences, message flows, data retention diagrams, and threat model doc. Stored in repo /docs/architecture.md",
+"deployment_documentation": "Step-by-step runbook with production checklist, env var references, emergency rollback steps, DNS and certificate renewal instructions, and contact list for infra providers. Stored in /docs/deploy.md and accessible as hosted runbook for on-call staff."
+},
+"user_documentation": {
+"user_guides": [
+{"title":"Getting Started with DreamJar","content":"How to connect wallet, create first Wish, and invite supporters."},
+{"title":"How Verification Works","content":"Explains proof methods and community voting."},
+{"title":"How to Pledge and Get a Supporter Badge","content":"Pledge flows and NFT badge information."}
+],
+"faq_section": [
+{"q":"Do you store my private keys?","a":"No — DreamJar never stores private keys. Wallet interactions are performed via TON Connect."},
+{"q":"What happens if I fail my goal?","a":"A configurable percent of the stake is routed to the public-impact pool; supporters may be refunded per pledge rules."},
+{"q":"How do disputes get resolved?","a":"Via community votes; if inconclusive, escalate to validators/admins with SLA."}
+],
+"help_center": "Full searchable knowledge base with articles, video walkthroughs, contact form and automated bot answers. Support ticket system integrated with admin dashboard for escalations."
+}
+},
+
+"project_timeline_milestones": {
+"development_phases": [
+{
+"phase_name": "Phase 0 - Prep & Discovery",
+"duration_weeks": 1,
+"deliverables": [
+"Requirements spec (this JSON)",
+"Design system tokens",
+"Initial smart-contract spec and testnet design"
+],
+"success_criteria": [
+"All stakeholders sign off on scope",
+"Design tokens approved",
+"Testnet contract flows defined"
+]
+},
+{
+"phase_name": "Phase 1 - MVP Development",
+"duration_weeks": 4,
+"deliverables": [
+"Telegram Mini-App basic UI (feed, create, detail)",
+"Backend API for create/get wish and pledges",
+"Testnet smart contract deployment",
+"TON Connect integration"
+],
+"success_criteria": [
+"End-to-end create-wish-to-contract flow works on testnet",
+"E2E tests for core journeys pass",
+"DAU simulated user tests pass"
+]
+},
+{
+"phase_name": "Phase 2 - Feature Completion & Hardening",
+"duration_weeks": 4,
+"deliverables": [
+"Community voting and verification flows",
+"NFT badge minting",
+"Admin dashboard",
+"Monitoring and logging setup"
+],
+"success_criteria": [
+"Verification and payout flows tested on testnet",
+"Penetration test scheduled",
+"CI/CD pipeline matured with staging deployments"
+]
+},
+{
+"phase_name": "Phase 3 - Audit & Production Launch",
+"duration_weeks": 2,
+"deliverables": [
+"Security pen-test report and remediations",
+"Smart contract audit report",
+"Production infra setup and blue-green deploy",
+"Public launch marketing assets"
+],
+"success_criteria": [
+"Audit findings resolved to acceptable risk level",
+"Production launch checklist completed",
+"Support on-call roster ready"
+]
+},
+{
+"phase_name": "Phase 4 - Growth & Scale",
+"duration_weeks": 8,
+"deliverables": [
+"Sponsor campaigns",
+"Localization for hi/en + one extra locale",
+"Feature: Sponsored Challenges & DAO governance"
+],
+"success_criteria": [
+"Achieve first 5k DAU",
+"Monetization pipeline active (sponsorships)",
+"Retention goals met"
+]
+}
+],
+"quality_gates": [
+"Code coverage >= 85% for unit tests before merge to main",
+"All critical security findings resolved before production deployment",
+"Performance baseline met on staging (P95 < 300ms)",
+"Smart contract audit completed and signed off"
+],
+"release_schedule": "Weekly sprints with demo on Fridays. Staging deploy every main merge; production deploy on tagged release after QA signoff. Monthly feature releases planned with hotfix windows available."
+}
 }

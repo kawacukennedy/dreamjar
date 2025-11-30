@@ -25,4 +25,6 @@ const ApiKeySchema: Schema = new Schema({
 ApiKeySchema.index({ key: 1 });
 ApiKeySchema.index({ userId: 1 });
 
-export default mongoose.model<IApiKey>("ApiKey", ApiKeySchema);
+export const ApiKey = mongoose.model<IApiKey>("ApiKey", ApiKeySchema);
+export type ApiKeyDocument = IApiKey;
+export { ApiKeySchema };

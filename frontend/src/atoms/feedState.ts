@@ -5,23 +5,24 @@ export interface WishItem {
   title: string;
   description: string;
   pledgeTotal: number;
-  deadline: Date;
+  deadline: string; // ISO8601
   status: string;
+  creator: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+  };
 }
 
 export interface FeedState {
-  paginatedFeed: {
-    items: WishItem[];
-    nextCursor: string | null;
-  };
+  items: WishItem[];
+  nextCursor: string;
 }
 
 export const feedState = atom<FeedState>({
   key: "feedState",
   default: {
-    paginatedFeed: {
-      items: [],
-      nextCursor: null,
-    },
+    items: [],
+    nextCursor: "",
   },
 });

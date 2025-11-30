@@ -22,4 +22,6 @@ const WebhookSchema: Schema = new Schema({
 // Indexes
 WebhookSchema.index({ userId: 1 });
 
-export default mongoose.model<IWebhook>("Webhook", WebhookSchema);
+export const Webhook = mongoose.model<IWebhook>("Webhook", WebhookSchema);
+export type WebhookDocument = IWebhook;
+export { WebhookSchema };

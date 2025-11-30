@@ -8,6 +8,7 @@ import { UserModule } from "./user/user.module";
 import { NotificationModule } from "./notification/notification.module";
 import { WebhookModule } from "./webhook/webhook.module";
 import { ApiKeyModule } from "./apikey/apikey.module";
+import { DAOModule } from "./dao/dao.module";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -38,6 +39,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     NotificationModule,
     WebhookModule,
     ApiKeyModule,
+    DAOModule,
   ],
 })
 export class AppModule {}
