@@ -20,6 +20,9 @@ type SortOrder = "asc" | "desc";
 type TimeFilter = "all" | "month" | "week" | "day";
 
 function Leaderboard() {
+  const [activeTab, setActiveTab] = useState<
+    "creators" | "supporters" | "trending"
+  >("creators");
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("totalPledged");
@@ -262,10 +265,47 @@ function Leaderboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-2">🏆 Dream Leaderboard</h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Top dreamers and supporters in the DreamJar community
+        <h1 className="text-h1 font-bold mb-2">🏆 Leaderboards & Trending</h1>
+        <p className="text-neutral-600 dark:text-neutral-400">
+          Top creators, supporters, and trending wishes in the DreamJar
+          community
         </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="mb-6 flex justify-center">
+        <div className="flex space-x-1 bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg">
+          <button
+            onClick={() => setActiveTab("creators")}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              activeTab === "creators"
+                ? "bg-white dark:bg-neutral-700 shadow-sm"
+                : "hover:bg-neutral-200 dark:hover:bg-neutral-600"
+            }`}
+          >
+            Top Creators
+          </button>
+          <button
+            onClick={() => setActiveTab("supporters")}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              activeTab === "supporters"
+                ? "bg-white dark:bg-neutral-700 shadow-sm"
+                : "hover:bg-neutral-200 dark:hover:bg-neutral-600"
+            }`}
+          >
+            Top Supporters
+          </button>
+          <button
+            onClick={() => setActiveTab("trending")}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              activeTab === "trending"
+                ? "bg-white dark:bg-neutral-700 shadow-sm"
+                : "hover:bg-neutral-200 dark:hover:bg-neutral-600"
+            }`}
+          >
+            Trending Wishes
+          </button>
+        </div>
       </div>
 
       {/* Filters and Controls */}
