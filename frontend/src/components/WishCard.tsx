@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ProgressBar from "./ProgressBar";
 import ShareButton from "./ShareButton";
 import Badge from "./Badge";
@@ -26,6 +27,7 @@ interface WishCardProps {
 
 const WishCard: React.FC<WishCardProps> = React.memo(
   ({ jar, favorites, onToggleFavorite }) => {
+    const { t } = useTranslation();
     const { trackWishView } = useAnalytics();
     const progress = (jar.pledgedAmount / jar.stakeAmount) * 100;
 
@@ -33,8 +35,28 @@ const WishCard: React.FC<WishCardProps> = React.memo(
       trackWishView(jar._id, jar.title);
     };
 
+    const handleCardClick = () => {
+      trackWishView(jar._id, jar.title);
+      // Navigate to details page
+      window.location.href = `/wish/${jar._id}`;
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleCardClick();
+      }
+    };
+
     return (
-      <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 animate-fade-in cursor-pointer group touch-manipulation">
+      <div
+        className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 animate-fade-in cursor-pointer group touch-manipulation focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        tabIndex={0}
+        role="button"
+        aria-label={t("view_dream_details", { title: jar.title })}
+        onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+      >
         <div className="flex justify-between items-start mb-2">
           <div>
             <h3 className="font-bold text-lg">{jar.title}</h3>
@@ -48,8 +70,8 @@ const WishCard: React.FC<WishCardProps> = React.memo(
             <Tooltip
               content={
                 favorites.includes(jar._id)
-                  ? "Remove from favorites"
-                  : "Add to favorites"
+                  ? t("remove_from_favorites")
+                  : t("add_to_favorites")
               }
             >
               <button
@@ -57,8 +79,12 @@ const WishCard: React.FC<WishCardProps> = React.memo(
                   e.stopPropagation();
                   onToggleFavorite(jar._id);
                 }}
-                className="text-2xl hover:scale-110 transition-all duration-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 touch-manipulation"
-                aria-label="Toggle favorite"
+                className="text-2xl hover:scale-110 transition-all duration-200 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 touch-manipulation"
+                aria-label={
+                  favorites.includes(jar._id)
+                    ? t("remove_from_favorites")
+                    : t("add_to_favorites")
+                }
               >
                 {favorites.includes(jar._id) ? "❤️" : "🤍"}
               </button>
@@ -73,7 +99,11 @@ const WishCard: React.FC<WishCardProps> = React.memo(
               }
               size="sm"
             >
-              {jar.status}
+              {jar.status === "Active"
+                ? t("active")
+                : jar.status === "ResolvedSuccess"
+                  ? t("successful")
+                  : t("failed")}
             </Badge>
           </div>
         </div>
@@ -82,28 +112,44 @@ const WishCard: React.FC<WishCardProps> = React.memo(
         </p>
         <div className="mb-2">
           <div className="flex justify-between text-sm mb-1">
-            <span>Pledged: {jar.pledgedAmount / 1000000000} TON</span>
-            <span>Goal: {jar.stakeAmount / 1000000000} TON</span>
+            <span
+              aria-label={t("pledge_amount", {
+                amount: jar.pledgedAmount / 1000000000,
+              })}
+            >
+              {t("pledged")}: {jar.pledgedAmount / 1000000000} TON
+            </span>
+            <span
+              aria-label={t("goal_amount", {
+                amount: jar.stakeAmount / 1000000000,
+              })}
+            >
+              {t("goal")}: {jar.stakeAmount / 1000000000} TON
+            </span>
           </div>
-          <ProgressBar progress={progress} />
+          <ProgressBar
+            progress={progress}
+            aria-label={t("funding_progress", {
+              progress: progress.toFixed(1),
+            })}
+          />
         </div>
         <p className="text-sm text-gray-500 mb-2">
-          By:{" "}
+          {t("by")}:{" "}
           {jar.ownerId.displayName ||
             jar.ownerId.walletAddress.slice(0, 6) + "..."}
         </p>
         <p className="text-sm text-gray-500 mb-4">
-          Deadline: {new Date(jar.deadline).toLocaleDateString()}
+          {t("deadline")}: {new Date(jar.deadline).toLocaleDateString()}
         </p>
         <div className="flex space-x-2">
-          <ShareButton url={`/wish/${jar._id}`} title={jar.title} />
-          <Link
-            to={`/wish/${jar._id}`}
-            onClick={handleViewDetails}
-            className="flex-1 text-center bg-primary text-white py-3 sm:py-2 rounded hover:bg-blue-600 active:bg-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 touch-manipulation text-base"
-          >
-            View Details
-          </Link>
+          <div onClick={(e) => e.stopPropagation()}>
+            <ShareButton
+              url={`/wish/${jar._id}`}
+              title={jar.title}
+              text={t("share")}
+            />
+          </div>
         </div>
       </div>
     );

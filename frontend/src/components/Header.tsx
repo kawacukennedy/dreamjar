@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTonConnectUI } from "@tonconnect/ui-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { useDarkMode } from "../contexts/DarkModeContext";
 import { useTheme } from "../contexts/ThemeContext";
 import NotificationBell from "./NotificationBell";
+import i18n from "../i18n";
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
   const [tonConnectUI] = useTonConnectUI();
   const { user, login, logout } = useAuth();
   const { isDark, toggleDarkMode } = useDarkMode();
@@ -14,6 +17,7 @@ const Header: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
   const handleWalletConnect = async () => {
     try {
@@ -50,6 +54,11 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setCurrentLanguage(lang);
+  };
+
   // Close mobile menu on escape key
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -77,17 +86,21 @@ const Header: React.FC = () => {
   }, [isMobileMenuOpen]);
 
   const navLinks = [
-    { to: "/", label: "Home", ariaLabel: "Go to home page" },
-    { to: "/leaderboard", label: "Leaderboard", ariaLabel: "View leaderboard" },
+    { to: "/", label: t("home"), ariaLabel: t("go_to_home") },
+    {
+      to: "/leaderboard",
+      label: t("leaderboard"),
+      ariaLabel: t("view_leaderboard"),
+    },
     {
       to: "/notifications",
-      label: "Notifications",
-      ariaLabel: "View notifications",
+      label: t("notifications"),
+      ariaLabel: t("view_notifications"),
     },
-    { to: "/settings", label: "Settings", ariaLabel: "Go to settings" },
-    { to: "/help", label: "Help", ariaLabel: "Get help and support" },
+    { to: "/settings", label: t("settings"), ariaLabel: t("go_to_settings") },
+    { to: "/help", label: t("help"), ariaLabel: t("get_help") },
     ...(user
-      ? [{ to: "/profile", label: "Profile", ariaLabel: "View your profile" }]
+      ? [{ to: "/profile", label: t("profile"), ariaLabel: t("view_profile") }]
       : []),
   ];
 
@@ -99,7 +112,7 @@ const Header: React.FC = () => {
             <Link
               to="/"
               className="text-2xl font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-              aria-label="DreamJar home page"
+              aria-label={t("dreamjar_home")}
             >
               DreamJar
             </Link>
@@ -134,10 +147,10 @@ const Header: React.FC = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
-              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="p-3 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
-              aria-label="Toggle mobile menu"
+              aria-label={t("toggle_mobile_menu")}
             >
               <svg
                 className="h-6 w-6"
@@ -170,20 +183,27 @@ const Header: React.FC = () => {
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value as any)}
-              className="p-2 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:outline-none"
-              aria-label="Select theme"
+              className="p-3 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:outline-none"
+              aria-label={t("select_theme")}
             >
               <option value="default">Default</option>
               <option value="blue">Blue</option>
               <option value="green">Green</option>
               <option value="purple">Purple</option>
             </select>
+            <select
+              value={currentLanguage}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="p-3 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:outline-none"
+              aria-label="Select language"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
             <button
               onClick={toggleDarkMode}
-              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-label={
-                isDark ? "Switch to light mode" : "Switch to dark mode"
-              }
+              className="p-3 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label={isDark ? t("switch_to_light") : t("switch_to_dark")}
               aria-pressed={isDark}
             >
               {isDark ? "☀️" : "🌙"}
@@ -193,14 +213,14 @@ const Header: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <span
                   className="text-sm text-gray-700 dark:text-gray-300"
-                  aria-label="Current user"
+                  aria-label={t("current_user")}
                 >
                   {user.displayName || user.walletAddress.slice(0, 6) + "..."}
                 </span>
                 <button
                   onClick={logout}
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-                  aria-label="Logout from your account"
+                  aria-label={t("logout_account")}
                 >
                   Logout
                 </button>
@@ -209,7 +229,7 @@ const Header: React.FC = () => {
               <button
                 onClick={handleWalletConnect}
                 className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                aria-label="Connect your TON wallet"
+                aria-label={t("connect_ton_wallet")}
               >
                 Connect Wallet
               </button>
@@ -224,7 +244,7 @@ const Header: React.FC = () => {
             id="mobile-menu"
             className="md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
             role="navigation"
-            aria-label="Mobile navigation"
+            aria-label={t("mobile_navigation")}
           >
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navLinks.map((link) => (
@@ -248,31 +268,52 @@ const Header: React.FC = () => {
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
                 <div className="flex items-center justify-between px-3">
-                  <label
-                    htmlFor="mobile-theme-select"
-                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Theme
-                  </label>
-                  <select
-                    id="mobile-theme-select"
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value as any)}
-                    className="p-2 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:outline-none"
-                    aria-label="Select theme"
-                  >
-                    <option value="default">Default</option>
-                    <option value="blue">Blue</option>
-                    <option value="green">Green</option>
-                    <option value="purple">Purple</option>
-                  </select>
+                  <div className="flex items-center justify-between px-3">
+                    <label
+                      htmlFor="mobile-theme-select"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      {t("theme")}
+                    </label>
+                    <select
+                      id="mobile-theme-select"
+                      value={theme}
+                      onChange={(e) => setTheme(e.target.value as any)}
+                      className="p-3 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:outline-none"
+                      aria-label={t("select_theme")}
+                    >
+                      <option value="default">Default</option>
+                      <option value="blue">Blue</option>
+                      <option value="green">Green</option>
+                      <option value="purple">Purple</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-between px-3">
+                    <label
+                      htmlFor="mobile-lang-select"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Language
+                    </label>
+                    <select
+                      id="mobile-lang-select"
+                      value={currentLanguage}
+                      onChange={(e) => handleLanguageChange(e.target.value)}
+                      className="p-3 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:outline-none"
+                      aria-label="Select language"
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Español</option>
+                    </select>
+                  </div>
                 </div>
 
                 <button
                   onClick={toggleDarkMode}
                   className="w-full mt-3 px-3 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   aria-label={
-                    isDark ? "Switch to light mode" : "Switch to dark mode"
+                    isDark ? t("switch_to_light") : t("switch_to_dark")
                   }
                   aria-pressed={isDark}
                 >
@@ -294,7 +335,7 @@ const Header: React.FC = () => {
                         closeMobileMenu();
                       }}
                       className="w-full px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 text-left"
-                      aria-label="Logout from your account"
+                      aria-label={t("logout_account")}
                     >
                       Logout
                     </button>
@@ -306,7 +347,7 @@ const Header: React.FC = () => {
                       closeMobileMenu();
                     }}
                     className="w-full px-3 py-2 bg-primary text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-primary text-left"
-                    aria-label="Connect your TON wallet"
+                    aria-label={t("connect_ton_wallet")}
                   >
                     Connect Wallet
                   </button>

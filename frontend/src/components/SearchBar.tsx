@@ -172,7 +172,7 @@ const SearchBar: React.FC<SearchBarProps> = React.memo(
               )}
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`p-2 rounded-md transition-colors duration-200 touch-manipulation ${
+                className={`p-3 rounded-md transition-colors duration-200 touch-manipulation ${
                   showFilters
                     ? "bg-primary text-white"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600"
@@ -196,7 +196,7 @@ const SearchBar: React.FC<SearchBarProps> = React.memo(
               </button>
               <button
                 onClick={() => setShowSavedSearches(!showSavedSearches)}
-                className={`p-2 rounded-md transition-colors duration-200 touch-manipulation ${
+                className={`p-3 rounded-md transition-colors duration-200 touch-manipulation ${
                   showSavedSearches
                     ? "bg-primary text-white"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600"

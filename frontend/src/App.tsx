@@ -1,6 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import * as Sentry from "@sentry/react";
 import { inject } from "@vercel/analytics";
+import { useTranslation } from "react-i18next";
 import {
   BrowserRouter as Router,
   Routes,
@@ -77,6 +78,7 @@ try {
 }
 
 function AppContent() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -138,7 +140,7 @@ function AppContent() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded z-50"
       >
-        Skip to main content
+        {t("skip_to_main_content")}
       </a>
       <div className="min-h-screen bg-backgroundLight dark:bg-backgroundDark text-gray-900 dark:text-gray-100">
         <Header />
@@ -149,7 +151,7 @@ function AppContent() {
                 <div className="text-center">
                   <LoadingSpinner className="mb-4" />
                   <p className="text-gray-600 dark:text-gray-400">
-                    Loading DreamJar...
+                    {t("loading_dreamjar")}
                   </p>
                 </div>
               </div>

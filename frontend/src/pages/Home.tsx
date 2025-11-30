@@ -8,6 +8,7 @@ import SearchBar from "../components/SearchBar";
 import WishCard from "../components/WishCard";
 import { useSearch } from "../contexts/SearchContext";
 import { useAnalytics } from "../hooks/useAnalytics";
+import { useOfflineStorage } from "../hooks/useOfflineStorage";
 import { api } from "../services/api";
 
 const ActivityFeed = lazy(() => import("../components/ActivityFeed"));
@@ -29,6 +30,10 @@ function Home() {
   const { filters, updateFilters, setIsLoading, savedSearches, saveCurrentSearch, loadSavedSearch, deleteSavedSearch } = useSearch();
   const { trackPageView, trackSearch, trackWishView } = useAnalytics();
   const [wishJars, setWishJars] = useState<WishJar[]>([]);
+  const { value: cachedWishes, setValue: setCachedWishes, isOnline } = useOfflineStorage<WishJar[]>({
+    key: "cachedWishes",
+    defaultValue: [],
+  });
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -111,6 +116,8 @@ function Home() {
         setWishJars(response.wishes);
         setNextCursor(response.pagination.nextCursor);
         setHasMore(response.pagination.hasNextPage);
+        // Cache the wishes for offline use
+        setCachedWishes(response.wishes);
       }
     } catch (error) {
       console.error("Failed to fetch wish jars:", error);
@@ -153,9 +160,15 @@ function Home() {
   };
 
   useEffect(() => {
-    fetchWishJars();
+    if (!isOnline && cachedWishes.length > 0) {
+      // Load from cache when offline
+      setWishJars(cachedWishes);
+      setHasMore(false);
+    } else {
+      fetchWishJars();
+    }
     trackPageView("home");
-  }, [fetchWishJars, trackPageView]);
+  }, [fetchWishJars, trackPageView, isOnline, cachedWishes]);
 
   // Track search when filters change
   useEffect(() => {
