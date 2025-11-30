@@ -50,105 +50,69 @@ const WishCard: React.FC<WishCardProps> = React.memo(
 
     return (
       <div
-        className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 animate-fade-in cursor-pointer group touch-manipulation focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className="bg-white dark:bg-neutral-900 p-4 rounded-lg shadow-level1 hover:shadow-level2 transition-all duration-300 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-dream-blue focus:ring-offset-2 flex"
         tabIndex={0}
         role="button"
         aria-label={t("view_dream_details", { title: jar.title })}
         onClick={handleCardClick}
         onKeyDown={handleKeyDown}
       >
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="font-bold text-lg">{jar.title}</h3>
-            {jar.category && (
-              <span className="text-sm text-primary font-medium">
-                {jar.category}
-              </span>
-            )}
+        {/* Thumbnail */}
+        <div className="w-30 h-30 bg-neutral-200 dark:bg-neutral-800 rounded-md flex-shrink-0 mr-4">
+          {/* Placeholder for thumbnail */}
+          <div className="w-full h-full flex items-center justify-center text-neutral-500">
+            📸
           </div>
-          <div className="flex items-center space-x-2">
-            <Tooltip
-              content={
-                favorites.includes(jar._id)
-                  ? t("remove_from_favorites")
-                  : t("add_to_favorites")
-              }
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFavorite(jar._id);
-                }}
-                className="text-2xl hover:scale-110 transition-all duration-200 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 touch-manipulation"
-                aria-label={
-                  favorites.includes(jar._id)
-                    ? t("remove_from_favorites")
-                    : t("add_to_favorites")
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start mb-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-lg truncate">{jar.title}</h3>
+              {jar.category && (
+                <span className="text-sm text-violet font-medium">
+                  {jar.category}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center space-x-2 ml-2">
+              <Badge
+                variant={
+                  jar.status === "active"
+                    ? "info"
+                    : jar.status === "verified"
+                      ? "success"
+                      : "error"
                 }
+                size="sm"
               >
-                {favorites.includes(jar._id) ? "❤️" : "🤍"}
-              </button>
-            </Tooltip>
-            <Badge
-              variant={
-                jar.status === "Active"
-                  ? "info"
-                  : jar.status === "ResolvedSuccess"
-                    ? "success"
-                    : "danger"
-              }
-              size="sm"
-            >
-              {jar.status === "Active"
-                ? t("active")
-                : jar.status === "ResolvedSuccess"
-                  ? t("successful")
-                  : t("failed")}
-            </Badge>
+                {jar.status}
+              </Badge>
+            </div>
           </div>
-        </div>
-        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-          {jar.description}
-        </p>
-        <div className="mb-2">
-          <div className="flex justify-between text-sm mb-1">
-            <span
-              aria-label={t("pledge_amount", {
-                amount: jar.pledgedAmount / 1000000000,
-              })}
-            >
-              {t("pledged")}: {jar.pledgedAmount / 1000000000} TON
-            </span>
-            <span
-              aria-label={t("goal_amount", {
-                amount: jar.stakeAmount / 1000000000,
-              })}
-            >
-              {t("goal")}: {jar.stakeAmount / 1000000000} TON
-            </span>
+
+          <p className="text-neutral-600 dark:text-neutral-400 mb-2 line-clamp-2 text-sm">
+            {jar.description}
+          </p>
+
+          <div className="mb-2">
+            <div className="flex justify-between text-xs mb-1">
+              <span>Pledged: {jar.pledgedAmount / 1000000000} TON</span>
+              <span>Goal: {jar.stakeAmount / 1000000000} TON</span>
+            </div>
+            <ProgressBar progress={progress} />
           </div>
-          <ProgressBar
-            progress={progress}
-            aria-label={t("funding_progress", {
-              progress: progress.toFixed(1),
-            })}
-          />
-        </div>
-        <p className="text-sm text-gray-500 mb-2">
-          {t("by")}:{" "}
-          {jar.ownerId.displayName ||
-            jar.ownerId.walletAddress.slice(0, 6) + "..."}
-        </p>
-        <p className="text-sm text-gray-500 mb-4">
-          {t("deadline")}: {new Date(jar.deadline).toLocaleDateString()}
-        </p>
-        <div className="flex space-x-2">
-          <div onClick={(e) => e.stopPropagation()}>
-            <ShareButton
-              url={`/wish/${jar._id}`}
-              title={jar.title}
-              text={t("share")}
-            />
+
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-neutral-500">
+              By:{" "}
+              {jar.ownerId.displayName ||
+                jar.ownerId.walletAddress.slice(0, 6) + "..."}
+            </p>
+            <p className="text-xs text-neutral-500">
+              Deadline: {new Date(jar.deadline).toLocaleDateString()}
+            </p>
           </div>
         </div>
       </div>
