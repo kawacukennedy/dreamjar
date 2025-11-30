@@ -8,10 +8,38 @@ DreamJar is a platform that allows users to create "Wish Jars" (goals) backed by
 
 ## Architecture
 
-- **Frontend**: React Mini-App hosted on Telegram
-- **Backend**: Node.js/Express API with MongoDB
+- **Frontend**: React 18 Mini-App with TypeScript, hosted on Vercel
+- **Backend**: NestJS API with MongoDB Atlas and Redis
 - **Blockchain**: TON smart contracts (Tolk/FunC)
-- **Storage**: TON Storage + IPFS for media proofs
+- **Storage**: IPFS + TON Storage for media proofs
+- **State Management**: Recoil for client state, SWR for data fetching
+- **Monitoring**: Sentry for error tracking, Logtail for logging
+
+## Tech Stack
+
+### Frontend
+
+- React 18.2.0 with TypeScript
+- Vite 5.0.0 for bundling
+- Tailwind CSS 4.0 for styling
+- Recoil 0.7.6 for state management
+- SWR 2.2.0 for data fetching
+- TON Connect SDK 1.2.0 for wallet integration
+
+### Backend
+
+- NestJS 10.0 with TypeScript
+- MongoDB Atlas 6.x with Mongoose
+- Redis 7.x with BullMQ for queues
+- JWT for authentication
+- Winston + Logtail for logging
+
+### DevOps
+
+- GitHub Actions for CI/CD
+- Docker for containerization
+- Sentry for monitoring
+- Playwright for E2E testing
 
 ## Getting Started
 
@@ -20,19 +48,25 @@ DreamJar is a platform that allows users to create "Wish Jars" (goals) backed by
 3. Set up environment variables (see docs/DEPLOYMENT.md)
 4. Run development servers:
    - Frontend: `cd frontend && npm run dev`
-   - Backend: `cd backend && npm run dev`
+   - Backend: `cd backend && npm run start:dev`
 
 ## Project Structure
 
-- `frontend/`: React Mini-App
-- `backend/`: Express API server
+- `frontend/`: React Mini-App with components, pages, hooks
+- `backend/`: NestJS API with modules, controllers, services
 - `contracts/`: TON smart contracts
-- `infrastructure/`: Deployment configs
-- `docs/`: Documentation
+- `docs/`: Documentation and specs
 
 ## API Documentation
 
-See [docs/API.md](docs/API.md) for API endpoints.
+See [docs/API.md](docs/API.md) for REST API endpoints.
+
+## Testing
+
+- Unit tests: `npm run test`
+- E2E tests: `npm run test:e2e`
+- Frontend: Vitest + React Testing Library
+- Backend: Jest
 
 ## Deployment
 
