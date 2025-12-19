@@ -17,6 +17,8 @@ import { VerificationService } from "./services/verification.service";
 import { BadgeSchema } from "./models/Badge";
 import { ProposalSchema } from "./models/Proposal";
 import { ImpactPoolService } from "./services/impact-pool.service";
+import { AdminService } from "./services/admin.service";
+import { AdminController } from "./controllers/admin.controller";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -53,13 +55,14 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     ApiKeyModule,
     DAOModule,
   ],
-  controllers: [LeaderboardController],
+  controllers: [LeaderboardController, AdminController],
   providers: [
     WebSocketGatewayService,
     LeaderboardService,
     ProofVerificationService,
     VerificationService,
     ImpactPoolService,
+    AdminService,
   ],
 })
 export class AppModule {}
