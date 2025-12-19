@@ -14,6 +14,7 @@ import { LeaderboardController } from "./services/leaderboard.controller";
 import { LeaderboardService } from "./services/leaderboard";
 import { ProofVerificationService } from "./services/proof-verification";
 import { VerificationService } from "./services/verification.service";
+import { BadgeSchema } from "./models/Badge";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -22,6 +23,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     MongooseModule.forRoot(
       process.env.MONGO_URI || "mongodb://localhost:27017/dreamjar",
     ),
+    MongooseModule.forFeature([{ name: "Badge", schema: BadgeSchema }]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || "secret",
