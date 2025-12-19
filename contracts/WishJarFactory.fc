@@ -1,20 +1,90 @@
 ;; WishJarFactory Contract
+;; Deploys and tracks WishJar contracts
 
 #include "imports/stdlib.fc";
 
+;; Contract data
+global cell wish_jars; ;; Dictionary of owner -> list of wish jar addresses
+global int total_wish_jars;
+
+;; Constants
+const int OP_CREATE_WISH = 0x11111111;
+const int OP_GET_WISHES = 0x22222222;
+
+() init() impure {
+  wish_jars = new_dict();
+  total_wish_jars = 0;
+}
+
 () recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-  if (in_msg_body~load_uint(32) == 0x11111111) { ;; create wish jar op
-    slice owner = in_msg_body~load_slice(256);
-    int stake = in_msg_body~load_uint(64);
-    ;; Deploy new WishJar contract
-    ;; Return address
+  int op = in_msg_body~load_uint(32);
+  int sender = in_msg~load_msg_addr();
+
+  if (op == OP_CREATE_WISH) {
+    ;; Create new WishJar contract
+    int stake_amount = in_msg_body~load_uint(64);
+    int deadline = in_msg_body~load_uint(32);
+    int proof_method = in_msg_body~load_uint(8);
+    int impact_percent = in_msg_body~load_uint(8);
+    int beneficiary = in_msg_body~load_uint(256);
+
+    ;; Deploy WishJar contract
+    cell wish_code = get_wish_jar_code();
+    cell wish_data = begin_cell()
+      .store_uint(sender, 256)  ;; owner
+      .store_uint(stake_amount, 64)
+      .store_uint(deadline, 32)
+      .store_uint(proof_method, 8)
+      .store_uint(impact_percent, 8)
+      .store_uint(beneficiary, 256)
+      .end_cell();
+
+    cell wish_state = begin_cell()
+      .store_ref(wish_code)
+      .store_ref(wish_data)
+      .end_cell();
+
+    int wish_address = cell_hash(wish_state);
+
+    ;; Store in our records
+    cell owner_wishes = wish_jars~udict_get?(256, sender);
+    if (owner_wishes.isnull()) {
+      owner_wishes = begin_cell().end_cell();
+    }
+
+    ;; Add to owner's wish list
+    owner_wishes = owner_wishes.append_cell(begin_cell().store_uint(wish_address, 256).end_cell());
+    wish_jars = wish_jars.udict_set(256, sender, owner_wishes);
+
+    total_wish_jars += 1;
+
+    ;; Send deployment message
+    send_raw_message(wish_address, 64 + 1, msg_value - 10000000); ;; Send stake minus deployment fee
   }
 }
 
 () recv_external(slice in_msg) impure {
-  ;; Handle external
+  ;; Handle external queries
 }
 
-slice get_wish_jars_by_owner(slice owner) method_id {
-  return null(); ;; Return list of addresses
+cell get_wish_jar_code() method_id {
+  ;; Return the WishJar contract code
+  ;; In practice, this would be the compiled code of WishJar.fc
+  return begin_cell().end_cell();
+}
+
+int get_total_wish_jars() method_id {
+  return total_wish_jars;
+}
+
+cell get_wish_jars_by_owner(int owner) method_id {
+  cell owner_wishes = wish_jars.udict_get(256, owner);
+  if (owner_wishes.isnull()) {
+    return begin_cell().end_cell();
+  }
+  return owner_wishes;
+}
+
+cell get_all_wish_jars() method_id {
+  return wish_jars;
 }

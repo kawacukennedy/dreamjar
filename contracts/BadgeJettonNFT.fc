@@ -1,19 +1,138 @@
 ;; Badge Jetton NFT Contract
+;; Mint supporter badges for successful pledges
 
 #include "imports/stdlib.fc";
 
+;; Contract data
+global int total_supply;
+global cell owners; ;; token_id -> owner
+global cell metadata; ;; token_id -> metadata_uri
+global int next_token_id;
+
+;; Constants
+const int OP_MINT = 0x22222222;
+const int OP_TRANSFER = 0x33333333;
+const int OP_BURN = 0x44444444;
+
+() init() impure {
+  total_supply = 0;
+  owners = new_dict();
+  metadata = new_dict();
+  next_token_id = 1;
+}
+
 () recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-  if (in_msg_body~load_uint(32) == 0x22222222) { ;; mint op
-    slice to = in_msg_body~load_slice(256);
-    slice uri = in_msg_body~load_slice(256);
-    ;; Mint NFT
+  int op = in_msg_body~load_uint(32);
+  int sender = in_msg~load_msg_addr();
+
+  if (op == OP_MINT) {
+    ;; Mint new badge NFT
+    int recipient = in_msg_body~load_uint(256);
+    slice metadata_uri = in_msg_body~load_slice(512);
+    int wish_id = in_msg_body~load_uint(256);
+
+    int token_id = next_token_id;
+    next_token_id += 1;
+    total_supply += 1;
+
+    ;; Store ownership
+    owners = owners.udict_set(256, token_id, begin_cell().store_uint(recipient, 256).end_cell());
+
+    ;; Store metadata
+    metadata = metadata.udict_set(256, token_id, begin_cell().store_slice(metadata_uri).end_cell());
+
+    ;; Emit transfer event (from 0 to recipient)
+    ;; In practice, this would emit an event
+
+  } elseif (op == OP_TRANSFER) {
+    ;; Transfer NFT
+    int token_id = in_msg_body~load_uint(256);
+    int to = in_msg_body~load_uint(256);
+
+    ;; Check ownership
+    cell owner_cell = owners.udict_get(256, token_id);
+    if (owner_cell.isnull()) {
+      return; ;; Token doesn't exist
+    }
+
+    int current_owner = owner_cell~load_uint(256);
+    if (current_owner != sender) {
+      return; ;; Not owner
+    }
+
+    ;; Update ownership
+    owners = owners.udict_set(256, token_id, begin_cell().store_uint(to, 256).end_cell());
+
+    ;; Emit transfer event
+
+  } elseif (op == OP_BURN) {
+    ;; Burn NFT
+    int token_id = in_msg_body~load_uint(256);
+
+    ;; Check ownership
+    cell owner_cell = owners.udict_get(256, token_id);
+    if (owner_cell.isnull()) {
+      return; ;; Token doesn't exist
+    }
+
+    int current_owner = owner_cell~load_uint(256);
+    if (current_owner != sender) {
+      return; ;; Not owner
+    }
+
+    ;; Remove token
+    owners = owners.udict_delete(256, token_id);
+    metadata = metadata.udict_delete(256, token_id);
+    total_supply -= 1;
+
+    ;; Emit burn event
   }
 }
 
 () recv_external(slice in_msg) impure {
-  ;; Handle external
+  ;; Handle external queries
+}
+
+;; Getters
+int get_total_supply() method_id {
+  return total_supply;
+}
+
+int get_owner(int token_id) method_id {
+  cell owner_cell = owners.udict_get(256, token_id);
+  if (owner_cell.isnull()) {
+    return 0; ;; Invalid token
+  }
+  return owner_cell~load_uint(256);
 }
 
 slice get_metadata(int token_id) method_id {
-  return null(); ;; Return metadata URI
+  cell metadata_cell = metadata.udict_get(256, token_id);
+  if (metadata_cell.isnull()) {
+    return null();
+  }
+  return metadata_cell~load_slice(512);
+}
+
+cell get_tokens_by_owner(int owner) method_id {
+  ;; Return list of token IDs owned by this address
+  cell result = begin_cell();
+  int count = 0;
+
+  ;; Iterate through all tokens (simplified - in practice would need proper iteration)
+  for (int i = 1; i <= total_supply + 1000; i += 1) { ;; Rough upper bound
+    cell owner_cell = owners.udict_get(256, i);
+    if (~ owner_cell.isnull()) {
+      int token_owner = owner_cell~load_uint(256);
+      if (token_owner == owner) {
+        result = result.store_uint(i, 256);
+        count += 1;
+        if (count >= 100) { ;; Limit results
+          break;
+        }
+      }
+    }
+  }
+
+  return result.end_cell();
 }

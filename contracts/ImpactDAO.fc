@@ -1,25 +1,211 @@
 ;; ImpactDAO Contract
+;; Manages impact pool funds from failed wishes
 
 #include "imports/stdlib.fc";
 
+;; Contract data
+global int total_funds;
+global cell proposals; ;; proposal_id -> proposal_data
+global cell votes; ;; proposal_id -> votes_data
+global int next_proposal_id;
+global int voting_period; ;; in seconds
+global int quorum_threshold; ;; minimum votes needed
+
+;; Proposal structure: [proposer, description_uri, amount_requested, beneficiary, deadline, executed]
+
+;; Constants
+const int OP_PROPOSE = 0x33333333;
+const int OP_VOTE = 0x44444444;
+const int OP_EXECUTE = 0x55555555;
+const int OP_DEPOSIT = 0x66666666;
+
+() init() impure {
+  total_funds = 0;
+  proposals = new_dict();
+  votes = new_dict();
+  next_proposal_id = 1;
+  voting_period = 604800; ;; 7 days
+  quorum_threshold = 100; ;; Minimum votes
+}
+
 () recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-  if (in_msg_body~load_uint(32) == 0x33333333) { ;; propose op
-    slice plan_uri = in_msg_body~load_slice(256);
-    ;; Create proposal
-  } elseif (in_msg_body~load_uint(32) == 0x44444444) { ;; vote op
-    int proposal_id = in_msg_body~load_uint(32);
-    int choice = in_msg_body~load_uint(1);
+  int op = in_msg_body~load_uint(32);
+  int sender = in_msg~load_msg_addr();
+
+  if (op == OP_DEPOSIT) {
+    ;; Deposit funds from failed wishes
+    total_funds += msg_value;
+
+  } elseif (op == OP_PROPOSE) {
+    ;; Create proposal for fund allocation
+    slice description_uri = in_msg_body~load_slice(512);
+    int amount_requested = in_msg_body~load_uint(64);
+    int beneficiary = in_msg_body~load_uint(256);
+
+    if (amount_requested > total_funds) {
+      return; ;; Insufficient funds
+    }
+
+    int proposal_id = next_proposal_id;
+    next_proposal_id += 1;
+
+    int deadline = now() + voting_period;
+
+    ;; Store proposal
+    cell proposal_data = begin_cell()
+      .store_uint(sender, 256)  ;; proposer
+      .store_slice(description_uri)
+      .store_uint(amount_requested, 64)
+      .store_uint(beneficiary, 256)
+      .store_uint(deadline, 32)
+      .store_uint(0, 1)  ;; executed flag
+      .end_cell();
+
+    proposals = proposals.udict_set(256, proposal_id, proposal_data);
+
+    ;; Initialize votes
+    cell vote_data = begin_cell()
+      .store_uint(0, 64)  ;; yes votes
+      .store_uint(0, 64)  ;; no votes
+      .store_dict(new_dict())  ;; voter -> choice
+      .end_cell();
+
+    votes = votes.udict_set(256, proposal_id, vote_data);
+
+  } elseif (op == OP_VOTE) {
+    ;; Vote on proposal
+    int proposal_id = in_msg_body~load_uint(256);
+    int choice = in_msg_body~load_uint(1); ;; 0=no, 1=yes
+
+    cell proposal_cell = proposals.udict_get(256, proposal_id);
+    if (proposal_cell.isnull()) {
+      return; ;; Proposal doesn't exist
+    }
+
+    ;; Check deadline
+    int deadline = proposal_cell~load_uint(32); ;; Skip to deadline field
+    proposal_cell~skip_bits(256 + 512 + 64 + 256); ;; Skip other fields
+    deadline = proposal_cell~load_uint(32);
+
+    if (now() > deadline) {
+      return; ;; Voting period ended
+    }
+
+    cell vote_cell = votes.udict_get(256, proposal_id);
+    if (vote_cell.isnull()) {
+      return; ;; No vote data
+    }
+
+    ;; Check if already voted
+    cell voters_dict = vote_cell~load_dict();
+    cell existing_vote = voters_dict.udict_get(1, sender);
+    if (~ existing_vote.isnull()) {
+      return; ;; Already voted
+    }
+
     ;; Record vote
-  } elseif (in_msg_body~load_uint(32) == 0x55555555) { ;; execute op
-    int proposal_id = in_msg_body~load_uint(32);
-    ;; Execute if passed
+    int yes_votes = vote_cell~load_uint(64);
+    int no_votes = vote_cell~load_uint(64);
+
+    if (choice == 1) {
+      yes_votes += 1;
+    } else {
+      no_votes += 1;
+    }
+
+    ;; Update voters
+    voters_dict = voters_dict.udict_set(1, sender, begin_cell().store_uint(choice, 1).end_cell());
+
+    ;; Update vote data
+    vote_cell = begin_cell()
+      .store_uint(yes_votes, 64)
+      .store_uint(no_votes, 64)
+      .store_dict(voters_dict)
+      .end_cell();
+
+    votes = votes.udict_set(256, proposal_id, vote_cell);
+
+  } elseif (op == OP_EXECUTE) {
+    ;; Execute approved proposal
+    int proposal_id = in_msg_body~load_uint(256);
+
+    cell proposal_cell = proposals.udict_get(256, proposal_id);
+    if (proposal_cell.isnull()) {
+      return; ;; Proposal doesn't exist
+    }
+
+    ;; Parse proposal data
+    int proposer = proposal_cell~load_uint(256);
+    slice description_uri = proposal_cell~load_slice(512);
+    int amount_requested = proposal_cell~load_uint(64);
+    int beneficiary = proposal_cell~load_uint(256);
+    int deadline = proposal_cell~load_uint(32);
+    int executed = proposal_cell~load_uint(1);
+
+    if (executed == 1) {
+      return; ;; Already executed
+    }
+
+    if (now() <= deadline) {
+      return; ;; Voting still active
+    }
+
+    cell vote_cell = votes.udict_get(256, proposal_id);
+    if (vote_cell.isnull()) {
+      return; ;; No votes
+    }
+
+    int yes_votes = vote_cell~load_uint(64);
+    int no_votes = vote_cell~load_uint(64);
+
+    int total_votes = yes_votes + no_votes;
+
+    ;; Check quorum and majority
+    if (total_votes >= quorum_threshold && yes_votes > no_votes) {
+      ;; Execute proposal
+      if (amount_requested <= total_funds) {
+        total_funds -= amount_requested;
+
+        ;; Send funds to beneficiary
+        send_raw_message(beneficiary, 64, amount_requested);
+
+        ;; Mark as executed
+        cell updated_proposal = begin_cell()
+          .store_uint(proposer, 256)
+          .store_slice(description_uri)
+          .store_uint(amount_requested, 64)
+          .store_uint(beneficiary, 256)
+          .store_uint(deadline, 32)
+          .store_uint(1, 1)  ;; executed
+          .end_cell();
+
+        proposals = proposals.udict_set(256, proposal_id, updated_proposal);
+      }
+    }
   }
 }
 
 () recv_external(slice in_msg) impure {
-  ;; Handle external
+  ;; Handle external queries
 }
 
-slice get_proposals() method_id {
-  return null(); ;; Return proposals
+;; Getters
+int get_total_funds() method_id {
+  return total_funds;
+}
+
+int get_next_proposal_id() method_id {
+  return next_proposal_id;
+}
+
+cell get_proposal(int proposal_id) method_id {
+  return proposals.udict_get(256, proposal_id);
+}
+
+cell get_proposal_votes(int proposal_id) method_id {
+  return votes.udict_get(256, proposal_id);
+}
+
+cell get_all_proposals() method_id {
+  return proposals;
 }
