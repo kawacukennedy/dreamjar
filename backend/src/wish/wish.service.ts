@@ -10,6 +10,7 @@ import { Update, UpdateDocument } from "../models/Update";
 import { MonitoringService } from "../services/monitoring";
 import { NFTService } from "../services/nft";
 import { VerificationService } from "../services/verification.service";
+import { SponsorshipService } from "../services/sponsorship.service";
 import { CreateWishDto } from "./create-wish.dto";
 
 @Injectable()
@@ -22,10 +23,20 @@ export class WishService {
     private monitoring: MonitoringService,
     private nftService: NFTService,
     private verificationService: VerificationService,
+    private sponsorshipService: SponsorshipService,
   ) {}
 
   async createWish(createWishDto: CreateWishDto, userId: string): Promise<any> {
     const wishId = uuidv4();
+
+    // Check for sponsorship matches
+    const sponsorshipMatches =
+      await this.sponsorshipService.findMatchingSponsorships({
+        category_tags: createWishDto.category_tags || [],
+        stake_amount_microton: createWishDto.stakeAmountMicroTon,
+        proof_method: createWishDto.proofMethod,
+      });
+
     const wish = new this.wishModel({
       wish_id: wishId,
       creator_user_id: userId,
@@ -36,9 +47,18 @@ export class WishService {
     // Enqueue contract creation
     await this.wishQueue.add("create-contract", { wishId });
 
-    this.monitoring.audit("wish_created", { wishId, userId });
+    this.monitoring.audit("wish_created", {
+      wishId,
+      userId,
+      sponsorshipMatches: sponsorshipMatches.length,
+    });
 
-    return { wishId, contractAddress: "mock_address", status: "active" };
+    return {
+      wishId,
+      contractAddress: "mock_address",
+      status: "active",
+      sponsorshipMatches,
+    };
   }
 
   async listWishes(query: any): Promise<any> {

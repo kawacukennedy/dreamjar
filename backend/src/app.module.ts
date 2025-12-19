@@ -16,9 +16,11 @@ import { ProofVerificationService } from "./services/proof-verification";
 import { VerificationService } from "./services/verification.service";
 import { BadgeSchema } from "./models/Badge";
 import { ProposalSchema } from "./models/Proposal";
+import { CampaignSchema } from "./models/Campaign";
 import { ImpactPoolService } from "./services/impact-pool.service";
 import { AdminService } from "./services/admin.service";
 import { AdminController } from "./controllers/admin.controller";
+import { SponsorshipService } from "./services/sponsorship.service";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -30,6 +32,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     MongooseModule.forFeature([
       { name: "Badge", schema: BadgeSchema },
       { name: "Proposal", schema: ProposalSchema },
+      { name: "Campaign", schema: CampaignSchema },
     ]),
     JwtModule.register({
       global: true,
@@ -63,6 +66,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     VerificationService,
     ImpactPoolService,
     AdminService,
+    SponsorshipService,
   ],
 })
 export class AppModule {}
