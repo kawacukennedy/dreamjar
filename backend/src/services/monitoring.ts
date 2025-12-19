@@ -47,6 +47,33 @@ export class MonitoringService {
         name: "pledges_created_total",
         help: "Total number of pledges created",
       }),
+      verificationCompleted: new Counter({
+        name: "verifications_completed_total",
+        help: "Total number of wish verifications completed",
+        labelNames: ["result"],
+      }),
+      badgesMinted: new Counter({
+        name: "badges_minted_total",
+        help: "Total number of supporter badges minted",
+      }),
+      impactPoolFunds: new Gauge({
+        name: "impact_pool_funds",
+        help: "Current funds in impact pool (microTON)",
+      }),
+      websocketConnections: new Gauge({
+        name: "websocket_connections",
+        help: "Number of active WebSocket connections",
+      }),
+      blockchainTransactions: new Counter({
+        name: "blockchain_transactions_total",
+        help: "Total blockchain transactions",
+        labelNames: ["type", "status"],
+      }),
+      apiErrors: new Counter({
+        name: "api_errors_total",
+        help: "Total API errors",
+        labelNames: ["endpoint", "error_type"],
+      }),
     };
 
     this.logger = winston.createLogger({
@@ -127,6 +154,64 @@ export class MonitoringService {
 
   setActiveUsers(count: number) {
     this.metrics.activeUsers.set(count);
+  }
+
+  incrementVerificationCompleted(result: "approved" | "rejected") {
+    this.metrics.verificationCompleted.inc({ result });
+  }
+
+  incrementBadgesMinted() {
+    this.metrics.badgesMinted.inc();
+  }
+
+  setImpactPoolFunds(amount: number) {
+    this.metrics.impactPoolFunds.set(amount);
+  }
+
+  setWebSocketConnections(count: number) {
+    this.metrics.websocketConnections.set(count);
+  }
+
+  incrementBlockchainTransaction(type: string, status: "success" | "failed") {
+    this.metrics.blockchainTransactions.inc({ type, status });
+  }
+
+  incrementApiError(endpoint: string, errorType: string) {
+    this.metrics.apiErrors.inc({ endpoint, error_type: errorType });
+  }
+
+  // Performance monitoring
+  recordDatabaseQuery(operation: string, duration: number, collection: string) {
+    // Could add histogram for DB query durations
+    this.logger.debug(`DB ${operation} on ${collection}`, { duration });
+  }
+
+  recordExternalApiCall(service: string, duration: number, success: boolean) {
+    // Could add histogram for external API calls
+    this.logger.info(`External API call to ${service}`, { duration, success });
+  }
+
+  // Business metrics
+  recordUserEngagement(userId: string, action: string, metadata?: any) {
+    this.logger.info(`User engagement: ${action}`, { userId, ...metadata });
+  }
+
+  recordConversion(from: string, to: string, userId: string) {
+    this.logger.info(`Conversion: ${from} -> ${to}`, { userId });
+  }
+
+  // Alert triggers
+  alertHighErrorRate(endpoint: string, rate: number) {
+    if (rate > 0.05) {
+      // 5% error rate
+      this.logger.error(`High error rate on ${endpoint}`, { rate });
+      // Could integrate with alerting system
+    }
+  }
+
+  alertLowVerificationRate() {
+    // Could check verification completion rates
+    this.logger.warn("Low verification completion rate detected");
   }
 
   getMetrics() {
