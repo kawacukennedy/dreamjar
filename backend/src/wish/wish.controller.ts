@@ -14,6 +14,8 @@ import { CreateWishDto } from "./create-wish.dto";
 import { CreatePledgeDto } from "./create-pledge.dto";
 import { PostUpdateDto } from "./post-update.dto";
 import { VerifyWishDto } from "./verify-wish.dto";
+import { SubmitProofDto } from "./submit-proof.dto";
+import { CastVoteDto } from "./cast-vote.dto";
 
 @ApiTags("Wishes")
 @Controller("wishes")
@@ -62,6 +64,38 @@ export class WishController {
       body.mediaUrls || [],
       req.user.userId,
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post(":wishId/proof")
+  async submitProof(
+    @Param("wishId") wishId: string,
+    @Body() body: SubmitProofDto,
+    @Request() req,
+  ) {
+    return this.wishService.submitProof(wishId, req.user.userId, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post(":wishId/vote")
+  async castVote(
+    @Param("wishId") wishId: string,
+    @Body() body: CastVoteDto,
+    @Request() req,
+  ) {
+    return this.wishService.castVote(
+      wishId,
+      req.user.userId,
+      body.choice,
+      body.comment,
+    );
+  }
+
+  @Get(":wishId/verification")
+  async getVerificationDetails(@Param("wishId") wishId: string) {
+    return this.wishService.getVerificationDetails(wishId);
   }
 
   @UseGuards(JwtAuthGuard)

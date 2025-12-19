@@ -13,6 +13,7 @@ import { WebSocketGatewayService } from "./services/websocket.gateway";
 import { LeaderboardController } from "./services/leaderboard.controller";
 import { LeaderboardService } from "./services/leaderboard";
 import { ProofVerificationService } from "./services/proof-verification";
+import { VerificationService } from "./services/verification.service";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -50,6 +51,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     WebSocketGatewayService,
     LeaderboardService,
     ProofVerificationService,
+    VerificationService,
   ],
 })
 export class AppModule {}

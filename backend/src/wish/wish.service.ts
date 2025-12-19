@@ -9,6 +9,7 @@ import { Pledge, PledgeDocument } from "../models/Pledge";
 import { Update, UpdateDocument } from "../models/Update";
 import { MonitoringService } from "../services/monitoring";
 import { NFTService } from "../services/nft";
+import { VerificationService } from "../services/verification.service";
 import { CreateWishDto } from "./create-wish.dto";
 
 @Injectable()
@@ -20,6 +21,7 @@ export class WishService {
     @InjectQueue("wish") private wishQueue: Queue,
     private monitoring: MonitoringService,
     private nftService: NFTService,
+    private verificationService: VerificationService,
   ) {}
 
   async createWish(createWishDto: CreateWishDto, userId: string): Promise<any> {
@@ -123,30 +125,35 @@ export class WishService {
     return { updateId: update._id };
   }
 
+  async submitProof(
+    wishId: string,
+    userId: string,
+    proofData: any,
+  ): Promise<any> {
+    return this.verificationService.submitProof(wishId, userId, proofData);
+  }
+
+  async castVote(
+    wishId: string,
+    userId: string,
+    choice: "yes" | "no",
+    comment?: string,
+  ): Promise<any> {
+    return this.verificationService.castVote(wishId, userId, choice, comment);
+  }
+
+  async getVerificationDetails(wishId: string): Promise<any> {
+    return this.verificationService.getVerificationDetails(wishId);
+  }
+
   async verifyWish(
     wishId: string,
     vote: "approve" | "reject",
     comment: string,
     userId: string,
   ): Promise<any> {
-    const wish = await this.wishModel.findOne({ wish_id: wishId });
-    if (!wish) throw new Error("Wish not found");
-
-    // Simple community vote logic - in real app, aggregate votes
-    if (vote === "approve") {
-      wish.status = "verified";
-      await wish.save();
-      // Trigger reward distribution
-      await this.wishQueue.add("distribute-rewards", { wishId });
-      // Mint supporter badges
-      await this.nftService.mintSupporterBadge(wishId);
-    }
-
-    this.monitoring.audit("wish_verified", { wishId, userId, vote });
-
-    return {
-      result: vote === "approve" ? "success" : "failure",
-      votesRequired: 10,
-    };
+    // Legacy method - now delegates to castVote
+    const choice = vote === "approve" ? "yes" : "no";
+    return this.castVote(wishId, userId, choice, comment);
   }
 }
