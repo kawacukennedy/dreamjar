@@ -1,0 +1,121 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/mongo_root_username
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo_root_password
+    volumes:
+      - mongodb_prod_data:/data/db
+      - ./secrets:/run/secrets:ro
+    networks:
+      - dreamjar_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - dreamjar_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  backend:
+    image: dreamjar/backend:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - MONGO_URI_FILE=/run/secrets/mongo_uri
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+      - FRONTEND_URL_FILE=/run/secrets/frontend_url
+      - SENTRY_DSN_FILE=/run/secrets/sentry_dsn
+      - SMTP_HOST_FILE=/run/secrets/smtp_host
+      - SMTP_USER_FILE=/run/secrets/smtp_user
+      - SMTP_PASS_FILE=/run/secrets/smtp_pass
+      - IPFS_PROJECT_ID_FILE=/run/secrets/ipfs_project_id
+      - IPFS_PROJECT_SECRET_FILE=/run/secrets/ipfs_project_secret
+      - AWS_ACCESS_KEY_ID_FILE=/run/secrets/aws_access_key_id
+      - AWS_SECRET_ACCESS_KEY_FILE=/run/secrets/aws_secret_access_key
+      - AWS_REGION_FILE=/run/secrets/aws_region
+      - AWS_S3_BUCKET_FILE=/run/secrets/aws_s3_bucket
+      - TON_NETWORK_FILE=/run/secrets/ton_network
+      - BADGE_CONTRACT_ADDRESS_FILE=/run/secrets/badge_contract_address
+      - DAO_CONTRACT_ADDRESS_FILE=/run/secrets/dao_contract_address
+      - WISHJAR_FACTORY_ADDRESS_FILE=/run/secrets/wishjar_factory_address
+    volumes:
+      - ./secrets:/run/secrets:ro
+    networks:
+      - dreamjar_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: dreamjar/frontend:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - VITE_API_URL_FILE=/run/secrets/vite_api_url
+      - VITE_TON_NETWORK_FILE=/run/secrets/vite_ton_network
+      - VITE_IPFS_GATEWAY_FILE=/run/secrets/vite_ipfs_gateway
+      - VITE_POSTHOG_KEY_FILE=/run/secrets/vite_posthog_key
+      - VITE_SENTRY_DSN_FILE=/run/secrets/vite_sentry_dsn
+      - VITE_TONCONNECT_MANIFEST_FILE=/run/secrets/vite_tonconnect_manifest
+      - VITE_VERSION_FILE=/run/secrets/vite_version
+    volumes:
+      - ./secrets:/run/secrets:ro
+    networks:
+      - dreamjar_network
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./secrets:/run/secrets:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - dreamjar_network
+
+volumes:
+  mongodb_prod_data:
+  redis_prod_data:
+
+networks:
+  dreamjar_network:
+    driver: bridge

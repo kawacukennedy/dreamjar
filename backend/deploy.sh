@@ -5,8 +5,8 @@ set -e  # Exit on any error
 echo "🚀 Starting DreamJar Backend Deployment"
 
 # Check if required environment variables are set
-if [ -z "$RENDER_API_KEY" ] && [ -z "$RAILWAY_TOKEN" ]; then
-    echo "⚠️  Warning: Neither RENDER_API_KEY nor RAILWAY_TOKEN is set"
+if [ -z "$RENDER_API_KEY" ] && [ -z "$RAILWAY_TOKEN" ] && [ -z "$DOCKER_DEPLOY" ]; then
+    echo "⚠️  Warning: Neither RENDER_API_KEY, RAILWAY_TOKEN, nor DOCKER_DEPLOY is set"
     echo "   Manual deployment will be used"
 fi
 
@@ -33,7 +33,59 @@ if [ ! -f ".env" ]; then
 fi
 
 # Deploy based on available tokens
-if [ -n "$RENDER_API_KEY" ]; then
+if [ "$DOCKER_DEPLOY" = "true" ]; then
+    echo "🐳 Deploying with Docker..."
+
+    # Check if docker and docker-compose are available
+    if ! command -v docker &> /dev/null; then
+        echo "❌ Docker is not installed. Please install Docker first."
+        exit 1
+    fi
+
+    if ! command -v docker-compose &> /dev/null; then
+        echo "❌ Docker Compose is not installed. Please install Docker Compose first."
+        exit 1
+    fi
+
+    # Navigate to infrastructure directory
+    cd ../infrastructure
+
+    # Create secrets directory if it doesn't exist
+    mkdir -p secrets
+
+    # Copy environment variables to secrets files for Docker
+    echo -n "${MONGO_URI:-mongodb://admin:password@mongodb:27017/dreamjar?authSource=admin}" > secrets/mongo_uri
+    echo -n "${JWT_SECRET:-your_jwt_secret_here_change_this_in_production}" > secrets/jwt_secret
+    echo -n "${FRONTEND_URL:-http://localhost:3000}" > secrets/frontend_url
+    echo -n "${SENTRY_DSN:-}" > secrets/sentry_dsn
+    echo -n "${SMTP_HOST:-}" > secrets/smtp_host
+    echo -n "${SMTP_USER:-}" > secrets/smtp_user
+    echo -n "${SMTP_PASS:-}" > secrets/smtp_pass
+    echo -n "${IPFS_PROJECT_ID:-}" > secrets/ipfs_project_id
+    echo -n "${IPFS_PROJECT_SECRET:-}" > secrets/ipfs_project_secret
+    echo -n "${AWS_ACCESS_KEY_ID:-}" > secrets/aws_access_key_id
+    echo -n "${AWS_SECRET_ACCESS_KEY:-}" > secrets/aws_secret_access_key
+    echo -n "${AWS_REGION:-us-east-1}" > secrets/aws_region
+    echo -n "${AWS_S3_BUCKET:-}" > secrets/aws_s3_bucket
+    echo -n "${TON_NETWORK:-mainnet}" > secrets/ton_network
+    echo -n "${BADGE_CONTRACT_ADDRESS:-}" > secrets/badge_contract_address
+    echo -n "${DAO_CONTRACT_ADDRESS:-}" > secrets/dao_contract_address
+    echo -n "${WISHJAR_FACTORY_ADDRESS:-}" > secrets/wishjar_factory_address
+
+    # Build and deploy with docker-compose
+    if [ "$ENVIRONMENT" = "production" ]; then
+        docker-compose -f docker-compose.prod.yml build backend
+        docker-compose -f docker-compose.prod.yml up -d backend
+        echo "✅ Successfully deployed backend to production with Docker"
+    else
+        docker-compose build backend
+        docker-compose up -d backend
+        echo "✅ Successfully deployed backend to development with Docker"
+    fi
+
+    cd ../backend
+
+elif [ -n "$RENDER_API_KEY" ]; then
     echo "⬆️  Deploying to Render..."
     # Create a temporary deployment archive
     tar -czf deploy.tar.gz --exclude=node_modules --exclude=.git .

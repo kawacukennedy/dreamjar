@@ -55,6 +55,10 @@ while [[ $# -gt 0 ]]; do
             DEPLOY_CONTRACTS=false
             shift
             ;;
+        --docker)
+            DOCKER_DEPLOY=true
+            shift
+            ;;
         --staging)
             ENVIRONMENT="staging"
             shift
@@ -70,6 +74,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --no-frontend    Skip frontend deployment"
             echo "  --no-backend     Skip backend deployment"
             echo "  --no-contracts   Skip contract deployment"
+            echo "  --docker         Deploy using Docker and docker-compose"
             echo "  --staging        Deploy to staging environment"
             echo "  --testnet        Deploy contracts to testnet"
             echo "  --help           Show this help message"
@@ -121,7 +126,11 @@ if [ "$DEPLOY_BACKEND" = true ]; then
     print_status "Deploying backend..."
     cd backend
     chmod +x deploy.sh
-    ./deploy.sh
+    if [ "$DOCKER_DEPLOY" = true ]; then
+        DOCKER_DEPLOY=true ENVIRONMENT=$ENVIRONMENT ./deploy.sh
+    else
+        ./deploy.sh
+    fi
     cd ..
 fi
 
@@ -130,7 +139,11 @@ if [ "$DEPLOY_FRONTEND" = true ]; then
     print_status "Deploying frontend..."
     cd frontend
     chmod +x deploy.sh
-    ./deploy.sh
+    if [ "$DOCKER_DEPLOY" = true ]; then
+        DOCKER_DEPLOY=true ENVIRONMENT=$ENVIRONMENT ./deploy.sh
+    else
+        ./deploy.sh
+    fi
     cd ..
 fi
 
