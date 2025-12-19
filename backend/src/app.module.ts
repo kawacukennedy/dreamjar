@@ -15,6 +15,8 @@ import { LeaderboardService } from "./services/leaderboard";
 import { ProofVerificationService } from "./services/proof-verification";
 import { VerificationService } from "./services/verification.service";
 import { BadgeSchema } from "./models/Badge";
+import { ProposalSchema } from "./models/Proposal";
+import { ImpactPoolService } from "./services/impact-pool.service";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -23,7 +25,10 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     MongooseModule.forRoot(
       process.env.MONGO_URI || "mongodb://localhost:27017/dreamjar",
     ),
-    MongooseModule.forFeature([{ name: "Badge", schema: BadgeSchema }]),
+    MongooseModule.forFeature([
+      { name: "Badge", schema: BadgeSchema },
+      { name: "Proposal", schema: ProposalSchema },
+    ]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || "secret",
@@ -54,6 +59,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     LeaderboardService,
     ProofVerificationService,
     VerificationService,
+    ImpactPoolService,
   ],
 })
 export class AppModule {}
