@@ -16,6 +16,7 @@ import { PostUpdateDto } from "./post-update.dto";
 import { VerifyWishDto } from "./verify-wish.dto";
 import { SubmitProofDto } from "./submit-proof.dto";
 import { CastVoteDto } from "./cast-vote.dto";
+import { WishListDto } from "./wish-list.dto";
 
 @ApiTags("Wishes")
 @Controller("wishes")
@@ -27,6 +28,11 @@ export class WishController {
   @Post()
   async createWish(@Body() body: CreateWishDto, @Request() req) {
     return this.wishService.createWish(body, req.user.userId);
+  }
+
+  @Get()
+  async listWishes(@Query() query: WishListDto) {
+    return this.wishService.listWishes(query);
   }
 
   @Get(":wishId")
