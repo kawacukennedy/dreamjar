@@ -26,7 +26,35 @@ async function bootstrap() {
   });
 
   // Security
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://fonts.googleapis.com",
+          ],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "https:", "http:"],
+          scriptSrc: ["'self'"],
+          connectSrc: [
+            "'self'",
+            "https://toncenter.com",
+            "https://testnet.toncenter.com",
+            "wss:",
+            "ws:",
+          ],
+        },
+      },
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    }),
+  );
   app.use(compression());
 
   // Rate limiting
@@ -34,6 +62,32 @@ async function bootstrap() {
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100, // limit each IP to 100 requests per windowMs
+      message: {
+        error: "Too many requests from this IP, please try again later.",
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+    }),
+  );
+
+  // Additional rate limiting for sensitive endpoints
+  app.use(
+    "/api/v1/wishes",
+    rateLimit({
+      windowMs: 60 * 1000, // 1 minute
+      max: 10, // 10 wish operations per minute
+      message: { error: "Too many wish operations, please slow down." },
+    }),
+  );
+
+  app.use(
+    "/api/v1/auth",
+    rateLimit({
+      windowMs: 5 * 60 * 1000, // 5 minutes
+      max: 5, // 5 auth attempts per 5 minutes
+      message: {
+        error: "Too many authentication attempts, please try again later.",
+      },
     }),
   );
 
@@ -47,14 +101,27 @@ async function bootstrap() {
 
   // Metrics endpoint
   app.get("/metrics", (req, res) => {
-    res.set("Content-Type", register.contentType);
+    res.set("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
     res.end(monitoring.getMetrics());
   });
 
   // CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: [
+      process.env.FRONTEND_URL || "http://localhost:3000",
+      "https://dreamjar.vercel.app",
+      "https://staging-dreamjar.vercel.app",
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "X-TonConnect-Auth",
+    ],
   });
 
   // Swagger

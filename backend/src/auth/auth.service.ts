@@ -25,24 +25,81 @@ export class AuthService {
     signedMessage: string,
     challengeMessage: string,
   ): Promise<{ jwt: string; user: User }> {
-    // Mock validation - in production use TON SDK
-    const isValid = signedMessage && challengeMessage;
-    if (!isValid) throw new Error("Invalid signature");
+    try {
+      // Verify TON signature
+      const isValidSignature = await this.verifyTonSignature(
+        address,
+        signedMessage,
+        challengeMessage,
+      );
 
-    let user = await this.userModel.findOne({
-      "wallet_addresses.address": address,
-    });
-    if (!user) {
-      user = new this.userModel({
-        username: `user_${address.slice(0, 8)}`,
-        display_name: `User ${address.slice(0, 8)}`,
-        wallet_addresses: [{ address, provider: "TonConnect" }],
+      if (!isValidSignature) {
+        throw new Error("Invalid signature");
+      }
+
+      let user = await this.userModel.findOne({
+        "wallet_addresses.address": address,
       });
-      await user.save();
-    }
 
-    const jwt = this.jwtService.sign({ userId: user._id });
-    return { jwt, user };
+      if (!user) {
+        user = new this.userModel({
+          username: `user_${address.slice(0, 8)}`,
+          display_name: `User ${address.slice(0, 8)}`,
+          wallet_addresses: [{ address, provider: "TonConnect" }],
+        });
+        await user.save();
+      }
+
+      const jwt = this.jwtService.sign({
+        userId: user._id,
+        walletAddress: address,
+        iat: Math.floor(Date.now() / 1000),
+      });
+
+      return { jwt, user };
+    } catch (error) {
+      throw new Error(`Wallet verification failed: ${error.message}`);
+    }
+  }
+
+  private async verifyTonSignature(
+    address: string,
+    signedMessage: string,
+    challengeMessage: string,
+  ): Promise<boolean> {
+    try {
+      // In production, use TON SDK for proper signature verification
+      // For now, implement basic validation
+      if (!signedMessage || !challengeMessage) {
+        return false;
+      }
+
+      // Check if signature format is valid (basic check)
+      if (signedMessage.length < 128) {
+        return false;
+      }
+
+      // Verify challenge message matches expected format
+      const expectedPrefix = "Sign this message to authenticate with DreamJar:";
+      if (!challengeMessage.startsWith(expectedPrefix)) {
+        return false;
+      }
+
+      // In production, you would:
+      // 1. Parse the signed message
+      // 2. Extract the public key from the address
+      // 3. Verify the signature using TON crypto libraries
+      // 4. Check timestamp is recent (prevent replay attacks)
+
+      // For demo purposes, accept signatures that match basic criteria
+      return (
+        signedMessage.length >= 128 &&
+        challengeMessage.includes(Date.now().toString().slice(0, -3))
+      );
+    } catch (error) {
+      console.error("Signature verification error:", error);
+      return false;
+    }
   }
 
   async getMe(userId: string): Promise<User> {
